@@ -3,7 +3,7 @@
   <div class="receipt">
     <!-- 标题 -->
     <div class="receipt-page-tag">
-      <span style="float: left; margin-top: 10px">销售订单</span>
+      <span style="float: left; margin-top: 10px">资金收款</span>
       <el-steps
         :active="formorder.approvalState + 1"
         finish-status="success"
