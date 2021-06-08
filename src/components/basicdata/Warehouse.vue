@@ -53,9 +53,10 @@
 				<el-table-column prop="date" label="操作" width="202">
 					<template #default="scope">
 						<el-button size="small" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.productId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
-						<el-button round style="background-color: orange;color: white;">禁用</el-button>
-					</template>
+						<el-button size="small" @click="del(scope.row.depotId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button v-if="scope.row.state==1" round style="background-color: coral;color: white;">禁用</el-button>
+						<el-button v-if="scope.row.state==0" round style="background-color: lightgreen ;color: white;">启用</el-button>
+						</template>
 				</el-table-column>
 				<el-table-column prop="depotName" label="仓库名称" sortable width="140" />
 				<el-table-column prop="depotId" label="仓库编号" sortable width="130" />
@@ -65,7 +66,8 @@
 				<el-table-column prop="remarks" label="备注" sortable width="120" />
 				<el-table-column prop="state" label="状态" sortable width="120">
 					<template #default="scope">
-						<span>{{scope.row.state==1?"已启用":"禁用"}}</span>
+						<span v-if="scope.row.state==0" style="color: orangered;">禁用</span>
+						<span v-if="scope.row.state==1" style="color: seagreen;">启用</span>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -133,6 +135,10 @@
 			}
 		},
 		methods: {
+			//改变页码数
+			handleCurrentChange(val) {
+				this.findpage(val, this.pagesize);
+			},
 			//分页查询
 			findpage() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -158,6 +164,54 @@
 					.catch(function(error) {
 						console.log(error);
 					});
+			},
+			//删除仓库
+			del(id, index) {
+				var _this = this;
+				this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var depotId = {
+						depotId: id
+					};
+					console.log(id)
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseDepot/delDepot",
+							method: "get",
+							processData: false,
+							params: depotId,
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log("删除是否成功：" + response.data.data);
+							if(response.data.data){
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+							}else{
+								ElMessage.warning({
+									message: '该仓库存在关联产品，无法删除！',
+									type: 'success'
+								});
+							}
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
 			}
 		},
 		computed: {},
