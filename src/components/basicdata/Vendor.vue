@@ -31,7 +31,7 @@
 							</el-select>
 						</el-form-item>
 						<el-form-item label="* 负责人 *" :label-width="formLabelWidth">
-							<el-select v-model="form.charge" placeholder="请选择 (必选)" style="width:150px" @change="findpageByTypeOrCharge">
+							<el-select v-model="form.charge" placeholder="请选择负责人 (必选)">
 								<el-option v-for="item in charge" :label="item.chargeName" :value="item.chargeName">
 								</el-option>
 							</el-select>
@@ -156,11 +156,11 @@
 				<el-table-column prop="vendorId" label="供应商编号" sortable width="120" />
 				<el-table-column prop="vendorType" label="供应商类型" sortable width="120" />
 				<el-table-column prop="accountsPayable" label="应付款金额(元)" sortable width="150" />
-				<el-table-column prop="address" label="地址" sortable width="120" />
+				<el-table-column prop="address" label="地址"  width="120" />
 				<el-table-column prop="charge" label="负责人" sortable width="120" />
-				<el-table-column prop="contactName" label="联系人姓名" sortable width="120" />
-				<el-table-column prop="contactNumber" label="联系人电话" sortable width="120" />
-				<el-table-column prop="contactAddress" label="联系人地址" sortable width="120" />
+				<el-table-column prop="contactName" label="联系人姓名"  width="120" />
+				<el-table-column prop="contactNumber" label="联系人电话"  width="120" />
+				<el-table-column prop="contactAddress" label="联系人地址"  width="120" />
 				<el-table-column prop="user" label="创建人" sortable width="120" />
 				<el-table-column prop="creationTime" label="创建时间" sortable width="150" />
 				<el-table-column prop="updateTime" label="更新时间" sortable width="150" />
@@ -184,7 +184,7 @@
 			return {
 				//新增供应商信息弹框
 				dialogFormVisible: false,
-				//修改客户信息弹框
+				//修改供应商信息弹框
 				updateDialogFormVisible: false,
 				//新增供应商表单
 				form: {
@@ -211,8 +211,12 @@
 				},
 				formLabelWidth: '120px',
 				radio: '1',
-				SearchType: '供应商名称',
+				
+				//选中搜索条件（默认仓库名称）
+				select: '供应商名称',
+				//搜索框中内容
 				SearchContent: '',
+				//搜索框条件
 				type: [{
 					label: '供应商名称'
 				}, {
@@ -228,8 +232,6 @@
 				//全部负责人
 				selectAll: '全部',
 
-				//选中搜索条件（默认客户名称）
-				select: '供应商名称',
 				//表单数据
 				tableData: [],
 				//分页
@@ -321,7 +323,7 @@
 						console.log(error);
 					});
 			},
-			//根据客户编号或客户名称查询
+			//根据供应商编号或供应商名称查询
 			findpageByidOrName() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
@@ -349,7 +351,7 @@
 						console.log(error);
 					});
 			},
-			//删除客户
+			//删除供应商
 			del(id, index) {
 				var _this = this;
 				this.$confirm('此操作将永久删除该客户, 是否继续?', '提示', {
@@ -388,7 +390,7 @@
 					});
 				});
 			},
-			//批量删除客户
+			//批量删除供应商
 			batchDel() {
 				this.$confirm('此操作将永久删除下列' + this.selectCus.length + ':个供应商, 是否继续?', '提示', {
 					confirmButtonText: '确定',
@@ -432,7 +434,7 @@
 			handleSelectionChange(val) {
 				this.selectCus = val
 			},
-			//判断客户ID是否重复并添加客户
+			//判断供应商ID是否重复并添加供应商
 			pdCID() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
@@ -464,7 +466,7 @@
 						console.log(error);
 					});
 			},
-			//添加客户
+			//添加供应商
 			AddVendor() {
 				console.log(this.form)
 				if (this.form.vendorId == '' ||
@@ -477,7 +479,7 @@
 					var _this = this;
 					this.form.user = state.userInfo.userName;
 					this.dialogFormVisible = false
-					//添加客户
+					//添加供应商
 					this.axios({
 							url: "http://localhost:8088/frameproject/baseVendor/addVendor",
 							method: "post",
@@ -517,7 +519,7 @@
 				this.updateForm.contactNumber= val.contactNumber
 				
 			},
-			//修改客户信息
+			//修改供应商信息
 			updateVendor(){
 				console.log(this.updateForm)
 				if (
@@ -528,7 +530,7 @@
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var _this = this;
 					this.dialogFormVisible = false
-					//修改客户
+					//修改供应商
 					this.axios({
 							url: "http://localhost:8088/frameproject/baseVendor/updateVendor",
 							method: "post",
@@ -569,12 +571,12 @@
 		background-color: white;
 	}
 
-	.r-float {
+	.vendor .r-float {
 		float: right;
 	}
 
 	/* 顶部 */
-	.page-tag {
+	.vendor .page-tag {
 		height: 40px;
 		padding: 0 10px;
 		color: #323232;
@@ -583,17 +585,17 @@
 		background-color: #e9eef3;
 	}
 
-	.shenpi {
+	.vendor .shenpi {
 		float: right;
 		line-height: 20px;
 	}
 
-	.page-search {
+	.vendor .page-search {
 		float: right;
 		padding: 13px;
 	}
 
-	.page-search-content {
+	.vendor .page-search-content {
 		margin: 4px;
 		float: left;
 		padding: 0px 10px 10px;

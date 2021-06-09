@@ -45,8 +45,8 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column prop="capitalId" label="账户编号" sortable width="120" />
-				<el-table-column prop="fundAccount" label="账户名称" />
-				<el-table-column prop="settlementTypeName" label="结算类型" sortable width="120" />
+				<el-table-column prop="fundAccount" label="账户名称" sortable width="120"/>
+				<el-table-column prop="settlementType" label="结算类型" sortable width="120" />
 				<el-table-column prop="initialAmount" label="初期金额" sortable width="120" />
 				<el-table-column prop="currentAmount" label="当前金额" sortable width="120" />
 				<el-table-column prop="state" label="是否为默认" sortable width="120">
