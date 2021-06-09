@@ -8,31 +8,34 @@
     </div>
     <!-- 表单头部 筛选 -->
     <div class="returnlist-header">
+      <el-form>
       <el-collapse accordion>
-          <div class="ss">
-            <!-- 操作员 -->
-            <br /><br />
-            <span>操作员:</span>
-            <el-select v-model="value1"  filterable>
-              <el-option>
-              </el-option>
-            </el-select>
             <!-- 登陆时间 -->
             <div class="block">
-            <span class="demonstration">登陆时间:</span>
-            <el-date-picker
-             v-model="value2"
-             align="right"
-             type="date"
-             placeholder="选择日期"
-            :disabled-date="disabledDate"
-            :shortcuts="shortcuts"
-          >
-        </el-date-picker>
+             <span class="demonstration">登陆日期:</span>
+             <el-date-picker
+               v-model="value2"
+               align="right"
+               type="date"
+               placeholder="选择日期"
+               :disabled-date="disabledDate"
+               :shortcuts="shortcuts"
+    >
+    </el-date-picker>
+    <el-form-item>
+      <el-from-label>操作员：</el-from-label>
+          <el-select v-model="operator.operatorname"  placeholder="请选择操作员">
+            <el-option
+                    v-for="item in categoryOptions"
+                    :key="item.operatorName"
+                    :label="item.operatorName"
+                    :value="item.operatorNmae"
+            ></el-option>
+          </el-select>
+        </el-form-item>
   </div>
-          </div>
-        
       </el-collapse>
+      </el-form>
     </div>
     <!-- 表体内容 -->
     <div class="returnlist-mian">
@@ -71,7 +74,8 @@
 <script>
 import {
 		ElMessage
-	} from 'element-plus'
+	} from 'element-plus';
+import store from "../../store";
  export default {
      data() {
       return {
@@ -101,9 +105,16 @@ import {
         //表单数据
         tableData:[],
         //分页
-		pagesize: 5,
-		max: 0,
-		currentPage: 1,
+		    pagesize: 5,
+		    max: 0,
+		    currentPage: 1,
+        //操作员下拉框
+        operator:[
+          {
+          operatorName:"",
+          }
+        ],
+        categoryOptions:[],
       };
     },
     methods: {
@@ -128,6 +139,7 @@ import {
 							JWTDemo: state.userInfo.token,
 						},
 					})
+
 					.then(function(response) {
 						_this.tableData = response.data.data.rows;
 						_this.max = response.data.data.total;
@@ -138,11 +150,31 @@ import {
 						console.log(error);
 					});
 			},
+     
     },
-    computed: {},
-		created() {
-			this.findpage()
-		}
+    computed: {}, 
+		created:function(){
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/operationlog/FindAllUserName",
+						method: "get",
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+					 response.data.data.forEach((item) => {
+             _this.categoryOptions.push({operatorName:item.userName});
+             console.log("1111");
+           });
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+      this.findpage();
+      this.handleCurrentChange();
+    }
   };
    
 </script>
@@ -206,13 +238,8 @@ import {
   background-color: white;
   text-align: center;
 }
-.ss{
-	margin-top:0px;
-	
-}
-
 .block{
-	float: left;
+
 }
 
 </style>
