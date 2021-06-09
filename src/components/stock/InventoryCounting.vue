@@ -14,15 +14,17 @@
     </div>
 
     <!--选择仓库 -->
-<el-dialog title="选择仓库" v-model="isdialog">
-  <el-select v-model="value" placeholder="请选择">
-    <el-option
+<el-dialog title="选择仓库" v-model="isdialog" width="300px" :show-close="false" :center="true">
+    <el-select v-model="value" placeholder="请选择" :center="true">
+    <el-option 
       v-for="item in depotlist"
       :key="item.depotId"
       :label="item.depotName"
       :value="item.depotId">
     </el-option>
   </el-select>
+  <el-button @click="enterdepot" class="elbutton" type="success" icon="el-icon-check" circle></el-button>
+  <el-button @click="exitdepot" class="elbutton" type="danger" icon="el-icon-close" circle></el-button>
 </el-dialog>
 
     <!-- 表单头部 -->
@@ -46,7 +48,7 @@
         <!-- 盘点仓库 -->
         <el-form-item label="盘点仓库:">
           <el-input
-            v-model="formorder.depot"
+            v-model="formorder.depotName"
             readonly="readonly"
             placeholder="盘点仓库"
           ></el-input>
@@ -55,7 +57,7 @@
         <!-- 盘点产品量 -->
         <el-form-item label="盘点产品量:">
           <el-input
-            v-model="formorder.productNum"
+            v-model="formorder.inventorycount"
             readonly="readonly"
             placeholder="盘点产品量"
           ></el-input>
@@ -64,7 +66,7 @@
         <!-- 盘点产品量 -->
         <el-form-item label="已盘点产品量:">
           <el-input
-            v-model="formorder.countedNum"
+            v-model="formorder.inventorycounter"
             readonly="readonly"
             placeholder="已盘点产品量"
           ></el-input>
@@ -117,14 +119,12 @@
           <el-table-column type="selection" width="55" />
           <el-table-column prop="productName" label="产品名称" width="200" />
           <el-table-column prop="productId" label="产品编号" width="120" />
-          <el-table-column prop="productType" label="产品属性" width="120" />
-          <el-table-column prop="remark" label="产品规格" width="120" />
-          <el-table-column prop="productSpec" label="产品分类" width="120" />
-          <el-table-column prop="productUnit" label="单位" width="120" />
-          <el-table-column prop="productNum" label="库存总量" width="120" />
-          <el-table-column prop="expectNum" label="盘点数量" width="120" />
-          <el-table-column prop="saleUnitPrice" label="盘盈盘亏" width="120" />
-          <el-table-column prop="ingredient" label="备份" width="120" />
+          <el-table-column prop="productSpec" label="产品规格" width="120" />
+          <el-table-column prop="productType" label="产品类型" width="120" />
+          <el-table-column prop="productUnit" label="产品单位" width="120" />
+          <el-table-column prop="systemNum" label="系统数量" width="120" />
+          <el-table-column prop="productPurchaseUnit" label="采购单价" width="120" />
+          <el-table-column prop="remark" label="remark" width="120" />
         </el-table>
         <!-- 表尾分页显示 -->
         <div
@@ -208,9 +208,9 @@
         </el-table-column>
         <el-table-column prop="productUnit" label="系统数量" width="120" />
 
-        <el-table-column prop="saleMoney" label="盘盈盘亏" width="120">
+        <el-table-column prop="" label="盘盈盘亏" width="120">
           <template #default="scope">
-            {{ saleMoney(scope.$index) }}
+            {{ (scope.$index) }}
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" width="120">
@@ -249,10 +249,9 @@ import store from "../../store";
 export default {
   data() {
     return {
-      isdialog:false,
+      //库存商品div
       dialogTableVisible: false,
       //库存产品--分类
-      depotlist:[],
       data: [],
       defaultProps: {
         children: "children",
@@ -261,16 +260,11 @@ export default {
       findstock: "", //库存产品名称查询
       stockdata: [], //库存产品--信息
       joinstockdata: [], //已选库存产品
-      formorder: {
-        //表头单据信息
-        orderId: "KCPD" + Date.now(), //单据编号
-        depot:"",
-        remarks: "", // 订单备注
-        //订单信息额外
-        founder: "",
-        productNum:"",
-        countedNum:""
-      },
+
+      // 表单头部下拉列表信息
+      headeroptions1: [],
+      headeroptions2: [],
+      //表体销售商品信息
       productdata: [
         {
           productId: "", //产品编号
@@ -287,20 +281,122 @@ export default {
           productDescribe: "", //产品描述
         },
       ],
+      //抄送对象信息
+      footeroptions: [],
+      notice: [], //抄送对象
+
+
+      isdialog:false,
+      value:"请选择",
+      depotlist:[],
+      formorder: {
+        orderId: "KCPD" + Date.now(), //单据编号
+        depotId:"",
+        depotName:"",
+        inventorycount:0,
+        inventorycounter:0
+      },
       //分页
       pagesize: 5,
       max: 0,
       currentPage: 1,
-      depots: [],
+      depot: {},
+      depots:[]
+
+
+
+
     }
   },computed: {
     //已选产品
     thisrow: function () {
       return this.joinstockdata.length;
     },
-    },methods: {
-    handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize);
+    //单个商品销售总价
+    saleMoney() {
+      return function (id) {
+        this.productdata[id].saleMoney =
+          Math.round(
+            this.productdata[id].saleUnitPrice *
+              this.productdata[id].productNum *
+              1000
+          ) / 1000;
+        return (
+          Math.round(
+            this.productdata[id].saleUnitPrice *
+              this.productdata[id].productNum *
+              1000
+          ) / 1000
+        );
+      };
+    },
+    //销售总金额
+    total: function () {
+      var allmoney = 0;
+      for (var i = 0; i < this.productdata.length; i++) {
+        allmoney +=
+          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
+      }
+      this.formorder.receivables =
+        Math.round(
+          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
+            1000
+        ) / 1000;
+      return (
+        Math.round(
+          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
+            1000
+        ) / 1000
+      );
+    },
+    //销售优惠金额
+    distotal: function () {
+      var allmoney = 0;
+      for (var i = 0; i < this.productdata.length; i++) {
+        allmoney +=
+          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
+      }
+      this.formorder.dismoney =
+        Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
+        100;
+      return (
+        Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
+        100
+      );
+    },
+  },
+  methods: {
+      enterdepot(){
+      this.isdialog=false;
+      for (let i=0; i<this.depotlist.length; i++){
+        if(this.depotlist[i].depotId==this.value){
+          this.depot=this.depotlist[i];
+        }
+      }
+      this.formorder.depotName=this.depot.depotName;
+    },
+    exitdepot(){
+      this.isdialog=false;
+      this.value=null;
+    },
+
+
+    tfdis(time) {
+      if(Date.now()-1000*3600*24 > time.getTime()){
+        this.formorder.orderTime=new Date()
+      }
+    },
+    handleSelectionChange(val) {
+      this.joinstockdata = val;
+    },
+    setcontacts() {
+      this.headeroptions1.forEach((item) => {
+        if (item.customerName == this.formorder.customer) {
+          this.formorder.contacts = item.contact;
+          this.formorder.contactsPhone = item.contactNumber;
+          this.formorder.contactsAddress = item.contactAddress;
+        }
+      });
     },
     //选择产品
     dialogopen() {
@@ -311,7 +407,7 @@ export default {
         pageSize: this.pagesize,
       };
       this.axios({
-        url: "http://localhost:8088/frameproject/baseProduct/allsaleproduct",
+        url: "http://localhost:8088/frameproject/stockInventory/allProduct",
         method: "get",
         processData: false,
         params: fd,
@@ -322,6 +418,7 @@ export default {
         .then(function (response) {
           _this.stockdata = response.data.data.rows;
           _this.max = response.data.data.total;
+          console.log(response)
         })
         .catch(function (error) {
           console.log(error);
@@ -330,16 +427,16 @@ export default {
     },
     //添加销售产品
     addproduct() {
-      var productlist=[]
-      this.productdata.forEach(item=>{
-        productlist.push(item.productId)
-      })
-      this.joinstockdata.forEach(item=>{
-        if(productlist.indexOf(item.productId)==-1){
-          item.productNum=1
-          this.productdata.push(item)
+      var productlist = [];
+      this.productdata.forEach((item) => {
+        productlist.push(item.productId);
+      });
+      this.joinstockdata.forEach((item) => {
+        if (productlist.indexOf(item.productId) == -1) {
+          item.productNum = 1;
+          this.productdata.push(item);
         }
-      })
+      });
       for (var i = this.productdata.length - 1; i >= 0; i--) {
         if (
           this.productdata[i].productId == "" &&
@@ -349,6 +446,11 @@ export default {
         }
       }
       this.dialogTableVisible = false;
+      this.formorder.inventorycount=this.thisrow;
+    },
+    //改变页码数
+    handleCurrentChange(val) {
+      this.dialogopen(val, this.pagesize);
     },
     //新增一行
     addrow(productdata, event) {
@@ -381,29 +483,35 @@ export default {
       var ifnum = true;
       this.productdata.forEach((item) => {
         if (
-          this.formorder.salesmen == "" ||
+          (ifnum == true && this.formorder.salesmen == "") ||
           item.productId == "" ||
-          item.depot == null
+          item.depot == null ||
+          this.formorder.customer == ""
         ) {
           this.$notify({
             title: "警告",
             message: "请先填写*必要信息!",
             type: "warning",
-            position: "top-left",
           });
           ifnum = false;
           return false;
         }
         item.baseOpenings.forEach((items) => {
-          if (items.depotName == item.depot) {
-            if (items.expectNumber < item.productNum) {
-              ElMessage.warning({
-                message:
-                  "仓库："+item.depot+"  中产品：" + item.productName + "的预计可用库存不足!",
-                type: "warning",
-              });
-              ifnum = false;
-            }
+          if (
+            items.depotName == item.depot &&
+            items.expectNumber < item.productNum &&
+            ifnum == true
+          ) {
+            ElMessage.warning({
+              message:
+                "仓库：" +
+                item.depot +
+                "  中产品：" +
+                item.productName +
+                "的预计可用库存不足!",
+              type: "warning",
+            });
+            ifnum = false;
           }
         });
       });
@@ -427,8 +535,10 @@ export default {
           },
         })
           .then(function (response) {
+            if(response.data.code==200){
             sessionStorage.setItem("orderid", response.data.data);
             _this.$router.push("/Sale");
+            }
           })
           .catch(function (error) {
             console.log(error);
@@ -437,24 +547,246 @@ export default {
     },
   },
   created: function () {
+    
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
     this.axios({
-      url: "http://localhost:8088/frameproject/baseProduct/",
+      url: "http://localhost:8088/frameproject/stockInventory/allDepot",
       method: "get",
       headers: {
         JWTDemo: state.userInfo.token,
       },
     })
       .then(function (response) {
-        response.data.data.forEach((item) => {
-          _this.headeroptions2.push({ salesmen: item.userName });
-        });
+          console.log(response)
+          _this.depotlist=response.data.data.depots
+          _this.isdialog=true;
       })
       .catch(function (error) {
         console.log(error);
       });
   },
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+//     enterdepot(){
+//       this.isdialog=false;
+//       for (let i=0; i<this.depotlist.length; i++){
+//         if(this.depotlist[i].depotId==this.value){
+//           this.depot=this.depotlist[i];
+//         }
+//       }
+//       this.formorder.depotName=this.depot.depotName;
+//     },
+//     exitdepot(){
+//       this.isdialog=false;
+//       this.value=null;
+//     }
+//     ,  
+//     handleCurrentChange(val) {
+//       this.dialogopen(val, this.pagesize);
+//     },
+//     //选择产品
+//     dialogopen() {
+//       const state = JSON.parse(sessionStorage.getItem("state"));
+//       const _this = this;
+//       var fd = {
+//         currentPage: this.currentPage,
+//         pageSize: this.pagesize,
+//       };
+//       this.axios({
+//         url: "http://localhost:8088/frameproject/baseProduct/allsaleproduct",
+//         method: "get",
+//         processData: false,
+//         params: fd,
+//         headers: {
+//           JWTDemo: state.userInfo.token,
+//         },
+//       })
+//         .then(function (response) {
+//           _this.stockdata = response.data.data.rows;
+//           _this.max = response.data.data.total;
+//         })
+//         .catch(function (error) {
+//           console.log(error);
+//         });
+//       this.dialogTableVisible = true;
+//     },
+//     //添加销售产品
+//     addproduct() {
+//       var productlist = [];
+//       this.productdata.forEach((item) => {
+//         productlist.push(item.productId);
+//         console.log(item)
+//       });
+//       this.joinstockdata.forEach((item) => {
+//         if (productlist.indexOf(item.productId) == -1) {
+//           item.productNum = 1;
+//           this.productdata.push(item);
+//         }
+//       });
+//       for (var i = this.productdata.length - 1; i >= 0; i--) {
+//         if (
+//           this.productdata[i].productId == "" &&
+//           this.productdata.length > 1
+//         ) {
+//           this.productdata.splice(i, 1);
+//         }
+//       }
+//       this.dialogTableVisible = false;
+//     },
+//     //新增一行
+//     addrow(productdata, event) {
+//       productdata.push({
+//         productId: "", //产品编号
+//         productName: "", //产品名称
+//         remark: "", //备注
+//         productSpec: "", //规格
+//         productUnit: "", //单位
+//         productNum: "", //数量
+//         saleUnitPrice: "", //销售单价
+//         saleMoney: "", //销售金额
+//         depot: "", //仓库
+//         ingredient: "", //成分
+//         gramHeavy: "", //克量
+//         productDescribe: "", //产品描述
+//       });
+//     },
+//     //移除一行
+//     delrow(index, rows) {
+//       if (this.productdata.length > 1) {
+//         rows.splice(index, 1); //删掉该行
+//       }
+//     },
+//     //提交审批（生成订单）
+//     examine(type) {
+//       const state = JSON.parse(sessionStorage.getItem("state"));
+//       const _this = this;
+//       //判断库存是否足够
+//       var ifnum = true;
+//       this.productdata.forEach((item) => {
+//         if (
+//           this.formorder.salesmen == "" ||
+//           item.productId == "" ||
+//           item.depot == null
+//         ) {
+//           this.$notify({
+//             title: "警告",
+//             message: "请先填写*必要信息!",
+//             type: "warning",
+//             position: "top-left",
+//           });
+//           ifnum = false;
+//           return false;
+//         }
+//         item.baseOpenings.forEach((items) => {
+//           if (items.depotName == item.depot) {
+//             if (items.expectNumber < item.productNum) {
+//               ElMessage.warning({
+//                 message:
+//                   "仓库："+item.depot+"  中产品：" + item.productName + "的预计可用库存不足!",
+//                 type: "warning",
+//               });
+//               ifnum = false;
+//             }
+//           }
+//         });
+//       });
+//       if (ifnum != false) {
+//         this.formorder.orderTime = dayjs(this.formorder.orderTime).format(
+//           "YYYY-MM-DD HH:mm:ss"
+//         );
+//         this.formorder.deliveryTime = dayjs(this.formorder.deliveryTime).format(
+//           "YYYY-MM-DD HH:mm:ss"
+//         );
+//         this.formorder.founder = state.userInfo.userName;
+//         this.axios({
+//           url: "http://localhost:8088/frameproject/saleorder/add/" + type,
+//           method: "post",
+//           data: {
+//             order: JSON.stringify(_this.formorder), //_this.formorder ,
+//             orderdetails: JSON.stringify(_this.productdata), //_this.productdata//
+//           },
+//           headers: {
+//             JWTDemo: state.userInfo.token,
+//           },
+//         })
+//           .then(function (response) {
+//             sessionStorage.setItem("orderid", response.data.data);
+//             _this.$router.push("/Sale");
+//           })
+//           .catch(function (error) {
+//             console.log(error);
+//           });
+//       }
+//     },
+//   },
+//   created: function () {
+    
+//     const state = JSON.parse(sessionStorage.getItem("state"));
+//     const _this = this;
+//     this.axios({
+//       url: "http://localhost:8088/frameproject/stockInventory/allDepot",
+//       method: "get",
+//       headers: {
+//         JWTDemo: state.userInfo.token,
+//       },
+//     })
+//       .then(function (response) {
+//           console.log(response)
+//           _this.depotlist=response.data.data.depots
+//           _this.isdialog=true;
+//       })
+//       .catch(function (error) {
+//         console.log(error);
+//       });
+//   },
+// }
 }
 </script>
 
@@ -518,5 +850,9 @@ export default {
 .addsale-footer {
   padding: 20px 15px;
   background-color: white;
+}
+.elbutton{
+  margin-top:10px;
+  margin-left: 60px;
 }
 </style>
