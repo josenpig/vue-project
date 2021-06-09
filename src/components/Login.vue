@@ -260,7 +260,9 @@ export default {
 }
 .login_container {
   height: 100%;
+  width: 100%;
   background: url("../assets/img/bgimg.jpg");
+  background-size: 100%
 }
 .gain {
   position: absolute;

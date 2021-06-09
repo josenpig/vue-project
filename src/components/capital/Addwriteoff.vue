@@ -1,10 +1,10 @@
 <template>
   <!-- 主内容 -->
-  <div class="addreceipt">
+  <div class="addwriteoff">
     <!-- 标题 -->
-    <div class="addreceipt-page-tag">
-      <span>新增收款</span>
-      <div class="addreceipt-shenpi">
+    <div class="addwriteoff-page-tag">
+      <span>新增核销单</span>
+      <div class="addwriteoff-shenpi">
         <!-- 提交 -->
         <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
@@ -13,7 +13,7 @@
       </div>
     </div>
     <!-- 表单头部 -->
-    <div class="addreceipt-header">
+    <div class="addwriteoff-header">
       <el-form
         :inline="true"
         size="mini"
@@ -23,20 +23,22 @@
       >
         <!-- 编号 -->
         <el-form-item label="编号:">
-          <el-input
-            v-model="formorder.receiptId"
-            readonly="readonly"
-          ></el-input>
+          <el-input v-model="formorder.cavId" readonly="readonly"></el-input>
         </el-form-item>
-        <!-- 收款日期 -->
-        <el-form-item label="收款日期:" class="form-input">
-          <el-date-picker
-            type="date"
-            v-model="formorder.receiptTime"
-            placeholder="选择日期"
-            :clearable="false"
+        <!-- 核销方式 -->
+        <el-form-item label="核销方式:">
+          <el-select
+            v-model="formorder.cavType"
+            placeholder="请选择"
+            @change="changetype()"
           >
-          </el-date-picker>
+            <el-option
+              v-for="item in cavType"
+              :key="item.value"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
         </el-form-item>
         <!-- 客户 -->
         <el-form-item label="*客户:">
@@ -44,7 +46,6 @@
             v-model="formorder.customer"
             size="mini"
             filterable
-            :disabled="tfhas"
             placeholder="请选择客户"
             @change="changetype()"
           >
@@ -56,34 +57,28 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <!-- 收款人员 -->
-        <el-form-item label="*收款人员:" class="form-input">
+        <!-- 单据日期 -->
+        <el-form-item label="单据日期:" class="form-input">
+          <el-date-picker
+            type="date"
+            v-model="formorder.orderTime"
+            placeholder="选择日期"
+            :clearable="false"
+          >
+          </el-date-picker>
+        </el-form-item>
+        <!-- 核销人 -->
+        <el-form-item label="*核销人:" class="form-input">
           <el-select
             v-model="formorder.payee"
             size="mini"
             filterable
-            placeholder="请选择收款人员"
+            placeholder="请选择核销人"
           >
             <el-option
               v-for="item in headeroptions2"
               :key="item.userName"
               :value="item.userName"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <!-- 收款类别 -->
-        <el-form-item label="收款类别:">
-          <el-select
-            v-model="formorder.incomeType"
-            placeholder="请选择"
-            :disabled="tfhas"
-            @change="changetype()"
-          >
-            <el-option
-              v-for="item in incomeType"
-              :key="item.value"
-              :value="item.value"
             >
             </el-option>
           </el-select>
@@ -147,9 +142,9 @@
     </el-dialog>
     <!-- 内容表体 -->
     <el-divider content-position="left">{{
-      formorder.incomeType == "应收收款" ? "应收单据列表:" : "销售订单列表:"
+      formorder.cavType == "预收冲应收" ? "应收单据:" : "应付单据:"
     }}</el-divider>
-    <div class="addreceipt-main">
+    <div class="addwriteoff-main">
       <!-- 销售产品信息table -->
       <el-table :data="billdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
@@ -160,7 +155,7 @@
               <el-button
                 size="mini"
                 icon="el-icon-plus"
-                @click="dialogopen()"
+                @click="billopen()"
                 type="primary"
                 circle
               />
@@ -180,16 +175,25 @@
         <el-table-column prop="saleId" label="单据编号" width="200" />
         <el-table-column prop="saleType" label="单据类型" />
         <el-table-column prop="saleTime" label="单据日期" />
-        <el-table-column prop="receiptMoney" label="应收款金额" />
-        <el-table-column prop="receivedMoney" label="已收金额" />
-        <el-table-column prop="uncollectedMoney" label="未收金额" />
-        <el-table-column prop="thisMoney" label="本次收款">
+        <el-table-column
+          prop="shouldMoney"
+          :label="formorder.cavType == '预收冲应收' ? '应收金额' : '应付金额'"
+        />
+        <el-table-column
+          prop="alreadyMoney"
+          :label="formorder.cavType == '预收冲应收' ? '已收金额' : '已款金额'"
+        />
+        <el-table-column
+          prop="notMoney"
+          :label="formorder.cavType == '预收冲应收' ? '未收金额' : '未付金额'"
+        />
+        <el-table-column prop="thisMoney" label="本次核销金额">
           <template #default="scope">
             <el-input-number
               v-model="billdata[scope.$index].thisMoney"
               :controls="false"
               :min="0"
-              :max="billdata[scope.$index].uncollectedMoney"
+              :max="billdata[scope.$index].notMoney"
               :precision="2"
             />
           </template>
@@ -200,10 +204,10 @@
         class="el-icon-s-finance"
         :closable="false"
       >
-        单据总计收款：{{ billtotal }}元
+        单据总计核销金额：{{ billtotal }}元
       </el-alert>
       <!-- 备注 -->
-      <div class="addreceipt-remarks">
+      <div class="addwriteoff-remarks">
         <el-input
           type="textarea"
           :rows="5"
@@ -213,8 +217,10 @@
         </el-input>
       </div>
       <!-- 本次收款 -->
-      <el-divider content-position="left">本次收款</el-divider>
-      <el-table :data="accountdata" style="width: 100%" border stripe>
+      <el-divider content-position="left">{{
+        formorder.cavType == "预收冲应收" ? "预收款列表:" : "预付款列表:"
+      }}</el-divider>
+      <el-table :data="capdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
         <el-table-column type="index" width="40" fixed />
         <el-table-column label="操作" width="100" fixed>
@@ -223,7 +229,7 @@
               <el-button
                 size="mini"
                 icon="el-icon-plus"
-                @click="addrow()"
+                @click="capopen()"
                 type="primary"
                 circle
               />
@@ -232,7 +238,7 @@
               <el-button
                 size="mini"
                 icon="el-icon-delete"
-                @click="delrow1(scope.$index, accountdata)"
+                @click="delrow1(scope.$index, capdata)"
                 type="primary"
                 circle
               />
@@ -240,29 +246,19 @@
           </template>
         </el-table-column>
         <!-- 账户详细信息 -->
-        <el-table-column prop="fundAccount" label="*资金账户">
-          <template #default="scope">
-            <el-select
-              style="width: 405px"
-              v-model="accountdata[scope.$index].fundAccount"
-              filterable
-              placeholder="请选择资金账户"
-              @change="settype(scope.$index)"
-            >
-              <el-option
-                v-for="item in options"
-                :key="item.fundAccount"
-                :value="item.fundAccount"
-              >
-              </el-option>
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column prop="settlementType" label="账户类型" />
-        <el-table-column prop="thisMoney" label="本次收款金额">
+        <el-table-column prop="capitalId" label="流水号" width="200" />
+        <el-table-column prop="capitalType" label="类型" />
+        <el-table-column prop="capitalTime" label="流水日期" />
+        <el-table-column
+          prop="beforeMoney"
+          :label="formorder.cavType == '预收冲应收' ? '预收金额' : '预付金额'"
+        />
+        <el-table-column prop="writtenMoney" label="已核销金额" />
+        <el-table-column prop="unwrittenMoney" label="未核销金额" />
+        <el-table-column prop="thisMoney" label="本次核销金额">
           <template #default="scope">
             <el-input-number
-              v-model="accountdata[scope.$index].thisMoney"
+              v-model="capdata[scope.$index].thisMoney"
               :controls="false"
               :min="0"
               :precision="2"
@@ -275,12 +271,10 @@
         class="el-icon-s-finance"
         :closable="false"
       >
-        账户总计收款：{{ accounttotal }}元
+        资金总计核销金额：{{ captotal }}元
       </el-alert>
     </div>
-    <div class="addreceipt-footer">
-      本次预收金额：<el-input v-model="ciaMoney" readonly style="width: 15%" />
-      <el-divider></el-divider>
+    <div class="addwriteoff-footer">
       <p style="font-size: 14px">
         抄送对象
         <span style="color: #999999; margin-left: 10px"
@@ -312,7 +306,7 @@ export default {
     sessionStorage.removeItem("receipt");
     next();
   },
-  name: "Addreceipt",
+  name: "addwriteoff",
   data() {
     return {
       //订单div
@@ -326,14 +320,12 @@ export default {
       //订单信息
       formorder: {
         //表头单据信息
-        receiptId: "SKD" + Date.now(), //单据编号
-        receiptTime: new Date(), //单据时间
+        cavId: "HXD" + Date.now(), //单据编号
+        orderTime: new Date(), //单据时间
         customer: "", //客户
-        payee: "", //收款人员
-        incomeType: "应收收款", //收款类别
-        receiptMoney: "", //收款金额
-        ciaMoney: "", //预收金额
-        ciaBalance: "", //预收余额
+        cavBy: "", //核销人
+        cavType: "预收冲应收", //核销方式
+        thisMoney: "", //本次核销余额
         founder: "", //订单创建人
         remarks: "", //订单备注
       },
@@ -343,26 +335,30 @@ export default {
           saleId: "", //单据编号
           saleType: "", //单据类型
           saleTime: "", //单据日期
-          receiptMoney: "", //应收款金额
-          receivedMoney: "", //已收金额
-          uncollectedMoney: "", //未收金额
-          thisMoney: "0.00", //本次收款
+          shouldMoney: "", //应收付款金额
+          alreadyMoney: "", //已收付金额
+          notMoney: "", //未收付金额
+          thisMoney: "0.00", //本次收付款金额
         },
       ],
-      //表体本次收款信息
-      accountdata: [
+      //表体本次收付款信息
+      capdata: [
         {
-          fundAccount: "", //资金账户
-          settlementType: "", //账户收款类型
-          thisMoney: "0.00", //本次收款
+          capitalId: "", //收付款单编号
+          capitalType: "", //收付款类型
+          capitalTime: "", //收付款日期
+          beforeMoney: "", //预收付金额
+          writtenMoney: "", //已核销金额
+          unwrittenMoney: "", //未核销金额
+          thisMoney: "0.00", //本次核销金额
         },
       ],
       //抄送对象信息
       footeroptions: [],
       notice: [], //抄送对象
       options: [], //资金账户
-      incomeType: [{ value: "应收收款" }, { value: "订单收款" }],
-      tfhas: false,
+      type: "应收单据列表", //收款方式
+      cavType: [{ value: "预收冲应收" }, { value: "预付冲应付" }],
       //条件查询订单
       condition: {
         customer: "",
@@ -375,7 +371,7 @@ export default {
     };
   },
   computed: {
-    //单据收款
+    //单据核销金额
     billtotal: function () {
       var allmoney = 0;
       this.billdata.forEach((item) => {
@@ -383,25 +379,14 @@ export default {
       });
       return allmoney;
     },
-    //账户收款
-    accounttotal: function () {
+    //资金核销金额
+    captotal: function () {
       var allmoney = 0;
-      this.accountdata.forEach((item) => {
+      this.capdata.forEach((item) => {
         allmoney += item.thisMoney;
       });
       this.formorder.receiptMoney = allmoney;
       return allmoney;
-    },
-    //预收款
-    ciaMoney: function () {
-      if (this.formorder.incomeType == "应收收款") {
-        this.formorder.ciaMoney = this.accounttotal - this.billtotal;
-        return this.accounttotal - this.billtotal;
-        //ciaBalance:"",
-      } else {
-        this.formorder.ciaMoney = this.accounttotal;
-        return this.accounttotal;
-      }
     },
     //已选产品
     thisrow: function () {
@@ -413,28 +398,18 @@ export default {
       this.joinstockdata = val;
     },
     //新增一行
-    addrow() {
-      this.accountdata.push({
-        fundAccount: "",
-        settlementType: "",
-        thisMoney: "0.00",
-      });
-    },
+    capopen() {},
     //改变收款方式
     changetype() {
-      this.billdata = [
-        {
-          saleId: "", //单据编号
-          thisMoney: "0.00", //本次收款
-        },
-      ];
+      this.billdata = [{saleId: "", thisMoney: 0.0 }];
+      this.capdata = [{capitalId: "", thisMoney: 0.0 }];
     },
     findbill() {
       this.condition.customer = this.formorder.customer;
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       var url = "";
-      this.formorder.incomeType == "应收收款"
+      this.formorder.cavType == "应收收款"
         ? (url =
             "http://localhost:8088/frameproject/capitalReceivable/finddeliverypage")
         : (url =
@@ -454,7 +429,7 @@ export default {
         .then(function (response) {
           response.data.data.rows.forEach((item) => {
             item.uncollectedMoney = item.receiptMoney - item.receivedMoney;
-            _this.formorder.incomeType == "应收收款"
+            _this.formorder.cavType == "应收收款"
               ? (item.saleType = "销售出库单")
               : (item.saleType = "销售订单");
           });
@@ -466,7 +441,7 @@ export default {
         });
     },
     //选择订单
-    dialogopen() {
+    billopen() {
       if (this.formorder.customer == "") {
         ElMessage.warning({
           message: "请先选择一位客户",
@@ -504,22 +479,15 @@ export default {
     },
     //移除一行
     delrow1(index, rows) {
-      if (this.accountdata.length > 1) {
+      if (this.capdata.length > 1) {
         rows.splice(index, 1); //删掉该行
       }
-    },
-    settype(index) {
-      this.options.forEach((item) => {
-        if (item.fundAccount == this.accountdata[index].fundAccount) {
-          this.accountdata[index].settlementType = item.settlementType;
-        }
-      });
     },
     //提交审批（生成订单）
     examine(type) {
       var tfok = true;
       if (tfok == true) {
-        this.accountdata.forEach((item) => {
+        this.capdata.forEach((item) => {
           if (
             item.fundAccount == "" ||
             this.formorder.payee == "" ||
@@ -552,7 +520,7 @@ export default {
           tfok = false;
         }
       });
-      if (this.accounttotal < this.billtotal && tfok == true) {
+      if (this.captotal < this.billtotal && tfok == true) {
         this.$notify({
           title: "警告",
           message: "账户总计收款不能小于单据总计收款",
@@ -570,13 +538,13 @@ export default {
         this.formorder.ciaBalance = this.formorder.ciaMoney;
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalReceipt/addreceipt/" +
+            "http://localhost:8088/frameproject/capitalReceipt/addwriteoff/" +
             type,
           method: "post",
           data: {
             receipt: JSON.stringify(_this.formorder),
             bill: JSON.stringify(_this.billdata),
-            account: JSON.stringify(_this.accountdata),
+            account: JSON.stringify(_this.capdata),
           },
           headers: {
             JWTDemo: state.userInfo.token,
@@ -590,62 +558,6 @@ export default {
             console.log(error);
           });
       }
-    },
-    findcan() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const receipt = JSON.parse(sessionStorage.getItem("receipt"));
-      const _this = this;
-      this.tfhas = true;
-      var url = "";
-      this.formorder.incomeType = receipt.type;
-      receipt.type == "应收收款"
-        ? (this.type = "应收单据列表:")
-        : (this.type = "销售订单:");
-      receipt.type == "应收收款"
-        ? (url =
-            "http://localhost:8088/frameproject/capitalReceivable/deliverythisReceipt")
-        : (url =
-            "http://localhost:8088/frameproject/capitalReceivable/salethisReceipt");
-      this.axios({
-        url: url,
-        method: "get",
-        params: { saleId: receipt.orderId },
-        headers: {
-          JWTDemo: state.userInfo.token,
-        },
-      })
-        .then(function (response) {
-          receipt.type == "应收收款"
-            ? (response.data.data.saleType = "销售出库单")
-            : (response.data.data.saleType = "销售订单");
-          response.data.data.uncollectedMoney =
-            response.data.data.receiptMoney - response.data.data.receivedMoney;
-          response.data.data.thisMoney = response.data.data.uncollectedMoney;
-          _this.formorder.customer = response.data.data.customer;
-          _this.billdata.push(response.data.data);
-          _this.billdata.splice(0, 1);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
-    findoptions() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      this.axios({
-        url: "http://localhost:8088/frameproject/capitalReceivable/findaccount",
-        method: "get",
-        processData: false,
-        headers: {
-          JWTDemo: state.userInfo.token,
-        },
-      })
-        .then(function (response) {
-          _this.options = response.data.data;
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
     },
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem("state"));
@@ -668,29 +580,24 @@ export default {
     },
   },
   created: function () {
-    const receipt = JSON.parse(sessionStorage.getItem("receipt"));
-    if (receipt != null) {
-      this.findcan();
-    }
-    this.findoptions();
     this.findsaleman();
   },
 };
 </script>
 
 <style lang="scss">
-.addreceipt {
+.addwriteoff {
   width: 100%;
   background-color: white;
 }
 /* 顶部 */
-.addreceipt .el-carousel__arrow--right,
+.addwriteoff .el-carousel__arrow--right,
 .el-notification.right {
   top: 110px !important;
   background-color: #f2dede;
   border-color: #ebccd1;
 }
-.addreceipt-page-tag {
+.addwriteoff-page-tag {
   height: 40px;
   padding: 0 10px;
   color: #323232;
@@ -698,54 +605,54 @@ export default {
   line-height: 40px;
   background-color: #e9eef3;
 }
-.addreceipt-shenpi {
+.addwriteoff-shenpi {
   float: right;
   line-height: 20px;
 }
 /* 内容表头 */
-.addreceipt-header {
+.addwriteoff-header {
   padding: 25px 15px;
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.addreceipt .el-form--inline .el-form-item {
+.addwriteoff .el-form--inline .el-form-item {
   margin-right: 20px !important;
 }
 /* 内容表体 */
-.addreceipt-main {
+.addwriteoff-main {
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.addreceipt .cell {
+.addwriteoff .cell {
   text-align: center;
   color: black !important;
   font-size: 8px !important;
 }
-.addreceipt-main .el-input__inner {
+.addwriteoff-main .el-input__inner {
   border: 0;
 }
-.addreceipt th {
+.addwriteoff th {
   color: black !important;
   background-color: #e8e8e8 !important;
 }
-.addreceipt-remarks {
+.addwriteoff-remarks {
   margin-top: 15px;
   height: 100%;
   width: 100%;
 }
-.addreceipt .el-textarea .el-textarea__inner {
+.addwriteoff .el-textarea .el-textarea__inner {
   resize: none;
   border: 0;
 }
-.addreceipt-main .el-input-number {
+.addwriteoff-main .el-input-number {
   width: 100% !important;
 }
-.addreceipt .el-alert__description {
+.addwriteoff .el-alert__description {
   font-size: 15px !important;
   color: black;
 }
 /* 内容表尾 */
-.addreceipt-footer {
+.addwriteoff-footer {
   padding: 20px 15px;
   background-color: white;
 }
