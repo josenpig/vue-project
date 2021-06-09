@@ -30,7 +30,7 @@
           <el-select
             v-model="formorder.cavType"
             placeholder="请选择"
-            @change="changetype()"
+            @change="changetype(0)"
           >
             <el-option
               v-for="item in cavType"
@@ -41,18 +41,35 @@
           </el-select>
         </el-form-item>
         <!-- 客户 -->
-        <el-form-item label="*客户:">
+        <el-form-item label="*客户:" v-if="formorder.cavType == '预收冲应收'">
           <el-select
-            v-model="formorder.customer"
+            v-model="formorder.otherParty"
             size="mini"
             filterable
-            placeholder="请选择客户"
-            @change="changetype()"
+            placeholder="请选择"
+            @change="changetype(1)"
           >
             <el-option
               v-for="item in headeroptions1"
               :key="item.customerName"
               :value="item.customerName"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <!-- 客户 -->
+        <el-form-item label="*供应商:" v-if="formorder.cavType == '预付冲应付'">
+          <el-select
+            v-model="formorder.otherParty"
+            size="mini"
+            filterable
+            placeholder="请选择"
+            @change="changetype(1)"
+          >
+            <el-option
+              v-for="item in headeroptions3"
+              :key="item.vendorName"
+              :value="item.vendorName"
             >
             </el-option>
           </el-select>
@@ -70,7 +87,7 @@
         <!-- 核销人 -->
         <el-form-item label="*核销人:" class="form-input">
           <el-select
-            v-model="formorder.payee"
+            v-model="formorder.cavBy"
             size="mini"
             filterable
             placeholder="请选择核销人"
@@ -86,8 +103,8 @@
       </el-form>
     </div>
     <!-- 表单表体 -->
-    <!-- 查询单据表 -->
-    <el-dialog title="选择单据" v-model="dialogTableVisible" width="50%">
+    <!-- 查询应收付单据表 -->
+    <el-dialog title="选择单据" v-model="dialogbill" width="50%">
       <div style="width: 100%; height: 500px; position: relative">
         <div style="width: 100%; height: 50px">
           已选<span style="color: #409eff">{{ thisrow }}</span
@@ -106,7 +123,7 @@
         <el-table
           ref="multipleTable"
           @selection-change="handleSelectionChange"
-          :data="stockdata"
+          :data="allbilldata"
           style="width: 100%"
           max-height="350"
           border
@@ -115,11 +132,11 @@
           <el-table-column prop="saleId" label="单据编号" width="200" />
           <el-table-column prop="saleType" label="单据类型" />
           <el-table-column prop="saleTime" label="单据日期" />
-          <el-table-column prop="receiptMoney" label="应收金额" />
-          <el-table-column prop="receivedMoney" label="已收金额" />
+          <el-table-column prop="shouldMoney" :label="formorder.cavType == '预收冲应收' ?'应收金额':'应付金额'" />
+          <el-table-column prop="alreadyMoney" :label="formorder.cavType == '预收冲应收' ?'已收金额':'已付金额'" />
           <el-table-column
-            prop="uncollectedMoney"
-            label="未收金额"
+            prop="notMoney"
+            :label="formorder.cavType == '预收冲应收' ?'未收金额':'未付金额'"
             width="120"
           />
         </el-table>
@@ -135,7 +152,61 @@
           >
           </el-pagination>
           <div style="float: right">
-            <el-button type="primary" @click="addproduct()">确定</el-button>
+            <el-button type="primary" @click="adddata()">确定</el-button>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+    <!-- 查询收付款单据列表 -->
+    <el-dialog title="选择单据" v-model="dialogcap" width="50%">
+      <div style="width: 100%; height: 500px; position: relative">
+        <div style="width: 100%; height: 50px">
+          已选<span style="color: #409eff">{{ thisrow }}</span
+          >个单据
+          <!-- 模糊查询 -->
+          <div style="float: right">
+            <el-input
+              v-model="findstock"
+              placeholder="请输入订单编号"
+              style="width: 250px"
+              size="small"
+            />
+            <el-button icon="el-icon-search" size="small">查询</el-button>
+          </div>
+        </div>
+        <el-table
+          ref="multipleTable"
+          @selection-change="handleSelectionChange"
+          :data="allcapdata"
+          style="width: 100%"
+          max-height="350"
+          border
+        >
+          <el-table-column type="selection" width="50" />
+          <el-table-column prop="capitalId" label="流水号" width="200" />
+          <el-table-column prop="capitalType" label="类型" />
+          <el-table-column prop="capitalTime" label="流水日期" />
+          <el-table-column prop="beforeMoney" :label="formorder.cavType == '预收冲应收' ?'预收金额':'预付金额'" />
+          <el-table-column prop="writtenMoney" label="已核销金额" />
+          <el-table-column
+            prop="unwrittenMoney"
+            label="未核销金额"
+            width="120"
+          />
+        </el-table>
+        <!-- 表尾分页显示 -->
+        <div
+          style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
+        >
+          <el-pagination
+            style="float: left"
+            background
+            layout="prev, pager, next"
+            :total="max"
+          >
+          </el-pagination>
+          <div style="float: right">
+            <el-button type="primary" @click="adddata()">确定</el-button>
           </div>
         </div>
       </div>
@@ -245,7 +316,7 @@
             </el-tooltip>
           </template>
         </el-table-column>
-        <!-- 账户详细信息 -->
+        <!-- 收付款详细信息 -->
         <el-table-column prop="capitalId" label="流水号" width="200" />
         <el-table-column prop="capitalType" label="类型" />
         <el-table-column prop="capitalTime" label="流水日期" />
@@ -262,6 +333,7 @@
               :controls="false"
               :min="0"
               :precision="2"
+              :max="capdata[scope.$index].unwrittenMoney"
             />
           </template>
         </el-table-column>
@@ -310,19 +382,23 @@ export default {
   data() {
     return {
       //订单div
-      dialogTableVisible: false,
-      findstock: "", //库存产品名称查询
-      stockdata: [], //库存产品--信息
-      joinstockdata: [], //已选库存产品
+      dialogbill: false,
+      dialogcap: false,
+      findstock: "", //查询
+      allbilldata: [], //库存产品--信息
+      joinallbilldata: [], //已选库存产品
+      allcapdata:[],
+      joinallcapdata:[],
       // 表单头部下拉列表信息
       headeroptions1: [],
       headeroptions2: [],
+      headeroptions3:[],
       //订单信息
       formorder: {
         //表头单据信息
         cavId: "HXD" + Date.now(), //单据编号
         orderTime: new Date(), //单据时间
-        customer: "", //客户
+        otherParty: "", //客户
         cavBy: "", //核销人
         cavType: "预收冲应收", //核销方式
         thisMoney: "", //本次核销余额
@@ -361,7 +437,7 @@ export default {
       cavType: [{ value: "预收冲应收" }, { value: "预付冲应付" }],
       //条件查询订单
       condition: {
-        customer: "",
+        otherParty: "",
         saleId: "",
       },
       //分页
@@ -385,35 +461,74 @@ export default {
       this.capdata.forEach((item) => {
         allmoney += item.thisMoney;
       });
-      this.formorder.receiptMoney = allmoney;
+      this.formorder.thisMoney = allmoney;
       return allmoney;
     },
     //已选产品
     thisrow: function () {
-      return this.joinstockdata.length;
+      if(this.dialogbill==true){
+      return this.joinallbilldata.length;
+      }else{
+        return this.joinallcapdata.length;
+      }
     },
   },
   methods: {
     handleSelectionChange(val) {
-      this.joinstockdata = val;
+      if(this.dialogbill==true){
+      this.joinallbilldata = val;
+      }else{
+        this.joinallcapdata=val
+      }
     },
-    //新增一行
-    capopen() {},
     //改变收款方式
-    changetype() {
+    changetype(type) {
+      if(type==0){
+        this.formorder.otherParty=''
+        }
       this.billdata = [{saleId: "", thisMoney: 0.0 }];
       this.capdata = [{capitalId: "", thisMoney: 0.0 }];
     },
-    findbill() {
-      this.condition.customer = this.formorder.customer;
+    findcap() {
+      this.condition.otherParty = this.formorder.otherParty;
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       var url = "";
-      this.formorder.cavType == "应收收款"
+      this.formorder.cavType == "预收冲应收"
         ? (url =
-            "http://localhost:8088/frameproject/capitalReceivable/finddeliverypage")
+            "http://localhost:8088/frameproject/capitalCavCia/receiptpage")
         : (url =
-            "http://localhost:8088/frameproject/capitalReceivable/findsalepage");
+            "http://localhost:8088/frameproject/capitalCavCia/receiptpage");
+      this.axios({
+        url: url,
+        method: "post",
+        data: {
+          currentPage: _this.currentPage,
+          pageSize: _this.pagesize,
+          condition: JSON.stringify(_this.condition),
+        },
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.allcapdata = response.data.data.rows;
+          _this.max = response.data.data.total;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    findbill() {
+      this.condition.otherParty = this.formorder.otherParty;
+      const state = JSON.parse(sessionStorage.getItem("state"));
+      const _this = this;
+      var url = "";
+      this.formorder.cavType == "预收冲应收"
+        ? (url =
+            "http://localhost:8088/frameproject/capitalCavCia/receivablepage")
+        : (url =
+            "http://localhost:8088/frameproject/capitalCavCia/receivablepage");
       this.axios({
         url: url,
         method: "post",
@@ -428,39 +543,55 @@ export default {
       })
         .then(function (response) {
           response.data.data.rows.forEach((item) => {
-            item.uncollectedMoney = item.receiptMoney - item.receivedMoney;
-            _this.formorder.cavType == "应收收款"
-              ? (item.saleType = "销售出库单")
-              : (item.saleType = "销售订单");
+            if (item.saleId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
+              item.saleType = "销售出库单"
+            }
           });
-          _this.stockdata = response.data.data.rows;
+          _this.allbilldata = response.data.data.rows;
           _this.max = response.data.data.total;
         })
         .catch(function (error) {
           console.log(error);
         });
     },
-    //选择订单
+    //选择应收付单
     billopen() {
-      if (this.formorder.customer == "") {
+      var message
+      this.formorder.cavType=='预收冲应收'?message='请先选择一位客户':message='请先选择一位供应商'
+      if (this.formorder.otherParty == "") {
         ElMessage.warning({
-          message: "请先选择一位客户",
+          message: message,
           type: "warning",
         });
       } else {
         this.findbill();
-        this.dialogTableVisible = true;
+        this.dialogbill = true;
+      }
+    },
+    //选择收付单
+    capopen() {
+      var message
+      this.formorder.cavType=='预收冲应收'?message='请先选择一位客户':message='请先选择一位供应商'
+      if (this.formorder.otherParty == "") {
+        ElMessage.warning({
+          message: message,
+          type: "warning",
+        });
+      } else {
+        this.findcap();
+        this.dialogcap = true;
       }
     },
     //添加订单
-    addproduct() {
+    adddata() {
+      if(this.dialogbill==true){
       var productlist = [];
       this.billdata.forEach((item) => {
         productlist.push(item.saleId);
       });
-      this.joinstockdata.forEach((item) => {
+      this.joinallbilldata.forEach((item) => {
         if (productlist.indexOf(item.saleId) == -1) {
-          item.thisMoney = item.uncollectedMoney;
+          item.thisMoney = item.notMoney;
           this.billdata.push(item);
         }
       });
@@ -469,7 +600,25 @@ export default {
           this.billdata.splice(i, 1);
         }
       }
-      this.dialogTableVisible = false;
+      this.dialogbill = false;
+      }else{
+        var productlist = [];
+      this.capdata.forEach((item) => {
+        productlist.push(item.capitalId);
+      });
+      this.joinallcapdata.forEach((item) => {
+        if (productlist.indexOf(item.capitalId) == -1) {
+          item.thisMoney = item.unwrittenMoney;
+          this.capdata.push(item);
+        }
+      });
+      for (var i = this.capdata.length - 1; i >= 0; i--) {
+        if (this.capdata[i].capitalId == "" && this.capdata.length > 1) {
+          this.capdata.splice(i, 1);
+        }
+      }
+      this.dialogcap = false;
+      }
     },
     //移除一行
     delrow(index, rows) {
@@ -487,72 +636,33 @@ export default {
     examine(type) {
       var tfok = true;
       if (tfok == true) {
-        this.capdata.forEach((item) => {
-          if (
-            item.fundAccount == "" ||
-            this.formorder.payee == "" ||
-            this.formorder.customer == "" ||
-            (this.billdata.length == 1 && this.billdata[0].saleId == "")
-          ) {
-            this.$notify({
-              title: "警告",
-              message: "请先填写*必要信息!",
-              type: "warning",
-            });
-            tfok = false;
-          }
-        });
-      }
-      this.billdata.forEach((item) => {
-        if (item.thisMoney > item.uncollectedMoney && tfok == true) {
-          this.$notify({
-            title: "警告",
-            message: "本次收款金额不能大于未收金额",
-            type: "warning",
-          });
-          tfok = false;
-        } else if (item.uncollectedMoney == 0 && tfok == true) {
-          this.$notify({
-            title: "警告",
-            message: "订单" + item.saleId + "的未收金额不足",
-            type: "warning",
-          });
-          tfok = false;
-        }
-      });
-      if (this.captotal < this.billtotal && tfok == true) {
-        this.$notify({
-          title: "警告",
-          message: "账户总计收款不能小于单据总计收款",
-          type: "warning",
-        });
-        tfok = false;
+        
       }
       if (tfok == true) {
         const state = JSON.parse(sessionStorage.getItem("state"));
         const _this = this;
-        this.formorder.receiptTime = dayjs(this.formorder.receiptTime).format(
+        this.formorder.saleTime = dayjs(this.formorder.saleTime).format(
           "YYYY-MM-DD HH:mm:ss"
         );
         this.formorder.founder = state.userInfo.userName;
         this.formorder.ciaBalance = this.formorder.ciaMoney;
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalReceipt/addwriteoff/" +
+            "http://localhost:8088/frameproject/capitalCavCia/add/" +
             type,
           method: "post",
           data: {
-            receipt: JSON.stringify(_this.formorder),
+            order: JSON.stringify(_this.formorder),
             bill: JSON.stringify(_this.billdata),
-            account: JSON.stringify(_this.capdata),
+            cap: JSON.stringify(_this.capdata),
           },
           headers: {
             JWTDemo: state.userInfo.token,
           },
         })
           .then(function (response) {
-            sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Receipt");
+            // sessionStorage.setItem("orderid", response.data.data);
+            // _this.$router.push("/Receipt");
           })
           .catch(function (error) {
             console.log(error);
@@ -563,7 +673,7 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/saleofpeople/" + 3,
+        url: "http://localhost:8088/frameproject/personnel/ofpeople",
         method: "get",
         headers: {
           JWTDemo: state.userInfo.token,
@@ -572,6 +682,7 @@ export default {
         .then(function (response) {
           _this.headeroptions1 = response.data.data.customers;
           _this.headeroptions2 = response.data.data.salemans;
+          _this.headeroptions3 = response.data.data.vendors;
           _this.footeroptions = response.data.data.notifiers;
         })
         .catch(function (error) {

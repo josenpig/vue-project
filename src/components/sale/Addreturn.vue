@@ -419,7 +419,7 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/saleofpeople/" + 3,
+        url: "http://localhost:8088/frameproject/personnel/ofpeople",
         method: "get",
         headers: {
           JWTDemo: state.userInfo.token,
