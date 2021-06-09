@@ -12,32 +12,73 @@
 				<el-dialog title="仓库信息" v-model="dialogFormVisible">
 					<hr style="margin-bottom: 20px;" />
 					<el-form :model="form">
-						<el-form-item label="仓库名称" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
+						<el-form-item label="* 仓库编号 *" :label-width="formLabelWidth">
+							<el-input v-model="form.depotId" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
-						<el-form-item label="仓库编号" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
+						<el-form-item label="* 仓库名称 *" :label-width="formLabelWidth">
+							<el-input v-model="form.depotName" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
 						<el-form-item label="仓库地址" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
+							<el-input v-model="form.depotAddress" autocomplete="off"></el-input>
 						</el-form-item>
 						<el-form-item label="负责人" :label-width="formLabelWidth">
-							<el-select v-model="selcharge" placeholder="请选择" size="mini" style="width:150px">
-								<el-option v-for="item in charge" :key="item.value" :label="item.label" :value="item.value">
+							<el-select v-model="form.chargeName" placeholder="请选择负责人 (必选)">
+								<el-option v-for="item in charge" :key="item.chargeName" :label="item.chargeName" :value="item.chargeName">
 								</el-option>
 							</el-select>
 						</el-form-item>
 						<el-form-item label="备注" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
+							<el-input v-model="form.remarks" autocomplete="off"></el-input>
 						</el-form-item>
 						<el-form-item label="联系人电话" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
+							<el-input v-model="form.contactNumber" autocomplete="off"></el-input>
 						</el-form-item>
 					</el-form>
 					<template #footer>
 						<span class="dialog-footer">
 							<el-button @click="dialogFormVisible = false">取 消</el-button>
-							<el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+							<el-button type="primary" @click="pdID">确 定</el-button>
+						</span>
+					</template>
+				</el-dialog>
+
+				<!--修改仓库信息-->
+				<el-dialog title="修改仓库信息" v-model="updateDialogFormVisible">
+					<hr style="margin-bottom: 20px;" />
+					<el-form :model="form">
+						<el-form-item label="* 仓库编号 *" :label-width="formLabelWidth">
+							<el-input :disabled="true" v-model="updateForm.depotId" autocomplete="off" placeholder="(必填)" maxlength="20"
+							 show-word-limit></el-input>
+						</el-form-item>
+						<el-form-item label="* 仓库名称 *" :label-width="formLabelWidth">
+							<el-input :disabled="true" v-model="updateForm.depotName" autocomplete="off" placeholder="(必填)" maxlength="20"
+							 show-word-limit></el-input>
+						</el-form-item>
+						<el-form-item label="仓库地址" :label-width="formLabelWidth">
+							<el-input v-model="updateForm.depotAddress" autocomplete="off"></el-input>
+						</el-form-item>
+						<el-form-item label="负责人" :label-width="formLabelWidth">
+							<el-select v-model="updateForm.chargeName" placeholder="请选择负责人 (必选)">
+								<el-option v-for="item in charge" :key="item.chargeName" :label="item.chargeName" :value="item.chargeName">
+								</el-option>
+							</el-select>
+						</el-form-item>
+						<el-form-item label="备注" :label-width="formLabelWidth">
+							<el-input v-model="updateForm.remarks" autocomplete="off"></el-input>
+						</el-form-item>
+						<el-form-item label="联系人电话" :label-width="formLabelWidth">
+							<el-input v-model="updateForm.contactNumber" autocomplete="off"></el-input>
+						</el-form-item>
+						<el-form-item label="状态" :label-width="formLabelWidth">
+							<span v-if="updateForm.state==0" style="color: orangered;padding: 15px;">已禁用</span>
+							<span v-if="updateForm.state==1" style="color: seagreen;padding: 15px;">已启用</span>
+						</el-form-item>
+
+					</el-form>
+					<template #footer>
+						<span class="dialog-footer">
+							<el-button @click="updateDialogFormVisible = false">取 消</el-button>
+							<el-button type="primary" @click="update">确 定</el-button>
 						</span>
 					</template>
 				</el-dialog>
@@ -45,25 +86,38 @@
 			</div>
 		</div>
 		<!-- 表单头部 -->
-
+		<!--搜索框-->
+		<div class="page-search">
+			<div style="float: left;margin: 5px 0px;">
+				<el-select v-model="select" size="mini" style="width:110px">
+					<el-option v-for="item in type" :key="item.label" :label="item.label" :value="item.label"></el-option>
+				</el-select>
+			</div>
+			<div class="page-search-content">
+				<el-input v-model="SearchContent" placeholder="请输入内容" size="small"></el-input>
+			</div>
+			<div style="float: left;">
+				<el-button @click="findpageByidOrName" icon="el-icon-search" circle></el-button>
+			</div>
+		</div>
 		<!-- 表体内容 -->
 		<div class="Warehouse-mian">
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column prop="date" label="操作" width="202">
 					<template #default="scope">
-						<el-button size="small" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.depotId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
-						<el-button v-if="scope.row.state==1" round style="background-color: coral;color: white;">禁用</el-button>
-						<el-button v-if="scope.row.state==0" round style="background-color: lightgreen ;color: white;">启用</el-button>
-						</template>
+						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						<el-button size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;">禁用</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;">启用</el-button>
+					</template>
 				</el-table-column>
 				<el-table-column prop="depotName" label="仓库名称" sortable width="140" />
 				<el-table-column prop="depotId" label="仓库编号" sortable width="130" />
-				<el-table-column prop="depotAddress" label="仓库地址" sortable width="130" />
+				<el-table-column prop="depotAddress" label="仓库地址"  width="130" />
 				<el-table-column prop="chargeName" label="负责人" sortable width="120" />
-				<el-table-column prop="contactNumber" label="联系电话" sortable width="120" />
-				<el-table-column prop="remarks" label="备注" sortable width="120" />
+				<el-table-column prop="contactNumber" label="联系电话"  width="120" />
+				<el-table-column prop="remarks" label="备注"  width="120" />
 				<el-table-column prop="state" label="状态" sortable width="120">
 					<template #default="scope">
 						<span v-if="scope.row.state==0" style="color: orangered;">禁用</span>
@@ -81,51 +135,50 @@
 	</div>
 </template>
 <script>
+	import {
+		ElMessage
+	} from 'element-plus'
 	export default {
 		name: "Warehouse",
 		data() {
 			return {
-				dialogTableVisible: false,
+				//新增仓库信息弹框
 				dialogFormVisible: false,
+				//修改仓库信息弹框
+				updateDialogFormVisible: false,
+				//新增仓库表单
 				form: {
-					name: '',
-					region: '',
-					date1: '',
-					date2: '',
-					delivery: false,
-					type: [],
-					resource: '',
-					desc: '',
-					charge: ''
+					depotId: '', //仓库编号
+					depotName: '', //仓库名称
+					depotAddress: '', //仓库地址
+					chargeName: '', //负责人
+					contactNumber: '', //联系电话
+					remarks: '', //备注
+				},
+				//修改仓库表单
+				updateForm: {
+					depotId: '', //仓库编号
+					depotName: '', //仓库名称
+					depotAddress: '', //仓库地址
+					chargeName: '', //负责人
+					contactNumber: '', //联系电话
+					remarks: '', //备注
+					state: '' //状态: （已启用：1；已禁用：0）
 				},
 				formLabelWidth: '120px',
-				radio: '1',
-				selcharge: '李明',
-				SearchType: '仓库名称',
+
+				//选中搜索条件（默认仓库名称）
+				select: '仓库名称',
+				//搜索框中内容
 				SearchContent: '',
+				//搜索框条件
 				type: [{
-					value: '选项1',
 					label: '仓库名称'
 				}, {
-					value: '选项2',
 					label: '仓库编号'
 				}],
-				charge: [{
-					value: '选项1',
-					label: '李明'
-				}, {
-					value: '选项2',
-					label: '张梅梅'
-				}, {
-					value: '选项3',
-					label: '王二狗'
-				}, {
-					value: '选项4',
-					label: '龙须面'
-				}, {
-					value: '选项5',
-					label: '王富贵'
-				}],
+				//负责人数据
+				charge: [],
 				//表单数据
 				tableData: [],
 				//分页
@@ -138,6 +191,26 @@
 			//改变页码数
 			handleCurrentChange(val) {
 				this.findpage(val, this.pagesize);
+			},
+			//查询所有负责人
+			findAllCharge() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseCharge/selectAll",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.charge = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
 			},
 			//分页查询
 			findpage() {
@@ -165,15 +238,43 @@
 						console.log(error);
 					});
 			},
+			//根据供应商编号或供应商名称查询
+			findpageByidOrName() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pageSize: this.pagesize,
+					SearchContent: this.SearchContent,
+					select: this.select,
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseDepot/findAllDepot/ByIdOrName",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data.rows)
+						_this.tableData = response.data.data.rows;
+						_this.max = response.data.data.total;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
 			//删除仓库
-			del(id, index) {
+			del(id) {
 				var _this = this;
 				this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					
+
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var depotId = {
 						depotId: id
@@ -190,12 +291,12 @@
 						})
 						.then(function(response) {
 							console.log("删除是否成功：" + response.data.data);
-							if(response.data.data){
+							if (response.data.data) {
 								_this.$message({
 									type: 'success',
 									message: '删除成功'
 								});
-							}else{
+							} else {
 								ElMessage.warning({
 									message: '该仓库存在关联产品，无法删除！',
 									type: 'success'
@@ -212,27 +313,198 @@
 						message: '已取消删除'
 					});
 				});
+			},
+			//判断仓库ID是否重复并添加仓库
+			pdID() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var id = {
+					id: this.form.depotId
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseDepot/judgeDepotId",
+						method: "get",
+						processData: false,
+						params: id,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log("id不重复是否通过:" + response.data)
+						_this.judge = response.data
+						if (response.data == false) {
+							ElMessage.warning({
+								message: '仓库ID重复',
+								type: 'success'
+							});
+						} else {
+							_this.Add()
+						}
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//添加仓库
+			Add() {
+				console.log(this.form)
+				if (this.form.depotId == '' ||
+					this.form.depotName == '' ||
+					this.form.chargeName == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.form.user = state.userInfo.userName;
+					this.dialogFormVisible = false
+					//添加仓库
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseDepot/addDepot",
+							method: "post",
+							processData: false,
+							data: {
+								Depot: JSON.stringify(_this.form)
+							},
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data)
+							ElMessage.success({
+								message: '添加成功',
+								type: 'success'
+							});
+							_this.form = {}
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}
+			},
+			//打开修改框
+			openupdate(val) {
+				this.updateDialogFormVisible = true;
+
+				this.updateForm.depotId = val.depotId
+				this.updateForm.depotName = val.depotName
+				this.updateForm.depotAddress = val.depotAddress
+				this.updateForm.chargeName = val.chargeName
+				this.updateForm.contactNumber = val.contactNumber
+				this.updateForm.remarks = val.remarks
+				this.updateForm.state = val.state
+
+			},
+			//修改仓库信息
+			update() {
+				console.log(this.updateForm)
+				if (
+					this.updateForm.charge == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.dialogFormVisible = false
+					//修改仓库
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseDepot/updateDepot",
+							method: "post",
+							processData: false,
+							data: {
+								Depot: JSON.stringify(_this.updateForm)
+							},
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data)
+							ElMessage.success({
+								message: '修改成功',
+								type: 'success'
+							});
+							_this.updateDialogFormVisible = false;
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}
+			},
+			//禁用或启用
+			disableOrEnable(val) {
+				var _this = this;
+				var able;
+				if (val.state == 0) {
+					able = '启用'
+				};
+				if (val.state == 1) {
+					able = '禁用'
+				};
+				this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+				
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					console.log(val)
+					var Dstate = {
+						Did: val.depotId,
+						Dstate: val.state
+					};
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseDepot/disableOrEnable",
+							method: "get",
+							processData: false,
+							params: Dstate,
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data);
+							if (response.data.data) {
+								_this.$message({
+									type: 'success',
+									message: able+'成功'
+								});
+							}
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消'+able
+					});
+				});
 			}
-		},
-		computed: {},
+	},
+	computed: {},
 		created() {
 			this.findpage()
+			this.findAllCharge()
 		}
 	};
 </script>
 
 <style lang="scss">
-	.Warehouse {
+	.Warehouse .Warehouse {
 		width: 100%;
 		background-color: white;
 	}
 
-	.r-float {
+	.Warehouse .r-float {
 		float: right;
 	}
 
 	/* 顶部 */
-	.page-tag {
+	.Warehouse .page-tag {
 		height: 40px;
 		padding: 0 10px;
 		color: #323232;
@@ -241,18 +513,18 @@
 		background-color: #e9eef3;
 	}
 
-	.shenpi {
+	.Warehouse .shenpi {
 		float: right;
 		line-height: 20px;
 	}
 
-	.page-search {
-		float: right;
-		padding: 13px;
+	.Warehouse .page-search {
+		float: left;
+		padding: 10px;
 	}
 
-	.page-search-content {
-		margin: -2px;
+	.Warehouse .page-search-content {
+		margin: 4px;
 		float: left;
 		padding: 0px 10px 10px;
 	}

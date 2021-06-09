@@ -159,10 +159,10 @@
 				<el-table-column prop="customerType" label="客户类型" sortable width="120" />
 				<el-table-column prop="ratio" label="调价比例(%)" sortable width="120" />
 				<el-table-column prop="chargeName" label="负责人" sortable width="120" />
-				<el-table-column prop="contact" label="联系人姓名" sortable width="120" />
-				<el-table-column prop="contactNumber" label="联系人电话" sortable width="120" />
-				<el-table-column prop="contactAddress" label="联系人地址" sortable width="120" />
-				<el-table-column prop="remarks" label="备注" sortable width="120" />
+				<el-table-column prop="contact" label="联系人姓名"  width="120" />
+				<el-table-column prop="contactNumber" label="联系人电话"  width="120" />
+				<el-table-column prop="contactAddress" label="联系人地址"  width="120" />
+				<el-table-column prop="remarks" label="备注"  width="120" />
 				<el-table-column prop="user" label="创建人" sortable width="120" />
 				<el-table-column prop="creationTime" label="创建时间" sortable width="150" />
 				<el-table-column prop="updateTime" label="更新时间" sortable width="150" />

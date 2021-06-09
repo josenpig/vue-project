@@ -348,8 +348,6 @@ export default {
           _this.tableData.forEach((item) => {
             if (item.deliveryId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
               item.deliveryType = "销售出库单"
-            }else if(item.deliveryId.match(/^[a-z|A-Z]+/gi) == "XSTHD"){
-              item.deliveryType = "销售退货单"
             }
           });
           _this.max = response.data.data.total;

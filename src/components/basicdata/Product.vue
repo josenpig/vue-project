@@ -53,9 +53,9 @@
 				</el-table-column>
 				<el-table-column prop="productName" label="产品名称" sortable width="120" />
 				<el-table-column prop="productId" label="产品编号" sortable width="120" />
-				<el-table-column prop="productSpec" label="规格" sortable width="120" />
-				<el-table-column prop="ingredient" label="成分" sortable width="120" />
-				<el-table-column prop="gramHeavy" label="克重" sortable width="120" />
+				<el-table-column prop="productSpec" label="规格"  width="120" />
+				<el-table-column prop="ingredient" label="成分"  width="120" />
+				<el-table-column prop="gramHeavy" label="克重"  width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
 				<el-table-column prop="opingNumber" label="初期数量" sortable width="120" />
@@ -65,7 +65,7 @@
 					</template>
 				</el-table-column>
 				<!---->
-				<el-table-column prop="remarks" label="备注" sortable width="120" />
+				<el-table-column prop="remarks" label="备注"  width="120" />
 				<el-table-column prop="purchaseMoney" label="采购单价" sortable width="120" />
 				<el-table-column prop="purchaseUnitPrice" label="销售单价" sortable width="120" />
 				<el-table-column prop="userName" label="创建人" sortable width="120" />
