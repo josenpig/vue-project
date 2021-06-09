@@ -121,22 +121,6 @@
     </div>
     <!-- 表体内容 -->
     <div class="writeofflist-mian">
-
-      <el-dialog title="订单出库状态" v-model="dialogTableVisible" width="70%">
-        <el-table :data="pstatus" max-height="300" border stripe class="writeofflist-look">
-          <el-table-column property="pid" label="产品编号"></el-table-column>
-          <el-table-column property="pname" label="产品名称"></el-table-column>
-          <el-table-column property="pnum" label="订单数量"></el-table-column>
-          <el-table-column property="okdnum" label="已出库数量"></el-table-column>
-          <el-table-column property="okrnum" label="已退货数量"></el-table-column>
-          <el-table-column property="nodnum" label="待出库数量"></el-table-column>
-        </el-table>
-        <el-divider></el-divider>
-        <div style="width:100%;height:30px;">
-        <el-button type="primary" style="float:right" @click="dialogTableVisible=false">确定</el-button>
-        </div>
-      </el-dialog>
-
       <div style="padding: 10px 25px">
         <el-button
           icon="el-icon-plus"
@@ -165,24 +149,10 @@
         @selection-change="handleSelectionChange"
         stripe
       >
-        <el-table-column fixed label="操作" width="150">
-          <template #default="scope">
-            <el-button
-              type="text"
-              v-if="tableData[scope.$index].orderState == 0"
-            >
-              结束执行
-            </el-button>
-            <el-button type="text" v-else> 恢复执行 </el-button>
-            <el-button type="text" @click="look(scope.$index)">
-              查看出库
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column prop="orderId" label="销售订单编号" fixed width="200">
+        <el-table-column prop="cavId" label="核销单编号" fixed width="200">
           <template #default="scope">
             <el-button type="text" @click="goorder(scope.$index)">{{
-              tableData[scope.$index].orderId
+              tableData[scope.$index].cavId
             }}</el-button>
           </template>
         </el-table-column>
@@ -192,29 +162,14 @@
           sortable
           width="150"
         />
+        <el-table-column prop="cavType" label="核销方式" width="120" />
+        <el-table-column prop="otherParty" label="aaa" width="120" />
+        <el-table-column prop="cavBy" label="核销人" width="120" />
         <el-table-column
-          prop="deliveryTime"
-          label="交货日期"
-          sortable
+          prop="thisMoney"
+          label="本次核销金额(元)"
           width="150"
         />
-        <el-table-column prop="customer" label="客户" width="120" />
-        <el-table-column prop="salesmen" label="销售人员" width="120" />
-        <el-table-column
-          prop="receivables"
-          label="优惠后应收款(元)"
-          width="150"
-        />
-        <el-table-column prop="advance" label="订单已收款(元)" width="120" />
-        <el-table-column prop="deliveryState" label="出库状态" width="120">
-          <template #default="scope">
-            <span v-if="tableData[scope.$index].deliveryState == 0">
-              未出库
-            </span>
-            <span v-else> 完全出库 </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="contacts" label="联系人" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
         <el-table-column
           prop="foundTime"
@@ -236,27 +191,19 @@
             <span v-else> 审批通过 </span>
           </template>
         </el-table-column>
-        <el-table-column prop="orderState" label="订单状态" width="120">
-          <template #default="scope">
-            <span v-if="tableData[scope.$index].orderState == 0"> 执行中 </span>
-            <span v-else> 已结束 </span>
-          </template>
-        </el-table-column>
         <el-table-column
           prop="updateTime"
           label="更新时间"
           sortable
           width="200"
         />
+         <el-table-column prop="approver" label="审批人" width="120" />
         <el-table-column
           prop="lastApprovalTime"
           label="最后审批时间"
           sortable
           width="200"
         />
-        <el-table-column prop="approver" label="审批人" width="120" />
-        <el-table-column prop="returnId" label="关联退货单" width="200" />
-        <el-table-column prop="deliveryId" label="关联出库单" width="200" />
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
@@ -312,7 +259,7 @@ export default {
         salesmen: "", //销售人
       },
       dialogTableVisible: false,
-      pstatus:[],
+      pstatus: [],
       //分页
       pagesize: 5,
       max: 0,
@@ -341,27 +288,6 @@ export default {
     },
   },
   methods: {
-    //查看出库
-    look(index) {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      var _this = this;
-      this.axios({
-        url:
-          "http://localhost:8088/frameproject/saleorder/status/" +
-          this.tableData[index].orderId,
-        method: "get",
-        headers: {
-          JWTDemo: state.userInfo.token,
-        },
-      })
-        .then(function (response) {
-          _this.pstatus=response.data.data;
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      this.dialogTableVisible = true;
-    },
     //新增单据
     goadd() {
       this.$router.push("/Addwriteoff");
@@ -371,12 +297,12 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       var _this = this;
       this.axios({
-        url: "http://localhost:8088/frameproject/saleorder/conditionpage",
+        url: "http://localhost:8088/frameproject/capitalCavCia/conditionpage",
         method: "post",
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
-          condition: JSON.stringify(_this.condition),
+          condition:""// JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
@@ -396,8 +322,8 @@ export default {
     },
     //前往订单详情
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].orderId);
-      this.$router.push("/Sale");
+      sessionStorage.setItem("orderid", this.tableData[val].cavId);
+      this.$router.push("/Writeoff");
     },
     //条件查询
     qbc() {
@@ -432,7 +358,7 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/saleofpeople/" + 3,
+        url: "http://localhost:8088/frameproject/personnel/ofpeople",
         method: "get",
         headers: {
           JWTDemo: state.userInfo.token,
@@ -506,7 +432,7 @@ export default {
   color: white !important;
   background-color: #459df5 !important;
 }
-.writeofflist-look th{
+.writeofflist-look th {
   color: #666666 !important;
   background-color: #e8e8e8 !important;
 }

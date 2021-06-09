@@ -6,12 +6,25 @@
       <span>库存盘点</span>
       <div class="addsale-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">临时保存</el-button>
-        <el-button type="primary" size="mini" @click="examine(0)"
+        <el-button size="mini" @click="examine(0)">临时保存</el-button>
+        <el-button type="primary" size="mini" @click="examine(1)"
           >盘点完成</el-button
         >
       </div>
     </div>
+
+    <!--选择仓库 -->
+<el-dialog title="选择仓库" v-model="isdialog">
+  <el-select v-model="value" placeholder="请选择">
+    <el-option
+      v-for="item in depotlist"
+      :key="item.depotId"
+      :label="item.depotName"
+      :value="item.depotId">
+    </el-option>
+  </el-select>
+</el-dialog>
+
     <!-- 表单头部 -->
     <div class="addsale-header">
       <el-form
@@ -104,31 +117,27 @@
           <el-table-column type="selection" width="55" />
           <el-table-column prop="productName" label="产品名称" width="200" />
           <el-table-column prop="productId" label="产品编号" width="120" />
-          <el-table-column prop="productType" label="产品类别" width="120" />
-          <el-table-column prop="remark" label="备注" width="120" />
-          <el-table-column prop="productSpec" label="规格" width="120" />
+          <el-table-column prop="productType" label="产品属性" width="120" />
+          <el-table-column prop="remark" label="产品规格" width="120" />
+          <el-table-column prop="productSpec" label="产品分类" width="120" />
           <el-table-column prop="productUnit" label="单位" width="120" />
           <el-table-column prop="productNum" label="库存总量" width="120" />
-          <el-table-column prop="expectNum" label="预计可用量" width="120" />
-          <el-table-column prop="saleUnitPrice" label="销售单价" width="120" />
-          <el-table-column prop="ingredient" label="成分" width="120" />
-          <el-table-column prop="gramHeavy" label="克量" width="120" />
-          <el-table-column
-            prop="productDescribe"
-            label="产品描述"
-            width="150"
-            :show-overflow-tooltip="true"
-          />
+          <el-table-column prop="expectNum" label="盘点数量" width="120" />
+          <el-table-column prop="saleUnitPrice" label="盘盈盘亏" width="120" />
+          <el-table-column prop="ingredient" label="备份" width="120" />
         </el-table>
         <!-- 表尾分页显示 -->
         <div
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
           <el-pagination
-            style="float: left"
             background
             layout="prev, pager, next"
             :total="max"
+            :page-size="pagesize"
+            style="float: left"
+            @current-change="handleCurrentChange"
+            v-model:currentPage="currentPage"
           >
           </el-pagination>
           <div style="float: right">
@@ -184,9 +193,11 @@
           </template>
         </el-table-column>
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
-        <el-table-column prop="productNum" label="数量" width="120">
+        <el-table-column prop="productSpec" label="产品属性" width="120" />
+        <el-table-column prop="productUnit" label="产品规格" width="120" />
+        <el-table-column prop="productUnit" label="产品分类" width="120" />
+        <el-table-column prop="productUnit" label="产品单位" width="120" />
+        <el-table-column prop="productNum" label="盘点数量" width="120">
           <template #default="scope">
             <el-input-number
               v-model="productdata[scope.$index].productNum"
@@ -195,39 +206,13 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="saleUnitPrice" label="销售单价" width="120">
-          <template #default="scope">
-            <el-input-number
-              v-model="productdata[scope.$index].saleUnitPrice"
-              :controls="false"
-              :precision="2"
-              :min="0"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column prop="saleMoney" label="销售金额" width="120">
+        <el-table-column prop="productUnit" label="系统数量" width="120" />
+
+        <el-table-column prop="saleMoney" label="盘盈盘亏" width="120">
           <template #default="scope">
             {{ saleMoney(scope.$index) }}
           </template>
         </el-table-column>
-        <el-table-column prop="depot" label="仓库" width="150">
-          <template #default="scope">
-            <el-select
-              v-model="productdata[scope.$index].depot"
-              size="mini"
-              filterable
-            >
-              <el-option
-                v-for="item in productdata[scope.$index].baseOpenings"
-                :key="item.depotName"
-                :value="item.depotName"
-              >
-              </el-option>
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
         <el-table-column prop="remark" label="备注" width="120">
           <template #default="scope">
             <el-input v-model="productdata[scope.$index].remark" />
@@ -264,8 +249,10 @@ import store from "../../store";
 export default {
   data() {
     return {
+      isdialog:false,
       dialogTableVisible: false,
       //库存产品--分类
+      depotlist:[],
       data: [],
       defaultProps: {
         children: "children",
@@ -311,53 +298,9 @@ export default {
     thisrow: function () {
       return this.joinstockdata.length;
     },
-    //单个商品销售总价
-    saleMoney() {
-      return function (id) {
-        this.productdata[id].saleMoney =
-          Math.round(this.productdata[id].saleUnitPrice * this.productdata[id].productNum*1000)/1000
-        return (
-          Math.round(this.productdata[id].saleUnitPrice * this.productdata[id].productNum*1000)/1000
-        );
-      };
-    },
-    //销售总金额
-    total: function () {
-      var allmoney = 0;
-      for (var i = 0; i < this.productdata.length; i++) {
-        allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
-      }
-      this.formorder.receivables =
-        Math.round(
-          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
-            1000
-        ) / 1000;
-      return (
-        Math.round(
-          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
-            1000
-        ) / 1000
-      );
-    },
-    //销售优惠金额
-    distotal: function () {
-      var allmoney = 0;
-      for (var i = 0; i < this.productdata.length; i++) {
-        allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
-      }
-      this.formorder.dismoney =
-        Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
-        100;
-      return (
-        Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
-        100
-      );
-    },
     },methods: {
-    handleSelectionChange(val) {
-      this.joinstockdata = val;
+    handleCurrentChange(val) {
+      this.dialogopen(val, this.pagesize);
     },
     //选择产品
     dialogopen() {
@@ -497,7 +440,7 @@ export default {
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
     this.axios({
-      url: "http://localhost:8088/frameproject/roleusers/" + 3,
+      url: "http://localhost:8088/frameproject/baseProduct/",
       method: "get",
       headers: {
         JWTDemo: state.userInfo.token,
