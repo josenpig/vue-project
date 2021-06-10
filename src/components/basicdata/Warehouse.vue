@@ -437,13 +437,13 @@
 			disableOrEnable(val) {
 				var _this = this;
 				var able;
-				if (val.state == 0) {
-					able = '启用'
-				};
 				if (val.state == 1) {
 					able = '禁用'
 				};
-				this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
+				if (val.state == 0) {
+					able = '启用'
+				};
+				this.$confirm('是否'+able+'该仓库！', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
