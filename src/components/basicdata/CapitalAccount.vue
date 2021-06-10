@@ -13,10 +13,38 @@
 				<el-dialog title="资金账户信息" v-model="dialogFormVisible">
 					<hr style="margin-bottom: 20px;" />
 					<el-form :model="form">
-						<el-form-item label="账户名称" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
+						<el-form-item label="* 账户编号 *" :label-width="formLabelWidth">
+							<el-input v-model="form.capitalId" autocomplete="off" placeholder="(必填)"></el-input>
 						</el-form-item>
+						<el-form-item label="* 账户名称 *" :label-width="formLabelWidth">
+							<el-input v-model="form.fundAccount" autocomplete="off" placeholder="(必填)"></el-input>
+						</el-form-item>
+						<el-form-item label="* 结算类型 *" :label-width="formLabelWidth">
+							<el-select v-model="form.selcharge" placeholder="请选择结算类型 (必选)">
+								<el-option v-for="item in SettlementType" :label="item.settlementType" :value="item.settlementType">
+								</el-option>
+							</el-select>
+						</el-form-item>
+						<el-form-item label="初期金额" :label-width="formLabelWidth">
+							<el-input v-model="form.initialAmount" autocomplete="off"></el-input>
+						</el-form-item>
+					</el-form>
+					<template #footer>
+						<span class="dialog-footer">
+							<el-button @click="dialogFormVisible = false">取 消</el-button>
+							<el-button type="primary" @click="pdAdd">确 定</el-button>
+						</span>
+					</template>
+				</el-dialog>
+
+				<!-- 修改资金账户 -->
+				<el-dialog title="修改资金账户" v-model="updateDialogFormVisible">
+					<hr style="margin-bottom: 20px;" />
+					<el-form :model="form">
 						<el-form-item label="账户编号" :label-width="formLabelWidth">
+							<el-input :disabled="true" v-model="form.name" autocomplete="off"></el-input>
+						</el-form-item>
+						<el-form-item label="账户名称" :label-width="formLabelWidth">
 							<el-input v-model="form.name" autocomplete="off"></el-input>
 						</el-form-item>
 						<el-form-item label="结算类型" :label-width="formLabelWidth">
@@ -26,17 +54,16 @@
 							</el-select>
 						</el-form-item>
 						<el-form-item label="初期金额" :label-width="formLabelWidth">
-							<el-input v-model="form.name" autocomplete="off"></el-input>
+							<el-input :disabled="true" v-model="form.initialAmount" autocomplete="off"></el-input>
 						</el-form-item>
 					</el-form>
 					<template #footer>
 						<span class="dialog-footer">
-							<el-button @click="dialogFormVisible = false">取 消</el-button>
-							<el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+							<el-button @click="updateDialogFormVisible = false">取 消</el-button>
+							<el-button type="primary" @click="update">确 定</el-button>
 						</span>
 					</template>
 				</el-dialog>
-
 			</div>
 		</div>
 		<!-- 表单头部 -->
@@ -47,8 +74,8 @@
 				<el-table-column prop="capitalId" label="账户编号" sortable width="120" />
 				<el-table-column prop="fundAccount" label="账户名称" sortable width="120"/>
 				<el-table-column prop="settlementType" label="结算类型" sortable width="120" />
-				<el-table-column prop="initialAmount" label="初期金额" sortable width="120" />
-				<el-table-column prop="currentAmount" label="当前金额" sortable width="120" />
+				<el-table-column prop="initialAmount" label="初期金额(元)" sortable width="120" />
+				<el-table-column prop="currentAmount" label="当前金额(元)" sortable width="120" />
 				<el-table-column prop="state" label="是否为默认" sortable width="120">
 					<template #default="scope">
 						<span>{{scope.row.state==1?"默认账户":" "}}</span>
@@ -75,48 +102,41 @@
 	</div>
 </template>
 <script>
+	import {
+		ElMessage
+	} from 'element-plus'
 	export default {
 		name: "CapitalAccount",
 		data() {
 			return {
-				dialogTableVisible: false,
+				//新增资金账户信息弹框
 				dialogFormVisible: false,
+				//修改资金账户信息弹框
+				updateDialogFormVisible: false,
+				//新增资金账户表单
 				form: {
-					name: '',
-					region: '',
-					date1: '',
-					date2: '',
-					delivery: false,
-					type: [],
-					resource: '',
-					desc: '',
-					charge: ''
+					capitalId: '', //资金账户编号
+					fundAccount: '', //资金账户名称
+					initialAmount: 0, //初期金额
+					settlementType: '', //结算类型名称
+				},
+				//修改资金账户表单
+				updateForm: {
+					capitalId: '', //资金账户编号
+					fundAccount: '', //资金账户名称
+					initialAmount: '', //初期金额
+					currentAmount: '', //当前金额
+					settlementType: '', //结算类型名称
+					state: '', //是否为默认账户: （是：1；否：0）
 				},
 				formLabelWidth: '120px',
 				radio: '1',
 				selcharge: '李明',
 				SearchType: '资金账户名称',
 				SearchContent: '',
-				type: [{
-					value: '选项1',
-					label: '资金账户名称'
-				}, {
-					value: '选项2',
-					label: '资金账户编号'
-				}],
-				Settlement_Type: [{
-					value: '选项1',
-					label: '微信'
-				}, {
-					value: '选项2',
-					label: '支付宝'
-				}, {
-					value: '选项3',
-					label: '银行卡'
-				}, {
-					value: '选项4',
-					label: '现金'
-				}],
+				
+				//资金账户表单
+				SettlementType: [],
 				
 				//表单数据
 				tableData: [],
@@ -156,11 +176,150 @@
 					.catch(function(error) {
 						console.log(error);
 					});
+			},
+			//查询结算类型列表
+			findST() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseSettlementType/findAllSettlementType/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.SettlementType = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//判断资金账户ID是否重复并添加资金账户
+			pdAdd() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var id = {
+					id: this.form.capitalId
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseCapitalAccount/judgeCapitalId",
+						method: "get",
+						processData: false,
+						params: id,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log("id不重复是否通过:" + response.data)
+						_this.judge = response.data
+						if (response.data == false) {
+							ElMessage.warning({
+								message: '资金账户ID重复',
+								type: 'success'
+							});
+						} else {
+							_this.Add()
+						}
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//添加资金账户
+			Add() {
+				console.log(this.form)
+				if (this.form.capitalId == '' ||
+					this.form.fundAccount == '' ||
+					this.form.settlementType ) {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.dialogFormVisible = false
+					//添加资金账户
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseCapitalAccount/addCapitalAccount",
+							method: "post",
+							processData: false,
+							data: {
+								SettlementType: JSON.stringify(_this.form)
+							},
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data)
+							ElMessage.success({
+								message: '添加成功',
+								type: 'success'
+							});
+							_this.form = {}
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}
+			},
+			//打开修改框
+			openupdate(val) {
+				this.updateDialogFormVisible = true;
+			
+				this.updateForm.capitalId = val.capitalId
+				this.updateForm.fundAccount = val.fundAccount
+				this.updateForm.initialAmount = val.initialAmount
+				this.updateForm.currentAmount = val.currentAmount
+				this.updateForm.settlementType = val.settlementType
+				this.updateForm.state = val.state
+			
+			},
+			//修改资金账户信息
+			update() {
+				console.log(this.updateForm)
+				if (
+					this.form.fundAccount == '' ||
+					this.form.settlementType) {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.dialogFormVisible = false
+					//修改资金账户
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseCapitalAccount/updateCapitalAccount",
+							method: "post",
+							processData: false,
+							data: {
+								CapitalAccount: JSON.stringify(_this.updateForm)
+							},
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data)
+							ElMessage.success({
+								message: '修改成功',
+								type: 'success'
+							});
+							_this.updateDialogFormVisible = false;
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}
 			}
 		},
 		computed: {},
 		created() {
 			this.findpage()
+			this.findST()
 		}
 	};
 </script>
