@@ -252,13 +252,14 @@
               <el-option
                 v-for="item in options"
                 :key="item.fundAccount"
-                :value="item.fundAccount"
+                :label="item.fundAccount"
+                :value="item.capitalId"
               >
               </el-option>
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="settlementType" label="账户类型" />
+        <el-table-column prop="settlementTypeName" label="账户类型" />
         <el-table-column prop="thisMoney" label="本次收款金额">
           <template #default="scope">
             <el-input-number
@@ -353,6 +354,7 @@ export default {
       accountdata: [
         {
           fundAccount: "", //资金账户
+          settlementTypeName:"",//账户收款类型
           settlementType: "", //账户收款类型
           thisMoney: "0.00", //本次收款
         },
@@ -416,6 +418,7 @@ export default {
     addrow() {
       this.accountdata.push({
         fundAccount: "",
+        settlementTypeName:"",
         settlementType: "",
         thisMoney: "0.00",
       });
@@ -510,8 +513,9 @@ export default {
     },
     settype(index) {
       this.options.forEach((item) => {
-        if (item.fundAccount == this.accountdata[index].fundAccount) {
-          this.accountdata[index].settlementType = item.settlementType;
+        if (item.capitalId == this.accountdata[index].fundAccount) {
+          this.accountdata[index].settlementTypeName = item.settlementType;
+          this.accountdata[index].settlementType = item.settlementTypeId;
         }
       });
     },

@@ -30,6 +30,7 @@ const store = createStore({
 		},
 		//角色菜单权限列表
 		setmenulists(state, data) {
+			sessionStorage.removeItem('menulists')
 			state.menulists = data
 			sessionStorage.setItem('menulists', JSON.stringify(data))
 		},
