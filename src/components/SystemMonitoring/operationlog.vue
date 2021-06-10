@@ -49,16 +49,16 @@
         stripe
       >
         <el-table-column
-          prop="returnTime"
-          label="登陆时间"
+          prop="createtime"
+          label="操作时间"
           sortable
           width="340"
         />
-        <el-table-column prop="customer" label="操作员" width="230" />
-        <el-table-column prop="salesmen" label="操作类容" width="185" />
-		<el-table-column prop="customer" label="操作的方法" width="230" />
-		<el-table-column prop="salesmen" label="参数" width="230" />
-		<el-table-column prop="customer" label="ip地址" width="230" />
+        <el-table-column prop="operator" label="操作员" width="230" />
+        <el-table-column prop="operation" label="操作内容" width="185" />
+		<el-table-column prop="method" label="操作的方法" width="230" />
+		<el-table-column prop="params" label="参数" width="230" />
+		<el-table-column prop="ipaddress" label="ip地址" width="230" />
 
       </el-table>
     </div>
@@ -79,6 +79,9 @@
 </template>
 
 <script>
+import {
+		ElMessage
+	} from 'element-plus'
  export default {
     data() {
       return {
@@ -103,10 +106,52 @@
             return date
           })(),
         }],
-        value1: '',
         value2: '',
-      };
-    }
+        //表单数据
+        tableData:[],
+        //分页
+		    pagesize: 5,
+	    	max: 0,
+	    	currentPage: 1,
+        };
+    },
+    methods: {
+			//改变页码数
+			handleCurrentChange(val) {
+				this.findpage(val, this.pagesize);
+			},
+			//分页查询
+			findpage() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pageSize: this.pagesize,
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/operationlog/findAllLog",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						_this.tableData = response.data.data.rows;
+						_this.max = response.data.data.total;
+                        console.log(response.data.data.rows);
+                        console.log(response.data.data.total)
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+    },
+    computed: {},
+		created() {
+			this.findpage()
+		}
   };
 </script>
 
