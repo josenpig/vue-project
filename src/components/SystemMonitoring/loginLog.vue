@@ -8,8 +8,12 @@
     </div>
     <!-- 表单头部 筛选 -->
     <div class="returnlist-header">
+       <el-collapse accordion>
+         <br/>
+         <br/>
+         <br/>
       <el-form>
-      <el-collapse accordion>
+        <div>
             <!-- 登陆时间 -->
             <div class="block">
              <span class="demonstration">登陆日期:</span>
@@ -21,21 +25,24 @@
                :disabled-date="disabledDate"
                :shortcuts="shortcuts"
     >
-    </el-date-picker>
+              </el-date-picker>
+            </div>
+            <br/>
     <el-form-item>
-      <el-from-label>操作员：</el-from-label>
-          <el-select v-model="operator.operatorname"  placeholder="请选择操作员">
+      <el-from-label>操作员：    </el-from-label>
+          <el-select v-model="operators"  placeholder="请选择操作员">
             <el-option
-                    v-for="item in categoryOptions"
-                    :key="item.operatorName"
-                    :label="item.operatorName"
-                    :value="item.operatorNmae"
+                    v-for="item in operator"
+                    :key="item.notifiers"
+                    :label="item.notifiers"
+                    :value="item.notifiers"
             ></el-option>
           </el-select>
         </el-form-item>
   </div>
-      </el-collapse>
+     
       </el-form>
+       </el-collapse>
     </div>
     <!-- 表体内容 -->
     <div class="returnlist-mian">
@@ -108,13 +115,11 @@ import store from "../../store";
 		    pagesize: 5,
 		    max: 0,
 		    currentPage: 1,
-        //操作员下拉框
-        operator:[
-          {
-          operatorName:"",
-          }
-        ],
-        categoryOptions:[],
+        
+        //表头单据信息
+        operator:[],//操作员
+        operators:"",
+      
       };
     },
     methods: {
@@ -122,6 +127,30 @@ import store from "../../store";
 			handleCurrentChange(val) {
 				this.findpage(val, this.pagesize);
 			},
+      //
+      findusername(){
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/personnel/ofpeople",
+						method: "get",
+            	processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+            console.log(""+response.data.data);
+            _this.operator=response.data.date;
+				    //response.data.data.forEach((item) => {
+         // _this.operator.push({ operator : item });
+       // });
+      })
+				
+					.catch(function(error) {
+						console.log(error);
+					});
+      },
 			//分页查询
 			findpage() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -139,7 +168,6 @@ import store from "../../store";
 							JWTDemo: state.userInfo.token,
 						},
 					})
-
 					.then(function(response) {
 						_this.tableData = response.data.data.rows;
 						_this.max = response.data.data.total;
@@ -152,31 +180,13 @@ import store from "../../store";
 			},
      
     },
-    computed: {}, 
-		created:function(){
-				const state = JSON.parse(sessionStorage.getItem("state"));
-				var _this = this;
-				this.axios({
-						url: "http://localhost:8088/frameproject/operationlog/FindAllUserName",
-						method: "get",
-						headers: {
-							JWTDemo: state.userInfo.token,
-						},
-					})
-					.then(function(response) {
-					 response.data.data.forEach((item) => {
-             _this.categoryOptions.push({operatorName:item.userName});
-             console.log("1111");
-           });
-					})
-					.catch(function(error) {
-						console.log(error);
-					});
+    computed: {}
+		,created() {
       this.findpage();
       this.handleCurrentChange();
-    }
-  };
-   
+      this.findusername();
+   },
+ }
 </script>
 
 <style>
@@ -237,9 +247,6 @@ import store from "../../store";
   padding: 25px 15px;
   background-color: white;
   text-align: center;
-}
-.block{
-
 }
 
 </style>
