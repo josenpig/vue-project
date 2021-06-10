@@ -140,7 +140,7 @@
 					pageSize: this.pagesize,
 				};
 				this.axios({
-						url: "http://localhost:8088/frameproject/baseCapitalAccount/findAllCapitalAccount",
+						url: "http://localhost:8088/frameproject/baseCapitalAccount/findAllCapitalAccountVo",
 						method: "get",
 						processData: false,
 						params: fd,
