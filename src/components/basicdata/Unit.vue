@@ -93,7 +93,7 @@
 				//表单数据
 				tableData: [],
 				//分页
-				pagesize: 8,
+				pagesize: 5,
 				max: 0,
 				currentPage: 1,
 
@@ -315,7 +315,7 @@
 								type: 'success'
 							});
 						}
-					}, 200)
+					}, 500)
 				}
 			}
 		},
