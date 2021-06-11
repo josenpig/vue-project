@@ -13,8 +13,12 @@
             <!-- 操作员 -->
             <br /><br />
             <span>操作员:</span>
-            <el-select v-model="value1"  filterable>
-              <el-option>
+            <el-select v-model="operator"  filterable>
+              <el-option 
+                   v-for="item in operators"
+                    :key="item.userName"
+                    :label="item.userName"
+                    :value="item.userName">
               </el-option>
             </el-select>
 			<!--操作类别 -->
@@ -63,7 +67,7 @@
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
-    <div class="returnlist-footer" v-show="paging">
+    <div class="returnlist-footer">
       <el-pagination
         background
         layout="prev, pager, next"
@@ -113,6 +117,8 @@ import {
 		    pagesize: 5,
 	    	max: 0,
 	    	currentPage: 1,
+        operator:"",//操作员
+        operators:[],
         };
     },
     methods: {
@@ -147,10 +153,31 @@ import {
 						console.log(error);
 					});
 			},
+      findusername(){
+				const state = JSON.parse(sessionStorage.getItem("state"));
+        var _this = this;
+        this.axios({
+          url:"http://localhost:8088/frameproject/personnel/ofpeople",
+          method:"get",
+          processData: false,
+          headers:{
+            JWTDemo:state.userInfo.token,
+          }
+          }).then(function(response){
+            _this.operators=response.data.data.notifiers;
+            console.log(response.data.data.notifiers)
+          }).catch(function(error){
+             console.log(error)
+          });
+
+      },
+      
     },
     computed: {},
 		created() {
-			this.findpage()
+			this.findpage();
+      this.handleCurrentChange();
+      this.findusername();
 		}
   };
 </script>
