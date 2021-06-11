@@ -147,15 +147,15 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column type="selection" width="55" />
-				<el-table-column label="操作" width="120">
+				<el-table-column fixed label="操作" width="120">
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						<el-button size="small" @click="del(scope.row.customerNumber,scope.$index)" type="text" icon="el-icon-delete"
 						 circle></el-button>
 					</template>
 				</el-table-column>
-				<el-table-column prop="customerName" label="客户名称" sortable width="120" />
-				<el-table-column prop="customerNumber" label="客户编号" sortable width="120" />
+				<el-table-column fixed prop="customerNumber" label="客户编号" sortable width="120" />
+				<el-table-column  prop="customerName" label="客户名称" sortable width="120" />
 				<el-table-column prop="customerType" label="客户类型" sortable width="120" />
 				<el-table-column prop="ratio" label="调价比例(%)" sortable width="120" />
 				<el-table-column prop="chargeName" label="负责人" sortable width="120" />

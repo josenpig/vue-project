@@ -18,11 +18,12 @@
           <el-form-item label="菜单图标：" style="width: 300px">
             <el-input v-model="form.icon" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="菜单排序：" v-if="form.menuId != 1">
-            <el-input-number v-model="form.orderNum" :min="1"></el-input-number>
+          <el-form-item label="菜单排序：" >
+            <el-input-number v-if="form.menuId != 1" v-model="form.orderNum" :min="1"/>
+            <span v-else>系统默认无法修改</span>
           </el-form-item>
           <el-form-item label="显示状态：" style="width: 200px">
-            <el-switch
+            <el-switch v-if="form.menuId != 9 && form.parentId !=9 "
               v-model="form.visible"
               :loading="false"
               :beforeChange="beforeChange1"
@@ -31,6 +32,7 @@
               active-text="显示"
               inactive-text="隐藏"
             />
+            <span v-else>系统默认无法修改</span>
           </el-form-item>
         </el-form>
         <template #footer>
@@ -92,6 +94,7 @@ export default {
       this.form.orderNum = this.all[index].orderNum;
       this.form.icon = this.all[index].icon;
       this.form.menuId = this.all[index].menuId;
+      this.form.parentId = this.all[index].parentId;
       this.all[index].visible == 0
         ? (this.form.visible = true)
         : (this.form.visible = false);
@@ -105,6 +108,7 @@ export default {
       });
     },
     changeok() {
+      this.dialogFormVisible = false;
       this.form.visible == true
         ? (this.form.visible = 0)
         : (this.form.visible = 1);
@@ -122,13 +126,15 @@ export default {
       })
         .then(function (response) {
           if (response.data.data != false) {
-            _this.dialogFormVisible = false;
+            _this.$store.commit("setmenulists", response.data.data);
+            _this.findpage();
             ElMessage.success({
               message: "菜单信息已被修改",
               type: "success",
             });
-            _this.findpage();
-            _this.$store.commit("setmenulists", response.data.data);
+            setTimeout(function () {
+              window.location.reload();
+            }, 1000);
           }
         })
         .catch(function (error) {
@@ -210,8 +216,8 @@ export default {
   background-color: white;
 }
 .menulist th {
-  color: white !important;
-  background-color: #459df5 !important;
+  background-color: #f8f8f9 !important;
+  color: #515a6e !important;
 }
 .menulist-look th {
   color: #666666 !important;
