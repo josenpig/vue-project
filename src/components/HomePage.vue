@@ -18,7 +18,7 @@
           </el-button>
         </el-col>
         <el-col :span="6" style="line-height: 48px">
-          <el-button type="text" icon="el-icon-setting" style="color: white"
+          <el-button type="text" icon="el-icon-setting" style="color: white" @click="gotoset()"
             >设置</el-button
           ></el-col
         >
@@ -121,6 +121,9 @@ export default {
         console.log(command);
       }
     },
+    gotoset(){
+      this.$router.push('/Menulist')
+    }
   },
   computed: {
     ...mapState(["menulists"]),
