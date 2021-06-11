@@ -65,6 +65,6 @@ export default {
 }
 
 .items .bg {
-  color: red;
+  color: black;
 }
 </style>

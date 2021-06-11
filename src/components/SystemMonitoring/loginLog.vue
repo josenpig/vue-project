@@ -11,15 +11,16 @@
        <el-collapse accordion>
          <br/>
          <br/>
-         <br/>
-      <el-form>
+      <p><el-form>
         <div>
             <!-- 登陆时间 -->
             <div class="block">
              <span class="demonstration">登陆日期:</span>
              <el-date-picker
                v-model="value2"
+               @change="findlogbyOperator()"
                align="right"
+              
                type="date"
                placeholder="选择日期"
                :disabled-date="disabledDate"
@@ -28,20 +29,22 @@
               </el-date-picker>
             </div>
             <br/>
+            <!--操作员--->
     <el-form-item>
       <el-from-label>操作员：    </el-from-label>
-          <el-select v-model="operators"  placeholder="请选择操作员">
+          <el-select v-model="operator"  placeholder="请选择操作员"  @change="findlogbyOperator()">
             <el-option
-                    v-for="item in operator"
-                    :key="item.notifiers"
-                    :label="item.notifiers"
-                    :value="item.notifiers"
+                    v-for="item in operators"
+                    :key="item.userName"
+                    :label="item.userName"
+                    :value="item.userName"
             ></el-option>
           </el-select>
         </el-form-item>
   </div>
      
       </el-form>
+      </p>
        </el-collapse>
     </div>
     <!-- 表体内容 -->
@@ -117,74 +120,70 @@ import store from "../../store";
 		    currentPage: 1,
         
         //表头单据信息
-        operator:[],//操作员
-        operators:"",
+        operator:"",//操作员
+        operators:[],
       
       };
     },
     methods: {
 			//改变页码数
 			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize);
+				this.findlogbyOperator(this.operator,val, this.pagesize,this.value2);
 			},
-      //
-      findusername(){
+      //获取操作员
+     findusername(){
 				const state = JSON.parse(sessionStorage.getItem("state"));
-				var _this = this;
-				this.axios({
-						url: "http://localhost:8088/frameproject/personnel/ofpeople",
-						method: "get",
-            	processData: false,
-						headers: {
-							JWTDemo: state.userInfo.token,
-						},
-					})
-					.then(function(response) {
-            console.log(""+response.data.data);
-            _this.operator=response.data.date;
-				    //response.data.data.forEach((item) => {
-         // _this.operator.push({ operator : item });
-       // });
-      })
-				
-					.catch(function(error) {
-						console.log(error);
-					});
+        var _this = this;
+        this.axios({
+          url:"http://localhost:8088/frameproject/personnel/ofpeople",
+          method:"get",
+          processData: false,
+          headers:{
+            JWTDemo:state.userInfo.token,
+          }
+          }).then(function(response){
+            _this.operators=response.data.data.notifiers;
+            console.log(response.data.data.notifiers)
+          }).catch(function(error){
+             console.log(error)
+          });
+
       },
-			//分页查询
-			findpage() {
-				const state = JSON.parse(sessionStorage.getItem("state"));
-				var _this = this;
-				var fd = {
-					currentPage: this.currentPage,
-					pageSize: this.pagesize,
-				};
-				this.axios({
-						url: "http://localhost:8088/frameproject/operationlog/findAll",
-						method: "get",
-						processData: false,
-						params: fd,
-						headers: {
-							JWTDemo: state.userInfo.token,
-						},
-					})
-					.then(function(response) {
-						_this.tableData = response.data.data.rows;
-						_this.max = response.data.data.total;
+      //通过操作员查询登录记录||查询所有||通过日期查询
+      findlogbyOperator(){
+        const state = JSON.parse(sessionStorage.getItem("state"));
+        var _this = this;
+        var params = {
+         logintime : this.value2,
+         operator : this.operator,
+         currentPage: this.currentPage,
+         pagesize: this.pagesize,
+        };
+        
+        this.axios({
+          url : "http://localhost:8088/frameproject/operationlog/findlogbyOperator",
+          methods : "get",
+          processData : false,
+          params : params,
+          headers:{
+            JWTDemo:state.userInfo.token,
+          }
+        }).then(function(response){
+          _this.tableData = response.data.data.rows;
+					_this.max = response.data.data.total;
                         console.log(response.data.data.rows);
-                        console.log(response.data.data.total)
-					})
-					.catch(function(error) {
-						console.log(error);
-					});
-			},
+                        console.log(response.data.data.total);
+        }).catch(function(error){
+          console.log(error)
+        })
+      },
      
     },
     computed: {}
 		,created() {
-      this.findpage();
       this.handleCurrentChange();
       this.findusername();
+      this.findlogbyOperator();
    },
  }
 </script>
