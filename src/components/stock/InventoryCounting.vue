@@ -39,7 +39,7 @@
         <!-- 编号 -->
         <el-form-item label="编号:">
           <el-input
-            v-model="formorder.orderId"
+            v-model="formorder.id"
             readonly="readonly"
             placeholder="编号"
           ></el-input>
@@ -66,7 +66,7 @@
         <!-- 盘点产品量 -->
         <el-form-item label="已盘点产品量:">
           <el-input
-            v-model="formorder.inventorycounter"
+            v-model="calccounter"
             readonly="readonly"
             placeholder="已盘点产品量"
           ></el-input>
@@ -193,37 +193,30 @@
           </template>
         </el-table-column>
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpec" label="产品属性" width="120" />
-        <el-table-column prop="productUnit" label="产品规格" width="120" />
-        <el-table-column prop="productUnit" label="产品分类" width="120" />
+        <el-table-column prop="productSpec" label="产品规格" width="120" />
+        <el-table-column prop="productType" label="产品分类" width="120" />
         <el-table-column prop="productUnit" label="产品单位" width="120" />
-        <el-table-column prop="productNum" label="盘点数量" width="120">
+        <el-table-column prop="pdNum" label="盘点数量" width="120">
           <template #default="scope">
             <el-input-number
-              v-model="productdata[scope.$index].productNum"
+              v-model="productdata[scope.$index].pdNum"
               :controls="false"
-              :min="1"
+              placeholder=0
             />
           </template>
         </el-table-column>
-        <el-table-column prop="productUnit" label="系统数量" width="120" />
+        <el-table-column prop="systemNum" label="系统数量" width="120" />
 
-        <el-table-column prop="" label="盘盈盘亏" width="120">
+        <el-table-column prop="pdyk" label="盘盈盘亏" width="120">
           <template #default="scope">
-            {{ (scope.$index) }}
+            {{ calcyk(scope.$index) }}
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" width="120">
+        <el-table-column prop="remark" label="备注" width="250">
           <template #default="scope">
             <el-input v-model="productdata[scope.$index].remark" />
           </template>
         </el-table-column>
-        <el-table-column
-          prop="productDescribe"
-          label="产品描述"
-          :show-overflow-tooltip="true"
-          width="120"
-        />
       </el-table>
       <!-- 备注 -->
       <div class="addsale-remarks">
@@ -267,18 +260,16 @@ export default {
       //表体销售商品信息
       productdata: [
         {
-          productId: "", //产品编号
-          productName: "", //产品名称
-          remark: "", //备注
-          productSpec: "", //规格
-          productUnit: "", //单位
-          productNum: "", //数量
-          saleUnitPrice: "", //销售单价
-          saleMoney: "", //销售金额
-          depot: "", //仓库
-          ingredient: "", //成分
-          gramHeavy: "", //克量
-          productDescribe: "", //产品描述
+          productName: "", //
+          productId: "", //
+          productSpec: "", //
+          productType: "", //
+          productUnit: "", //
+          systemNum: 0, //
+          productPurchaseUnit: "", //
+          remark: "", //
+          pdyk:0,
+          pdNum:0
         },
       ],
       //抄送对象信息
@@ -290,11 +281,15 @@ export default {
       value:"请选择",
       depotlist:[],
       formorder: {
-        orderId: "KCPD" + Date.now(), //单据编号
+        id: "KCPD" + Date.now(), //单据编号
+        inventoryTime:new Date(),
         depotId:"",
         depotName:"",
         inventorycount:0,
-        inventorycounter:0
+        inventorycounter:0,
+        inventorypeople:"",
+        inventorypl:0,
+        remarks:""
       },
       //分页
       pagesize: 5,
@@ -308,9 +303,32 @@ export default {
 
     }
   },computed: {
-    //已选产品
+    //弹出框已选产品数量计算
     thisrow: function () {
       return this.joinstockdata.length;
+    },
+    //计算所选产品的数量
+    computedcount:function(){
+      return this.productdata.length;
+    },
+    //计算盘盈盘亏
+    calcyk:function(){
+      return function(id){
+       this.productdata[id].pdyk=
+       this.productdata[id].pdNum-this.productdata[id].systemNum;
+       return this.productdata[id].pdNum-this.productdata[id].systemNum;
+      }
+    }  
+    ,
+    calccounter:function(){
+      var k=0;
+      for(var i=0;i<this.productdata.length;i++){
+        if(this.productdata[i].pdNum!=0){
+          k++;
+        }
+      }
+      this.formorder.inventorycounter=k;
+      return k;
     },
     //单个商品销售总价
     saleMoney() {
@@ -374,6 +392,7 @@ export default {
         }
       }
       this.formorder.depotName=this.depot.depotName;
+      this.formorder.depotId = this.depot.depotId;
     },
     exitdepot(){
       this.isdialog=false;
@@ -407,7 +426,7 @@ export default {
         pageSize: this.pagesize,
       };
       this.axios({
-        url: "http://localhost:8088/frameproject/stockInventory/allProduct",
+        url: "http://localhost:8088/frameproject/stockInventory/allProduct/"+this.formorder.depotName,
         method: "get",
         processData: false,
         params: fd,
@@ -425,7 +444,6 @@ export default {
         });
       this.dialogTableVisible = true;
     },
-    //添加销售产品
     addproduct() {
       var productlist = [];
       this.productdata.forEach((item) => {
@@ -446,7 +464,9 @@ export default {
         }
       }
       this.dialogTableVisible = false;
-      this.formorder.inventorycount=this.thisrow;
+      this.formorder.inventorycount=this.computedcount;
+
+      console.log(this.productdata)
     },
     //改变页码数
     handleCurrentChange(val) {
@@ -455,18 +475,16 @@ export default {
     //新增一行
     addrow(productdata, event) {
       productdata.push({
-        productId: "", //产品编号
-        productName: "", //产品名称
-        remark: "", //备注
-        productSpec: "", //规格
-        productUnit: "", //单位
-        productNum: "", //数量
-        saleUnitPrice: "", //销售单价
-        saleMoney: "", //销售金额
-        depot: "", //仓库
-        ingredient: "", //成分
-        gramHeavy: "", //克量
-        productDescribe: "", //产品描述
+          productName: "", //
+          productId: "", //
+          productSpec: "", //
+          productType: "", //
+          productUnit: "", //
+          systemNum: 0, //
+          productPurchaseUnit: "", //
+          remark: "", //
+          pdyk:0,
+          pdNum:0
       });
     },
     //移除一行
@@ -479,14 +497,12 @@ export default {
     examine(type) {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
-      //判断库存是否足够
-      var ifnum = true;
       this.productdata.forEach((item) => {
         if (
-          (ifnum == true && this.formorder.salesmen == "") ||
+          (this.formorder.depotName == "") ||
           item.productId == "" ||
-          item.depot == null ||
-          this.formorder.customer == ""
+          this.formorder.depotId == "" ||
+          item.pdNum==0
         ) {
           this.$notify({
             title: "警告",
@@ -496,24 +512,7 @@ export default {
           ifnum = false;
           return false;
         }
-        item.baseOpenings.forEach((items) => {
-          if (
-            items.depotName == item.depot &&
-            items.expectNumber < item.productNum &&
-            ifnum == true
-          ) {
-            ElMessage.warning({
-              message:
-                "仓库：" +
-                item.depot +
-                "  中产品：" +
-                item.productName +
-                "的预计可用库存不足!",
-              type: "warning",
-            });
-            ifnum = false;
-          }
-        });
+        
       });
       if (ifnum != false) {
         this.formorder.orderTime = dayjs(this.formorder.orderTime).format(
@@ -524,7 +523,7 @@ export default {
         );
         this.formorder.founder = state.userInfo.userName;
         this.axios({
-          url: "http://localhost:8088/frameproject/saleorder/add/" + type,
+          url: "http://localhost:8088/frameproject/stockInventory/add/" + type,
           method: "post",
           data: {
             order: JSON.stringify(_this.formorder), //_this.formorder ,
