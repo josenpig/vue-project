@@ -146,14 +146,14 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column type="selection" width="55" />
-				<el-table-column label="操作" width="120">
+				<el-table-column fixed label="操作" width="120">
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						<el-button size="small" @click="del(scope.row.vendorId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
 					</template>
 				</el-table-column>
+				<el-table-column fixed prop="vendorId" label="供应商编号" sortable width="120" />
 				<el-table-column prop="vendorName" label="供应商名称" sortable width="120" />
-				<el-table-column prop="vendorId" label="供应商编号" sortable width="120" />
 				<el-table-column prop="vendorType" label="供应商类型" sortable width="120" />
 				<el-table-column prop="accountsPayable" label="应付款金额(元)" sortable width="150" />
 				<el-table-column prop="address" label="地址"  width="120" />

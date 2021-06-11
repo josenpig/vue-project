@@ -104,7 +104,7 @@
 		<div class="Warehouse-mian">
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
-				<el-table-column prop="date" label="操作" width="202">
+				<el-table-column prop="date" fixed label="操作" width="202">
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						<el-button size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
@@ -112,8 +112,8 @@
 						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;">启用</el-button>
 					</template>
 				</el-table-column>
+				<el-table-column prop="depotId" fixed label="仓库编号" sortable width="130" />
 				<el-table-column prop="depotName" label="仓库名称" sortable width="140" />
-				<el-table-column prop="depotId" label="仓库编号" sortable width="130" />
 				<el-table-column prop="depotAddress" label="仓库地址"  width="130" />
 				<el-table-column prop="chargeName" label="负责人" sortable width="120" />
 				<el-table-column prop="contactNumber" label="联系电话"  width="120" />

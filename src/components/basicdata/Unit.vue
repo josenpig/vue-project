@@ -88,7 +88,7 @@
 				//修改单位表单
 				updateForm: {
 					unitName: '', //单位名称
-					unitId: '' //单位名称
+					unitId: '' //单位id
 				},
 				//表单数据
 				tableData: [],
@@ -215,7 +215,6 @@
 						if (this.judge) {
 							const state = JSON.parse(sessionStorage.getItem("state"));
 							var _this = this;
-							this.form.user = state.userInfo.userName;
 							this.dialogFormVisible = false
 							//添加仓库
 							this.axios({
