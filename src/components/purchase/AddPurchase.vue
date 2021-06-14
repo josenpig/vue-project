@@ -75,8 +75,8 @@
           >
             <el-option
               v-for="item in headeroptions2"
-              :key="item.buyerName"
-              :value="item.buyerName"
+              :key="item.userName"
+              :value="item.userName"
             >
             </el-option>
           </el-select>
@@ -566,16 +566,18 @@ export default {
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
     this.axios({
-      url: "http://localhost:8088/frameproject/roleusers/" + 2,
+      url: "http://localhost:8088/frameproject/personnel/ofpeople",
       method: "get",
       headers: {
         JWTDemo: state.userInfo.token,
       },
     })
       .then(function (response) {
-        response.data.data.forEach((item) => {
-          _this.headeroptions2.push({ buyerName: item.userName });
-        });
+        // response.data.data.forEach((item) => {
+          // _this.headeroptions2.push({ buyerName: item.userName });
+          _this.headeroptions1 = response.data.data.vendors;
+          _this.headeroptions2 = response.data.data.purchasemans;
+        // });
       })
       .catch(function (error) {
         console.log(error);

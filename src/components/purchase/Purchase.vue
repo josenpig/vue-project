@@ -5,7 +5,7 @@
     <div class="sale-page-tag">
       <span style="float: left; margin-top: 10px">采购订单</span>
       <el-steps
-        :active="formorder.approvalState+1+formorder.orderState"
+        :active="formorder.vettingState+1+formorder.orderState"
         finish-status="success"
         simple
         style="width: 50%; float: left"
@@ -19,12 +19,12 @@
         <el-button size="mini" @click="dialogVisible = true"
           >查看关联单据</el-button
         >
-        <el-button size="mini" v-if="formorder.approvalState == 1"
+        <el-button size="mini" v-if="formorder.vettingState == 1"
           >付款</el-button
         >
         <el-button
           size="mini"
-          v-if="formorder.approvalState == 0"
+          v-if="formorder.vettingState == 0"
           v-has="{ action: 'approval' }"
           @click="approval(-1)"
           >驳回</el-button
@@ -32,14 +32,14 @@
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == -2"
+          v-if="formorder.vettingState == -2"
           @click="approval(0)"
           >提交审批</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == 0"
+          v-if="formorder.vettingState == 0"
           v-has="{ action: 'approval' }"
           @click="approval(1)"
           >审批通过</el-button
@@ -47,7 +47,7 @@
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == 1 && formorder.orderState == 0"
+          v-if="formorder.vettingState == 1 && formorder.orderState == 0"
           @click="approval(2)"
           >生成入库单</el-button
         >
@@ -61,15 +61,15 @@
     >
       <div style="float: left">
         <span v-if="formorder.deliveryId == null">关联采购入库单：无</span>
-        <span v-else>关联采购入库单：{{ formorder.deliveryId }}</span>
+        <span v-else>关联采购入库单：{{ formorder.receiptOrderId }}</span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
         <span v-if="formorder.returnId == null">关联采购退货单：无</span>
-        <span v-else>关联采购退货单：{{ formorder.returnId }}</span>
+        <span v-else>关联采购退货单：{{ formorder.exitOrderId }}</span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
         <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.receiptId }}</span>
+        <span v-else>关联收款单：{{ formorder.paymentOrder }}</span>
       </div>
 
       <template #footer>
@@ -84,19 +84,19 @@
     <div class="sale-header">
       <el-row :gutter="20">
         <el-col :span="4"
-          ><div>单据编号：{{ formorder.orderId }}</div></el-col
+          ><div>单据编号：{{ formorder.id }}</div></el-col
         >
         <el-col :span="4"
-          ><div>单据日期：{{ formorder.orderTime }}</div></el-col
+          ><div>单据日期：{{ formorder.documentsDate }}</div></el-col
         >
         <el-col :span="4"
-          ><div>交货时间：{{ formorder.deliveryTime }}</div></el-col
+          ><div>交货时间：{{ formorder.deliceryDate }}</div></el-col
         >
         <el-col :span="4"
-          ><div>供应商：{{ formorder.customer }}</div></el-col
+          ><div>供应商：{{ formorder.vendorName }}</div></el-col
         >
         <el-col :span="4"
-          ><div>采购员：{{ formorder.salesmen }}</div></el-col
+          ><div>采购员：{{ formorder.buyerName }}</div></el-col
         >
       </el-row>
     </div>
@@ -112,12 +112,12 @@
         <el-table-column prop="productUnit" label="单位" width="120" />
         <el-table-column prop="productNum" label="数量" width="120" />
         <el-table-column
-          prop="saleUnitPrice"
+          prop="purchaseUnitPrice"
           label="采购单价(元)"
           width="120"
         />
-        <el-table-column prop="saleMoney" label="采购金额(元)" width="120" />
-        <el-table-column prop="depot" label="仓库" width="120" />
+        <el-table-column prop="purchaseMoney" label="采购金额(元)" width="120" />
+        <el-table-column prop="depotName" label="仓库" width="120" />
         <el-table-column
           :show-overflow-tooltip="true"
           prop="productDescribe"
@@ -196,7 +196,7 @@ export default {
     total: function () {
       var allmoney = 0;
       this.productdata.forEach((money) => {
-        allmoney += money.saleMoney;
+        allmoney += money.purchaseMoney;
       });
       return Math.round(allmoney * 1000) / 1000;
     },
@@ -213,7 +213,7 @@ export default {
         const orderid = sessionStorage.getItem("orderid");
         var _this = this;
         var fd = {
-          orderid: orderid,
+          id: orderid,
           type: type,
           user: state.userInfo.userName,
         };
@@ -263,8 +263,9 @@ export default {
           },
         })
           .then(function (response) {
-            _this.formorder = response.data.data.order;
-            _this.productdata = response.data.data.orderdetails;
+            console.log(response)
+            _this.formorder = response.data.data.purchaseOrder;
+            _this.productdata = response.data.data.list;
           })
           .catch(function (error) {
             console.log(error);
