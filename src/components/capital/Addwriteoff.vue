@@ -545,6 +545,8 @@ export default {
           response.data.data.rows.forEach((item) => {
             if (item.saleId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
               item.saleType = "销售出库单"
+            }else{
+              item.saleType = "销售退货单"
             }
           });
           _this.allbilldata = response.data.data.rows;
@@ -661,8 +663,8 @@ export default {
           },
         })
           .then(function (response) {
-            // sessionStorage.setItem("orderid", response.data.data);
-            // _this.$router.push("/Receipt");
+            sessionStorage.setItem("orderid", response.data.data);
+            _this.$router.push("/Receipt");
           })
           .catch(function (error) {
             console.log(error);

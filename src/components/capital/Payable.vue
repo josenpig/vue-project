@@ -1,17 +1,17 @@
 <template>
   <!-- 主内容 -->
-  <div class="receivable">
+  <div class="payable">
     <!-- 标题 -->
     <div class="page-tag">
-      <span style="float: left">收款资金管理</span>
+      <span style="float: left">付款资金管理</span>
       <!-- 标签页 -->
       <ul>
-        <li><router-link to="Receivable" class="active">应收</router-link></li>
-        <li><router-link to="Receiptlist">收款单</router-link></li>
+        <li><router-link to="Payable" class="active">应付</router-link></li>
+        <li><router-link to="Paymentlist">付款单</router-link></li>
       </ul>
     </div>
     <!-- 表单头部 筛选 -->
-    <div class="receivable-header">
+    <div class="payable-header">
       <el-collapse accordion v-model="activeNames">
         <el-collapse-item name="1">
           <template #title>
@@ -23,7 +23,7 @@
           <div>
             <!-- 单据日期 -->
             <span>单据日期:</span>
-            <el-radio-group v-model="billdate" size="small" @change="qbc()">
+            <el-radio-group v-model="billdate" size="small">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
               <el-radio-button label="昨天"></el-radio-button>
@@ -44,10 +44,10 @@
               >
               </el-date-picker>
             </div>
-            <!-- 收款日期 -->
+            <!-- 付款日期 -->
             <br />
-            <span>收款日期:</span>
-            <el-radio-group v-model="collection" size="small" @change="qbc()">
+            <span>付款日期:</span>
+            <el-radio-group v-model="collection" size="small">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
               <el-radio-button label="昨天"></el-radio-button>
@@ -72,14 +72,14 @@
             <!-- 结案状态 -->
             <br />
             <span>结案状态:</span>
-            <el-radio-group v-model="status" size="small" @change="qbc()">
+            <el-radio-group v-model="status" size="small">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="未结案"></el-radio-button>
               <el-radio-button label="结案"></el-radio-button>
             </el-radio-group>
-            <!-- 客户 -->
+            <!-- 供应商 -->
             <br /><br />
-            <span>客户:</span>
+            <span>供应商:</span>
             <el-select
               v-model="value1"
               size="small"
@@ -102,8 +102,8 @@
               <el-option v-for="item in options2" :value="item.userName">
               </el-option>
             </el-select>
-            <!-- 销售人员 -->
-            <span>销售人员:</span>
+            <!-- 采购人员 -->
+            <span>采购人员:</span>
             <el-select
               v-model="value3"
               clearable
@@ -119,14 +119,14 @@
       </el-collapse>
     </div>
     <!-- 表体内容 -->
-    <div class="receivable-mian">
+    <div class="payable-mian">
       <div style="padding: 10px 25px">
         <el-button
           icon="el-icon-plus"
           type="primary"
           size="small"
           @click="goadd()"
-          >新增收款</el-button
+          >新增付款</el-button
         >
       </div>
       <el-table
@@ -143,7 +143,7 @@
               v-if="tableData[scope.$index].caseState == 0"
               @click="goreceipt(scope.$index)"
             >
-              收款
+              付款
             </el-button>
             <el-button
               type="text"
@@ -163,34 +163,34 @@
         </el-table-column>
         <el-table-column
           prop="deliveryTime"
-          label="出库日期"
+          label="入库日期"
           sortable
           width="120"
         />
         <el-table-column prop="deliveryType" label="单据类型" width="120" />
-        <el-table-column prop="customer" label="客户名称" width="120" />
-        <el-table-column prop="salesmen" label="销售人员" width="120" />
-        <el-table-column prop="receivables" label="应收金额" width="120" />
-        <el-table-column prop="received" label="已收金额" width="120" />
-        <el-table-column prop="uncollected" label="未收金额" width="120" />
+        <el-table-column prop="vendor" label="供应商" width="120" />
+        <el-table-column prop="buyer" label="采购人员" width="120" />
+        <el-table-column prop="payables" label="应付金额" width="120" />
+        <el-table-column prop="paid" label="已付金额" width="120" />
+        <el-table-column prop="unpaid" label="未付金额" width="120" />
         <el-table-column prop="remarks" label="单据备注" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
         <el-table-column
           prop="receiptRemark"
-          label="最后收款备注"
+          label="最后付款备注"
           :show-overflow-tooltip="true"
           width="200"
         />
         <el-table-column
           prop="lastCollectionTime"
-          label="最后收款时间"
+          label="最后付款时间"
           sortable
           width="200"
         />
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
-    <div class="receivable-footer" v-show="paging">
+    <div class="payable-footer" v-show="paging">
       <el-pagination
         background
         layout="prev, pager, next"
@@ -207,21 +207,21 @@
 
 <script>
 export default {
-  name: "Receivable",
+  name: "payable",
   data() {
     return {
       //默认展开
       activeNames: "1",
       //筛选框
       billdate: "全部", //单据日期
-      collection: "全部", //收款日期
+      collection: "全部", //付款日期
       status: "全部", //结案状态
       customtime1: "", //自定义时间
       customtime2: "",
       options1: [],
       options2: [],
       options3: [],
-      value1: "", //客户
+      value1: "", //供应商
       value2: "", //创建人
       value3: "", //销售人员
       //表单数据
@@ -229,15 +229,15 @@ export default {
       //条件查询数据
       vagueorderid: "",
       condition: {
-        deliveryId: "", //订单id
-        deliveryTime: "", //单据日期
+        orderId: "", //订单id
+        orderTime: "", //单据日期
         otimeState: "",
         otimeEnd: "",
-        lastCollectionTime: "", //收款日期
+        deliveryTime: "", //交货日期
         dtimeState: "",
         dtimeEnd: "",
-        caseState: "", //结案状态
-        customer: "", //客户
+        approvalState: "", //审批状态
+        customer: "", //供应商
         founder: "", //创建人
         salesmen: "", //销售人
       },
@@ -260,9 +260,9 @@ export default {
     all: function () {
       return [
         "单据日期: " + this.billdate,
-        "收款日期: " + this.collection,
+        "付款日期: " + this.collection,
         "结案状态: " + this.status,
-        "客户: " + this.value1,
+        "供应商: " + this.value1,
         "创建人: " + this.value2,
         "销售人员: " + this.value3,
       ];
@@ -271,15 +271,11 @@ export default {
   methods: {
     goorder(val) {
       sessionStorage.setItem("orderid", this.tableData[val].deliveryId);
-      if(this.tableData[val].deliveryId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
       this.$router.push("/Deliver");
-      }else{
-      this.$router.push("/Return");
-      }
     },
     goreceipt(val) {
       var receipt = {
-        type: "应收收款",
+        type: "应付付款",
         orderId: this.tableData[val].deliveryId,
       };
       sessionStorage.setItem("receipt", JSON.stringify(receipt));
@@ -290,9 +286,9 @@ export default {
     },
     //条件查询
     qbc() {
-      this.condition.deliveryTime = this.billdate;
-      this.condition.lastCollectionTime = this.collection;
-      this.condition.caseState = this.status;
+      this.condition.orderTime = this.billdate;
+      this.condition.deliveryTime = this.collection;
+      this.condition.approvalState = this.status;
       this.condition.customer = this.value1;
       this.condition.founder = this.value2;
       this.condition.salesmen = this.value3;
@@ -310,7 +306,7 @@ export default {
         this.condition.dtimeState = null;
         this.condition.dtimeEnd = null;
       }
-      this.findpage();
+      //this.findpage();
     },
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem("state"));
@@ -341,7 +337,7 @@ export default {
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
-          condition: JSON.stringify(_this.condition),
+          condition: "",
         },
         headers: {
           JWTDemo: state.userInfo.token,
@@ -352,8 +348,6 @@ export default {
           _this.tableData.forEach((item) => {
             if (item.deliveryId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
               item.deliveryType = "销售出库单"
-            }else{
-              item.deliveryType = "销售退货单"
             }
           });
           _this.max = response.data.data.total;
@@ -361,10 +355,6 @@ export default {
         .catch(function (error) {
           console.log(error);
         });
-    },
-    //改变页码数
-    handleCurrentChange(val) {
-      this.findpage(val, this.pagesize);
     },
   },
   created: function () {
@@ -375,7 +365,7 @@ export default {
 </script>
 
 <style>
-.receivable {
+.payable {
   width: 100%;
   background-color: #e9eef3 !important ;
 }
@@ -415,47 +405,47 @@ export default {
   background-color: #f7fbfe;
 }
 /* 内容表头 筛选框 */
-.receivable-header {
+.payable-header {
   padding: 15px 15px;
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.receivable .el-radio-group {
+.payable .el-radio-group {
   margin: 10px 0px;
 }
-.receivable-header span {
+.payable-header span {
   font-size: 14px;
   color: #666666;
   margin-right: 10px;
 }
-.receivable .el-tag {
+.payable .el-tag {
   color: #409eff !important;
 }
-.receivable .el-collapse,
-.receivable .el-collapse-item__wrap,
-.receivable .el-collapse-item__header,
-.receivable .el-radio-button__inner {
+.payable .el-collapse,
+.payable .el-collapse-item__wrap,
+.payable .el-collapse-item__header,
+.payable .el-radio-button__inner {
   border: none !important;
   border-radius: 0px !important;
 }
-.receivable .el-select--small {
+.payable .el-select--small {
   line-height: 32px;
   margin-right: 20px;
 }
 /* 表体内容 */
-.receivable-main {
+.payable-main {
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.receivable th {
+.payable th {
   color: white !important;
   background-color: #459df5 !important;
 }
-.receivable .cell {
+.payable .cell {
   text-align: center;
 }
 /* 内容表尾 */
-.receivable-footer {
+.payable-footer {
   padding: 25px 15px;
   background-color: white;
   text-align: center;
