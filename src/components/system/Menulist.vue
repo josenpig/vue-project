@@ -23,7 +23,7 @@
             <span v-else>系统默认无法修改</span>
           </el-form-item>
           <el-form-item label="显示状态：" style="width: 200px">
-            <el-switch v-if="form.menuId != 9 && form.parentId !=9 "
+            <el-switch v-if="form.menuId != 9 && form.parentId !=9 && form.menuId!=1"
               v-model="form.visible"
               :loading="false"
               :beforeChange="beforeChange1"
@@ -37,6 +37,7 @@
         </el-form>
         <template #footer>
           <span class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="changeok()">确 定</el-button>
           </span>
         </template>

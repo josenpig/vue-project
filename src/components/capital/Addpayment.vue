@@ -1,10 +1,10 @@
 <template>
   <!-- 主内容 -->
-  <div class="addreceipt">
+  <div class="addpayment">
     <!-- 标题 -->
-    <div class="addreceipt-page-tag">
-      <span>新增收款</span>
-      <div class="addreceipt-shenpi">
+    <div class="addpayment-page-tag">
+      <span>新增付款</span>
+      <div class="addpayment-shenpi">
         <!-- 提交 -->
         <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
@@ -13,7 +13,7 @@
       </div>
     </div>
     <!-- 表单头部 -->
-    <div class="addreceipt-header">
+    <div class="addpayment-header">
       <el-form
         :inline="true"
         size="mini"
@@ -28,8 +28,8 @@
             readonly="readonly"
           ></el-input>
         </el-form-item>
-        <!-- 收款日期 -->
-        <el-form-item label="收款日期:" class="form-input">
+        <!-- 付款日期 -->
+        <el-form-item label="付款日期:" class="form-input">
           <el-date-picker
             type="date"
             v-model="formorder.receiptTime"
@@ -38,14 +38,14 @@
           >
           </el-date-picker>
         </el-form-item>
-        <!-- 客户 -->
-        <el-form-item label="*客户:">
+        <!-- 供应商 -->
+        <el-form-item label="*供应商:">
           <el-select
             v-model="formorder.customer"
             size="mini"
             filterable
             :disabled="tfhas"
-            placeholder="请选择客户"
+            placeholder="请选择供应商"
             @change="changetype()"
           >
             <el-option
@@ -56,13 +56,13 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <!-- 收款人员 -->
-        <el-form-item label="*收款人员:" class="form-input">
+        <!-- 付款人员 -->
+        <el-form-item label="*付款人员:" class="form-input">
           <el-select
             v-model="formorder.payee"
             size="mini"
             filterable
-            placeholder="请选择收款人员"
+            placeholder="请选择付款人员"
           >
             <el-option
               v-for="item in headeroptions2"
@@ -72,8 +72,8 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <!-- 收款类别 -->
-        <el-form-item label="收款类别:">
+        <!-- 付款类别 -->
+        <el-form-item label="付款类别:">
           <el-select
             v-model="formorder.incomeType"
             placeholder="请选择"
@@ -120,7 +120,7 @@
           <el-table-column prop="saleId" label="单据编号" width="200" />
           <el-table-column prop="saleType" label="单据类型" />
           <el-table-column prop="saleTime" label="单据日期" />
-          <el-table-column prop="receiptMoney" label="应收金额" />
+          <el-table-column prop="receiptMoney" label="应付金额" />
           <el-table-column prop="receivedMoney" label="已收金额" />
           <el-table-column
             prop="uncollectedMoney"
@@ -147,9 +147,9 @@
     </el-dialog>
     <!-- 内容表体 -->
     <el-divider content-position="left">{{
-      formorder.incomeType == "应收收款" ? "应收单据列表:" : "销售订单列表:"
+      formorder.incomeType == "应付付款" ? "应付单据列表:" : "销售订单列表:"
     }}</el-divider>
-    <div class="addreceipt-main">
+    <div class="addpayment-main">
       <!-- 销售产品信息table -->
       <el-table :data="billdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
@@ -180,10 +180,10 @@
         <el-table-column prop="saleId" label="单据编号" width="200" />
         <el-table-column prop="saleType" label="单据类型" />
         <el-table-column prop="saleTime" label="单据日期" />
-        <el-table-column prop="receiptMoney" label="应收款金额" />
+        <el-table-column prop="receiptMoney" label="应付款金额" />
         <el-table-column prop="receivedMoney" label="已收金额" />
         <el-table-column prop="uncollectedMoney" label="未收金额" />
-        <el-table-column prop="thisMoney" label="本次收款">
+        <el-table-column prop="thisMoney" label="本次付款">
           <template #default="scope">
             <el-input-number
               v-model="billdata[scope.$index].thisMoney"
@@ -199,10 +199,10 @@
         class="el-icon-s-finance"
         :closable="false"
       >
-        单据总计收款：{{ billtotal }}元
+        单据总计付款：{{ billtotal }}元
       </el-alert>
       <!-- 备注 -->
-      <div class="addreceipt-remarks">
+      <div class="addpayment-remarks">
         <el-input
           type="textarea"
           :rows="5"
@@ -211,8 +211,8 @@
         >
         </el-input>
       </div>
-      <!-- 本次收款 -->
-      <el-divider content-position="left">本次收款</el-divider>
+      <!-- 本次付款 -->
+      <el-divider content-position="left">本次付款</el-divider>
       <el-table :data="accountdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
         <el-table-column type="index" width="40" fixed />
@@ -259,7 +259,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="settlementTypeName" label="账户类型" />
-        <el-table-column prop="thisMoney" label="本次收款金额">
+        <el-table-column prop="thisMoney" label="本次付款金额">
           <template #default="scope">
             <el-input-number
               v-model="accountdata[scope.$index].thisMoney"
@@ -274,10 +274,10 @@
         class="el-icon-s-finance"
         :closable="false"
       >
-        账户总计收款：{{ accounttotal }}元
+        账户总计付款：{{ accounttotal }}元
       </el-alert>
     </div>
-    <div class="addreceipt-footer">
+    <div class="addpayment-footer">
       本次预收金额：<el-input v-model="ciaMoney" readonly style="width: 15%" />
       <el-divider></el-divider>
       <p style="font-size: 14px">
@@ -311,7 +311,7 @@ export default {
     sessionStorage.removeItem("receipt");
     next();
   },
-  name: "Addreceipt",
+  name: "addpayment",
   data() {
     return {
       //订单div
@@ -327,10 +327,10 @@ export default {
         //表头单据信息
         receiptId: "SKD" + Date.now(), //单据编号
         receiptTime: new Date(), //单据时间
-        customer: "", //客户
-        payee: "", //收款人员
-        incomeType: "应收收款", //收款类别
-        receiptMoney: "", //收款金额
+        customer: "", //供应商
+        payee: "", //付款人员
+        incomeType: "应付付款", //付款类别
+        receiptMoney: "", //付款金额
         ciaMoney: "", //预收金额
         ciaBalance: "", //预收余额
         founder: "", //订单创建人
@@ -342,26 +342,26 @@ export default {
           saleId: "", //单据编号
           saleType: "", //单据类型
           saleTime: "", //单据日期
-          receiptMoney: "", //应收款金额
+          receiptMoney: "", //应付款金额
           receivedMoney: "", //已收金额
           uncollectedMoney: "", //未收金额
-          thisMoney: 0.00, //本次收款
+          thisMoney: 0.00, //本次付款
         },
       ],
-      //表体本次收款信息
+      //表体本次付款信息
       accountdata: [
         {
           fundAccount: "", //资金账户
-          settlementTypeName: "", //账户收款类型
-          settlementType: "", //账户收款类型
-          thisMoney: 0.00, //本次收款
+          settlementTypeName: "", //账户付款类型
+          settlementType: "", //账户付款类型
+          thisMoney: 0.00, //本次付款
         },
       ],
       //抄送对象信息
       footeroptions: [],
       notice: [], //抄送对象
       options: [], //资金账户
-      incomeType: [{ value: "应收收款" }, { value: "订单收款" }],
+      incomeType: [{ value: "应付付款" }, { value: "订单付款" }],
       tfhas: false,
       //条件查询订单
       condition: {
@@ -375,7 +375,7 @@ export default {
     };
   },
   computed: {
-    //单据收款
+    //单据付款
     billtotal: function () {
       var allmoney = 0;
       this.billdata.forEach((item) => {
@@ -383,7 +383,7 @@ export default {
       });
       return allmoney;
     },
-    //账户收款
+    //账户付款
     accounttotal: function () {
       var allmoney = 0;
       this.accountdata.forEach((item) => {
@@ -392,9 +392,9 @@ export default {
       this.formorder.receiptMoney = allmoney;
       return allmoney;
     },
-    //预收款
+    //预付款
     ciaMoney: function () {
-      if (this.formorder.incomeType == "应收收款") {
+      if (this.formorder.incomeType == "应付付款") {
         this.formorder.ciaMoney = this.accounttotal - this.billtotal;
         return this.accounttotal - this.billtotal;
         //ciaBalance:"",
@@ -421,12 +421,12 @@ export default {
         thisMoney:0.00,
       });
     },
-    //改变收款方式
+    //改变付款方式
     changetype() {
       this.billdata = [
         {
           saleId: "", //单据编号
-          thisMoney: "0.00", //本次收款
+          thisMoney: "0.00", //本次付款
         },
       ];
     },
@@ -435,7 +435,7 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       var url = "";
-      this.formorder.incomeType == "应收收款"
+      this.formorder.incomeType == "应付付款"
         ? (url =
             "http://localhost:8088/frameproject/capitalReceivable/finddeliverypage")
         : (url =
@@ -473,7 +473,7 @@ export default {
     dialogopen() {
       if (this.formorder.customer == "") {
         ElMessage.warning({
-          message: "请先选择一位客户",
+          message: "请先选择一位供应商",
           type: "warning",
         });
       } else {
@@ -544,7 +544,7 @@ export default {
         if (item.thisMoney > item.uncollectedMoney && tfok == true) {
           this.$notify({
             title: "警告",
-            message: "本次收款金额不能大于未收金额",
+            message: "本次付款金额不能大于未收金额",
             type: "warning",
           });
           tfok = false;
@@ -560,7 +560,7 @@ export default {
       if (this.accounttotal < this.billtotal && tfok == true) {
         this.$notify({
           title: "警告",
-          message: "账户总计收款不能小于单据总计收款",
+          message: "账户总计付款不能小于单据总计付款",
           type: "warning",
         });
         tfok = false;
@@ -575,7 +575,7 @@ export default {
         this.formorder.ciaBalance = this.formorder.ciaMoney;
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalReceipt/addreceipt/" +
+            "http://localhost:8088/frameproject/capitalReceipt/addpayment/" +
             type,
           method: "post",
           data: {
@@ -603,10 +603,10 @@ export default {
       this.tfhas = true;
       var url = "";
       this.formorder.incomeType = receipt.type;
-      receipt.type == "应收收款"
-        ? (this.type = "应收单据列表:")
+      receipt.type == "应付付款"
+        ? (this.type = "应付单据列表:")
         : (this.type = "销售订单:");
-      receipt.type == "应收收款"
+      receipt.type == "应付付款"
         ? (url =
             "http://localhost:8088/frameproject/capitalReceivable/deliverythisReceipt")
         : (url =
@@ -686,18 +686,18 @@ export default {
 </script>
 
 <style lang="scss">
-.addreceipt {
+.addpayment {
   width: 100%;
   background-color: white;
 }
 /* 顶部 */
-.addreceipt .el-carousel__arrow--right,
+.addpayment .el-carousel__arrow--right,
 .el-notification.right {
   top: 110px !important;
   background-color: #f2dede;
   border-color: #ebccd1;
 }
-.addreceipt-page-tag {
+.addpayment-page-tag {
   height: 40px;
   padding: 0 10px;
   color: #323232;
@@ -705,54 +705,54 @@ export default {
   line-height: 40px;
   background-color: #e9eef3;
 }
-.addreceipt-shenpi {
+.addpayment-shenpi {
   float: right;
   line-height: 20px;
 }
 /* 内容表头 */
-.addreceipt-header {
+.addpayment-header {
   padding: 25px 15px;
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.addreceipt .el-form--inline .el-form-item {
+.addpayment .el-form--inline .el-form-item {
   margin-right: 20px !important;
 }
 /* 内容表体 */
-.addreceipt-main {
+.addpayment-main {
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.addreceipt .cell {
+.addpayment .cell {
   text-align: center;
   color: black !important;
   font-size: 8px !important;
 }
-.addreceipt-main .el-input__inner {
+.addpayment-main .el-input__inner {
   border: 0;
 }
-.addreceipt th {
+.addpayment th {
   color: black !important;
   background-color: #e8e8e8 !important;
 }
-.addreceipt-remarks {
+.addpayment-remarks {
   margin-top: 15px;
   height: 100%;
   width: 100%;
 }
-.addreceipt .el-textarea .el-textarea__inner {
+.addpayment .el-textarea .el-textarea__inner {
   resize: none;
   border: 0;
 }
-.addreceipt-main .el-input-number {
+.addpayment-main .el-input-number {
   width: 100% !important;
 }
-.addreceipt .el-alert__description {
+.addpayment .el-alert__description {
   font-size: 15px !important;
   color: black;
 }
 /* 内容表尾 */
-.addreceipt-footer {
+.addpayment-footer {
   padding: 20px 15px;
   background-color: white;
 }

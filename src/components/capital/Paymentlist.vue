@@ -1,17 +1,19 @@
 <template>
   <!-- 主内容 -->
-  <div class="receivable">
+  <div class="paymentlist">
     <!-- 标题 -->
     <div class="page-tag">
-      <span style="float: left">收款资金管理</span>
+      <span style="float: left">付款资金管理</span>
       <!-- 标签页 -->
       <ul>
-        <li><router-link to="Receivable" class="active">应收</router-link></li>
-        <li><router-link to="Receiptlist">收款单</router-link></li>
+        <li><router-link to="Payable">应付</router-link></li>
+        <li>
+          <router-link to="Paymentlist" class="active">付款单</router-link>
+        </li>
       </ul>
     </div>
     <!-- 表单头部 筛选 -->
-    <div class="receivable-header">
+    <div class="paymentlist-header">
       <el-collapse accordion v-model="activeNames">
         <el-collapse-item name="1">
           <template #title>
@@ -44,9 +46,9 @@
               >
               </el-date-picker>
             </div>
-            <!-- 收款日期 -->
+            <!-- 付款日期 -->
             <br />
-            <span>收款日期:</span>
+            <span>付款日期:</span>
             <el-radio-group v-model="collection" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
@@ -77,41 +79,23 @@
               <el-radio-button label="未结案"></el-radio-button>
               <el-radio-button label="结案"></el-radio-button>
             </el-radio-group>
-            <!-- 客户 -->
+            <!-- 供应商 -->
             <br /><br />
-            <span>客户:</span>
-            <el-select
-              v-model="value1"
-              size="small"
-              clearable
-              filterable
-              @change="qbc()"
-            >
-              <el-option v-for="item in options1" :value="item.customerName">
+            <span>供应商:</span>
+            <el-select v-model="value1" size="small" filterable @change="qbc()">
+              <el-option v-for="item in options1" :value="item.label">
               </el-option>
             </el-select>
             <!-- 创建人 -->
             <span>创建人:</span>
-            <el-select
-              v-model="value2"
-              clearable
-              size="small"
-              filterable
-              @change="qbc()"
-            >
-              <el-option v-for="item in options2" :value="item.userName">
+            <el-select v-model="value3" size="small" filterable @change="qbc()">
+              <el-option v-for="item in options3" :value="item.label">
               </el-option>
             </el-select>
             <!-- 销售人员 -->
             <span>销售人员:</span>
-            <el-select
-              v-model="value3"
-              clearable
-              size="small"
-              filterable
-              @change="qbc()"
-            >
-              <el-option v-for="item in options3" :value="item.userName">
+            <el-select v-model="value4" size="small" filterable @change="qbc()">
+              <el-option v-for="item in options4" :value="item.label">
               </el-option>
             </el-select>
           </div>
@@ -119,78 +103,69 @@
       </el-collapse>
     </div>
     <!-- 表体内容 -->
-    <div class="receivable-mian">
-      <div style="padding: 10px 25px">
-        <el-button
-          icon="el-icon-plus"
-          type="primary"
-          size="small"
-          @click="goadd()"
-          >新增收款</el-button
-        >
-      </div>
+    <div class="paymentlist-mian">
       <el-table
         :data="tableData"
         style="width: 100%"
-        max-height="400"
         @selection-change="handleSelectionChange"
         stripe
       >
-        <el-table-column label="操作" width="120" fixed>
-          <template #default="scope">
-            <el-button
-              type="text"
-              v-if="tableData[scope.$index].caseState == 0"
-              @click="goreceipt(scope.$index)"
-            >
-              收款
-            </el-button>
-            <el-button
-              type="text"
-              v-if="tableData[scope.$index].caseState == 0"
-            >
-              结案
-            </el-button>
-            <el-button type="text" v-else> 反结案 </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column prop="deliveryId" fixed label="单据编号" width="200">
+        <el-table-column
+          prop="receiptId"
+          label="付款单据编号"
+          fixed
+          width="200"
+        >
           <template #default="scope">
             <el-button type="text" @click="goorder(scope.$index)">{{
-              tableData[scope.$index].deliveryId
+              tableData[scope.$index].receiptId
             }}</el-button>
           </template>
         </el-table-column>
         <el-table-column
-          prop="deliveryTime"
-          label="出库日期"
+          prop="receiptTime"
+          label="付款日期"
           sortable
-          width="120"
+          width="150"
         />
-        <el-table-column prop="deliveryType" label="单据类型" width="120" />
-        <el-table-column prop="customer" label="客户名称" width="120" />
-        <el-table-column prop="salesmen" label="销售人员" width="120" />
-        <el-table-column prop="receivables" label="应收金额" width="120" />
-        <el-table-column prop="received" label="已收金额" width="120" />
-        <el-table-column prop="uncollected" label="未收金额" width="120" />
-        <el-table-column prop="remarks" label="单据备注" width="120" />
+        <el-table-column
+          prop="customer"
+          label="供应商名称"
+          sortable
+          width="150"
+        />
+        <el-table-column prop="payee" label="付款人" width="120" />
+        <el-table-column prop="incomeType" label="付款类别" width="120" />
+        <el-table-column prop="receiptMoney" label="付款金额(元)" width="150" />
+        <el-table-column prop="ciaMoney" label="预收金额(元)" width="120" />
+        <el-table-column prop="ciaBalance" label="预收余额(元)" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
+        <el-table-column prop="remarks" label="单据备注" width="120" />
+        <el-table-column prop="approvalState" label="审批状态" width="120">
+          <template #default="scope">
+            <span v-if="tableData[scope.$index].approvalState == 0">
+              待一级审批
+            </span>
+            <span v-else-if="tableData[scope.$index].approvalState == -2">
+              草稿
+            </span>
+            <span v-else-if="tableData[scope.$index].approvalState == -1">
+              审批未通过
+            </span>
+            <span v-else> 审批通过 </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="approver" label="当前审批人" width="120" />
         <el-table-column
-          prop="receiptRemark"
-          label="最后收款备注"
-          :show-overflow-tooltip="true"
-          width="200"
-        />
-        <el-table-column
-          prop="lastCollectionTime"
-          label="最后收款时间"
+          prop="lastApprovalTime"
+          label="最后审批时间"
           sortable
           width="200"
         />
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
-    <div class="receivable-footer" v-show="paging">
+    <div class="paymentlist-footer" v-show="paging">
       <el-pagination
         background
         layout="prev, pager, next"
@@ -214,32 +189,28 @@ export default {
       activeNames: "1",
       //筛选框
       billdate: "全部", //单据日期
-      collection: "全部", //收款日期
+      collection: "全部", //付款日期
       status: "全部", //结案状态
       customtime1: "", //自定义时间
       customtime2: "",
       options1: [],
       options2: [],
       options3: [],
-      value1: "", //客户
-      value2: "", //创建人
-      value3: "", //销售人员
+      options4: [],
+      value1: "全部", //供应商
+      value2: "全部", //仓库
+      value3: "全部", //创建人
+      value4: "全部", //销售人员
       //表单数据
       tableData: [],
       //条件查询数据
-      vagueorderid: "",
       condition: {
-        deliveryId: "", //订单id
-        deliveryTime: "", //单据日期
-        otimeState: "",
-        otimeEnd: "",
-        lastCollectionTime: "", //收款日期
-        dtimeState: "",
-        dtimeEnd: "",
-        caseState: "", //结案状态
-        customer: "", //客户
-        founder: "", //创建人
-        salesmen: "", //销售人
+        orderTime: "",
+        deliveryTime: "",
+
+        customer: "",
+        founder: "",
+        salesmen: "",
       },
       //分页
       pagesize: 5,
@@ -260,88 +231,27 @@ export default {
     all: function () {
       return [
         "单据日期: " + this.billdate,
-        "收款日期: " + this.collection,
+        "付款日期: " + this.collection,
         "结案状态: " + this.status,
-        "客户: " + this.value1,
-        "创建人: " + this.value2,
-        "销售人员: " + this.value3,
+        "供应商: " + this.value1,
+        "仓库: " + this.value2,
+        "创建人: " + this.value3,
+        "销售人员: " + this.value4,
       ];
     },
   },
   methods: {
-    goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].deliveryId);
-      if(this.tableData[val].deliveryId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
-      this.$router.push("/Deliver");
-      }else{
-      this.$router.push("/Return");
-      }
-    },
-    goreceipt(val) {
-      var receipt = {
-        type: "应收收款",
-        orderId: this.tableData[val].deliveryId,
-      };
-      sessionStorage.setItem("receipt", JSON.stringify(receipt));
-      this.$router.push("/Addreceipt");
-    },
-    goadd() {
-      this.$router.push("/Addreceipt");
-    },
-    //条件查询
-    qbc() {
-      this.condition.deliveryTime = this.billdate;
-      this.condition.lastCollectionTime = this.collection;
-      this.condition.caseState = this.status;
-      this.condition.customer = this.value1;
-      this.condition.founder = this.value2;
-      this.condition.salesmen = this.value3;
-      if (this.customtime1 != null) {
-        this.condition.otimeState = this.customtime1[0];
-        this.condition.otimeEnd = this.customtime1[1];
-      } else {
-        this.condition.otimeState = null;
-        this.condition.otimeEnd = null;
-      }
-      if (this.customtime2 != null) {
-        this.condition.dtimeState = this.customtime2[0];
-        this.condition.dtimeEnd = this.customtime2[1];
-      } else {
-        this.condition.dtimeState = null;
-        this.condition.dtimeEnd = null;
-      }
-      this.findpage();
-    },
-    findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
-        headers: {
-          JWTDemo: state.userInfo.token,
-        },
-      })
-        .then(function (response) {
-          _this.options1 = response.data.data.customers;
-          _this.options2 = response.data.data.notifiers;
-          _this.options3 = response.data.data.salemans;
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    },
     findpage() {
       const state = JSON.parse(sessionStorage.getItem("state"));
       var _this = this;
       this.axios({
-        url:
-          "http://localhost:8088/frameproject/capitalReceivable/conditionpage",
+        url: "http://localhost:8088/frameproject/capitalReceipt/conditionpage",
         method: "post",
+        processData: false,
         data: {
-          currentPage: _this.currentPage,
-          pageSize: _this.pagesize,
-          condition: JSON.stringify(_this.condition),
+          currentPage: this.currentPage,
+          pageSize: this.pagesize,
+          condition: "",
         },
         headers: {
           JWTDemo: state.userInfo.token,
@@ -349,13 +259,6 @@ export default {
       })
         .then(function (response) {
           _this.tableData = response.data.data.rows;
-          _this.tableData.forEach((item) => {
-            if (item.deliveryId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
-              item.deliveryType = "销售出库单"
-            }else{
-              item.deliveryType = "销售退货单"
-            }
-          });
           _this.max = response.data.data.total;
         })
         .catch(function (error) {
@@ -366,16 +269,23 @@ export default {
     handleCurrentChange(val) {
       this.findpage(val, this.pagesize);
     },
+    goorder(val) {
+      sessionStorage.setItem("orderid", this.tableData[val].receiptId);
+      this.$router.push("/Receipt");
+    },
+    qbc() {
+      this.condition.orderTime = this.billdate;
+      console.log(this.condition);
+    },
   },
   created: function () {
     this.findpage();
-    this.findsaleman();
   },
 };
 </script>
 
 <style>
-.receivable {
+.paymentlist {
   width: 100%;
   background-color: #e9eef3 !important ;
 }
@@ -414,48 +324,57 @@ export default {
   border-top: 2px solid #459df5;
   background-color: #f7fbfe;
 }
+/* 顶部 */
+.paymentlist .page-tag {
+  height: 40px;
+  padding: 0 10px;
+  color: #323232;
+  font-size: 18px;
+  line-height: 40px;
+  background-color: #e9eef3;
+}
 /* 内容表头 筛选框 */
-.receivable-header {
+.paymentlist-header {
   padding: 15px 15px;
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.receivable .el-radio-group {
+.paymentlist .el-radio-group {
   margin: 10px 0px;
 }
-.receivable-header span {
+.paymentlist-header span {
   font-size: 14px;
   color: #666666;
   margin-right: 10px;
 }
-.receivable .el-tag {
+.paymentlist .el-tag {
   color: #409eff !important;
 }
-.receivable .el-collapse,
-.receivable .el-collapse-item__wrap,
-.receivable .el-collapse-item__header,
-.receivable .el-radio-button__inner {
+.paymentlist .el-collapse,
+.paymentlist .el-collapse-item__wrap,
+.paymentlist .el-collapse-item__header,
+.paymentlist .el-radio-button__inner {
   border: none !important;
   border-radius: 0px !important;
 }
-.receivable .el-select--small {
+.paymentlist .el-select--small {
   line-height: 32px;
   margin-right: 20px;
 }
 /* 表体内容 */
-.receivable-main {
+.paymentlist-main {
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.receivable th {
+.paymentlist th {
   color: white !important;
   background-color: #459df5 !important;
 }
-.receivable .cell {
+.paymentlist .cell {
   text-align: center;
 }
 /* 内容表尾 */
-.receivable-footer {
+.paymentlist-footer {
   padding: 25px 15px;
   background-color: white;
   text-align: center;

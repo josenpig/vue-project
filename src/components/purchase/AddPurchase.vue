@@ -75,8 +75,8 @@
           >
             <el-option
               v-for="item in headeroptions2"
-              :key="item.buyerName"
-              :value="item.buyerName"
+              :key="item.userName"
+              :value="item.userName"
             >
             </el-option>
           </el-select>
@@ -146,10 +146,13 @@
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
           <el-pagination
-            style="float: left"
             background
             layout="prev, pager, next"
             :total="max"
+            :page-size="pagesize"
+            style="float: left"
+            @current-change="handleCurrentChange"
+            v-model:currentPage="currentPage"
           >
           </el-pagination>
           <div style="float: right">
@@ -160,7 +163,6 @@
     </el-dialog>
     <!-- 内容表体 -->
     <div class="addsale-main">
-      <!-- 销售产品信息table -->
       <el-table :data="productdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
         <el-table-column type="index" width="40" fixed />
@@ -355,7 +357,6 @@ export default {
       //订单信息
       formorder: {
         //表头单据信息
-
         id:"CGDD" + Date.now(), //单据编号
         deliceryDate:new Date(), //交货日期
         vendorName:"",//供应商用户名
@@ -511,6 +512,9 @@ export default {
         rows.splice(index, 1); //删掉该行
       }
     },
+    handleCurrentChange(val) {
+      this.dialogopen(val, this.pagesize);
+    },
     //提交审批（生成订单）
     examine(type) {
       const state = JSON.parse(sessionStorage.getItem("state"));
@@ -519,19 +523,52 @@ export default {
       var ifnum = true;
       this.productdata.forEach((item) => {
         if (
-          this.formorder.buyerName == "" ||
-          item.productId == "" ||
-          item.depotName == null
+          this.formorder.vendorName == ""
         ) {
           this.$notify({
             title: "警告",
-            message: "请先填写*必要信息!",
+            message: "请选择供应商！！！",
             type: "warning",
             position: "top-left",
           });
           ifnum = false;
           return false;
         }
+        if (
+          this.formorder.buyerName == ""
+        ) {
+          this.$notify({
+            title: "警告",
+            message: "请选择采购员",
+            type: "warning",
+            position: "top-left",
+          });
+          ifnum = false;
+          return false;
+        }
+        if(item.productId == ""){
+          this.$notify({
+            title: "警告",
+            message: "产品ID错误，请重新删除产品或重新选择产品!",
+            type: "warning",
+            position: "top-left",
+          });
+          ifnum = false;
+          return false;
+        }
+        if(item.depotName == null){
+          this.$notify({
+            title: "警告",
+            message: "请选择产品采购时的公司仓库",
+            type: "warning",
+            position: "top-left",
+          });
+          ifnum = false;
+          return false;
+        }
+
+
+
       });
       if (ifnum != false) {
         this.formorder.deliceryDate = dayjs(this.formorder.deliceryDate).format(
@@ -566,16 +603,18 @@ export default {
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
     this.axios({
-      url: "http://localhost:8088/frameproject/roleusers/" + 2,
+      url: "http://localhost:8088/frameproject/personnel/ofpeople",
       method: "get",
       headers: {
         JWTDemo: state.userInfo.token,
       },
     })
       .then(function (response) {
-        response.data.data.forEach((item) => {
-          _this.headeroptions2.push({ buyerName: item.userName });
-        });
+        // response.data.data.forEach((item) => {
+          // _this.headeroptions2.push({ buyerName: item.userName });
+          _this.headeroptions1 = response.data.data.vendors;
+          _this.headeroptions2 = response.data.data.purchasemans;
+        // });
       })
       .catch(function (error) {
         console.log(error);

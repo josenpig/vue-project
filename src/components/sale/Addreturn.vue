@@ -282,13 +282,13 @@ export default {
         allmoney +=
           this.productdata[i].saleUnitPrice * this.productdata[i].returnNum;
       }
-      this.formorder.receivables =
+      this.formorder.receivables =-
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
             1000
         ) / 1000;
       return (
-        Math.round(
+        -Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) * 100
         ) / 100
       );
