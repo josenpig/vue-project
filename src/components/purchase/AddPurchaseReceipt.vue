@@ -24,15 +24,15 @@
         <!-- 编号 -->
         <el-form-item label="编号:">
           <el-input
-            v-model="formorder.deliveryId"
+            v-model="formorder.id"
             readonly
             placeholder="编号"
           ></el-input>
         </el-form-item>
-        <!-- 出库日期 -->
-        <el-form-item label="出库日期:" class="form-input">
+        <!-- 入库日期 -->
+        <el-form-item label="入库日期:" class="form-input">
           <el-date-picker
-            v-model="formorder.deliveryTime"
+            v-model="formorder.inboundDate"
             type="date"
             placeholder="选择日期"
             :clearable="false"
@@ -42,7 +42,7 @@
         <!-- 客户 -->
         <el-form-item label="*:供应商">
           <el-select
-            v-model="formorder.customer"
+            v-model="formorder.vendorName"
             size="mini"
             filterable
             placeholder="请选择供应商"
@@ -50,8 +50,8 @@
           >
             <el-option
               v-for="item in headeroptions1"
-              :key="item.customer"
-              :value="item.customer"
+              :key="item.vendorName"
+              :value="item.vendorName"
             >
             </el-option>
           </el-select>
@@ -59,7 +59,7 @@
         <!-- 销售人员 -->
         <el-form-item label="*采购人员:" class="form-input">
           <el-select
-            v-model="formorder.salesmen"
+            v-model="formorder.buyerName"
             size="mini"
             filterable
             placeholder="请选择采购人员"
@@ -67,8 +67,8 @@
           >
             <el-option
               v-for="item in headeroptions2"
-              :key="item.salesmen"
-              :value="item.salesmen"
+              :key="item.userName"
+              :value="item.userName"
             >
             </el-option>
           </el-select>
@@ -116,18 +116,16 @@
           style="width: 100%"
           max-height="350"
           border
-          ><el-table-column type="selection" width="55" />
+          >
+          <el-table-column type="selection" width="55" />
           <el-table-column prop="productName" label="产品名称" width="200" />
           <el-table-column prop="productId" label="产品编号" width="120" />
-          <el-table-column prop="productType" label="产品类别" width="120" />
+          <el-table-column prop="product_type_name" label="产品类别" width="120" />
           <el-table-column prop="remark" label="备注" width="120" />
-          <el-table-column prop="productSpec" label="规格" width="120" />
           <el-table-column prop="productUnit" label="单位" width="120" />
           <el-table-column prop="productNum" label="库存总量" width="120" />
           <el-table-column prop="expectNum" label="预计可用量" width="120" />
-          <el-table-column prop="saleUnitPrice" label="采购单价" width="120" />
-          <el-table-column prop="ingredient" label="成分" width="120" />
-          <el-table-column prop="gramHeavy" label="克量" width="120" />
+          <el-table-column prop="purchaseUnitPrice" label="采购单价" width="120" />
           <el-table-column
             prop="productDescribe"
             label="产品描述"
@@ -154,7 +152,6 @@
     </el-dialog>
     <!-- 内容表体 -->
     <div class="adddeliver-main">
-      <!-- 销售产品信息table -->
       <el-table :data="productdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
         <el-table-column type="index" width="40" fixed />
@@ -199,7 +196,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
         <el-table-column prop="productUnit" label="单位" width="120" />
         <el-table-column prop="productNum" label="数量" width="120">
           <template #default="scope">
@@ -207,36 +203,33 @@
               v-model="productdata[scope.$index].productNum"
               :controls="false"
               :min="1"
-              :disabled="issale"
             />
           </template>
         </el-table-column>
-        <el-table-column prop="saleUnitPrice" label="采购单价" width="120">
+        <el-table-column prop="purchaseUnitPrice" label="采购单价" width="120">
           <template #default="scope">
             <el-input-number
-              v-model="productdata[scope.$index].saleUnitPrice"
+              v-model="productdata[scope.$index].purchaseUnitPrice"
               :controls="false"
               :precision="2"
               :min="0"
-              :disabled="issale"
             />
           </template>
         </el-table-column>
-        <el-table-column prop="saleMoney" label="采购金额" width="120">
+        <el-table-column prop="purchaseMoney" label="采购金额" width="120">
           <template #default="scope">
-            {{ saleMoney(scope.$index) }}
+            {{ saleMoney(scope.$index)}}
           </template>
         </el-table-column>
         <el-table-column prop="depot" label="仓库" width="150">
           <template #default="scope">
             <el-select
-              v-model="productdata[scope.$index].depot"
+              v-model="productdata[scope.$index].depotName"
               size="mini"
               filterable
-              :disabled="issale"
             >
               <el-option
-                v-for="item in productdata[scope.$index].baseOpenings"
+                v-for="item in productdata[scope.$index].baseDepots"
                 :key="item.depotName"
                 :value="item.depotName"
               >
@@ -244,9 +237,7 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
-        <el-table-column prop="remark" label="备注" width="120">
+        <el-table-column prop="remark" label="备注" width="203">
           <template #default="scope">
             <el-input v-model="productdata[scope.$index].remark" />
           </template>
@@ -337,7 +328,7 @@ import { ElMessage } from "element-plus";
 import store from "../../store";
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("saledeliver");
+    sessionStorage.removeItem("receipt");
     next();
   },
   name: "AddPurchaseReceipt",
@@ -360,21 +351,16 @@ export default {
       headeroptions2: [],
       //订单信息
       formorder: {
-        //表头单据信息
-        deliveryId: "CGRKD" + Date.now(), //单据编号
-        deliveryTime: new Date(), //交货时间
-        customer: "", //供应商
-        salesmen: "", //销售人员
-        remarks: "", // 订单备注
-        //表尾买家信息
-        disrate: 0, //优惠率
-        dismoney: 0, //优惠金额
-        receivables: 0, //应收款
-        contacts: "", //客户联系人
-        contactsPhone: "", //客户联系人电话
-        contactsAddress: "", //客户地址
-        //订单信息额外
-        founder: "",
+        id:"CGRKD" + Date.now(), //单据编号
+        inboundDate:new Date(),
+        vendorName:"",
+        buyerName:"",
+        buyerType:"",
+        disrate:0,
+        dismoney:0,
+        offersPrice:0,
+        createPeople:"",
+        createDate:new Date()
       },
 
       //表体销售商品信息
@@ -383,15 +369,11 @@ export default {
           productId: "", //产品编号
           productName: "", //产品名称
           remark: "", //备注
-          productSpec: "", //规格
           productUnit: "", //单位
-          productNum: "", //数量
-          saleUnitPrice: "", //销售单价
-          saleMoney: "", //销售金额
-          depot: "", //仓库
-          ingredient: "", //成分
-          gramHeavy: "", //克量
-          productDescribe: "", //产品描述
+          productNum: 0, //数量
+          purchaseUnitPrice: 0, //采购单价
+          purchaseMoney: 0, //采购金额
+          depotName: "", //仓库
         },
       ],
       //抄送对象信息
@@ -413,10 +395,10 @@ export default {
     //单个商品销售总价
     saleMoney() {
       return function (id) {
-        this.productdata[id].saleMoney =
-          this.productdata[id].saleUnitPrice * this.productdata[id].productNum;
+        this.productdata[id].purchaseMoney =
+          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*1000)/1000
         return (
-          this.productdata[id].saleUnitPrice * this.productdata[id].productNum
+          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*1000)/1000
         );
       };
     },
@@ -425,9 +407,9 @@ export default {
       var allmoney = 0;
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
+          this.productdata[i].purchaseUnitPrice * this.productdata[i].productNum;
       }
-      this.formorder.receivables =
+      this.formorder.offersPrice =
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
             1000
@@ -444,7 +426,7 @@ export default {
       var allmoney = 0;
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
+          this.productdata[i].purchaseUnitPrice * this.productdata[i].productNum;
       }
       this.formorder.dismoney =
         Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
@@ -459,6 +441,9 @@ export default {
     handleSelectionChange(val) {
       this.joinstockdata = val;
     },
+    handleCurrentChange(val) {
+      this.dialogopen(val, this.pagesize);
+    },
     //选择产品
     dialogopen() {
       const state = JSON.parse(sessionStorage.getItem("state"));
@@ -468,7 +453,7 @@ export default {
         pageSize: this.pagesize,
       };
       this.axios({
-        url: "http://localhost:8088/frameproject/baseProduct/allsaleproduct",
+        url: "http://localhost:8088/frameproject/baseProduct/allpurchaseproduct",
         method: "get",
         processData: false,
         params: fd,
@@ -511,17 +496,13 @@ export default {
     addrow(productdata, event) {
       productdata.push({
         productId: "", //产品编号
-        productName: "", //产品名称
-        remark: "", //备注
-        productSpec: "", //规格
-        productUnit: "", //单位
-        productNum: "", //数量
-        saleUnitPrice: "", //采购单价
-        saleMoney: "", //采购金额
-        depot: "", //仓库
-        ingredient: "", //成分
-        gramHeavy: "", //克量
-        productDescribe: "", //产品描述
+          productName: "", //产品名称
+          remark: "", //备注
+          productUnit: "", //单位
+          productNum: 0, //数量
+          purchaseUnitPrice: 0, //采购单价
+          purchaseMoney: 0, //采购金额
+          depotName: "", //仓库
       });
     },
     //移除一行
@@ -535,36 +516,44 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       var ifnum = true;
-      const sale = JSON.parse(sessionStorage.getItem("saledeliver")); //获取是否绑定采购订单
+      const receipt = JSON.parse(sessionStorage.getItem("receipt")); //获取是否绑定采购订单
       //如果采购入库单不来自采购订单 则判断库存是否足够
-      if (sale == null) {
+      if (receipt == null) {
         this.productdata.forEach((item) => {
-          if (
-            this.formorder.salesmen == "" ||
-            item.productId == "" ||
-            item.depot == null
-          ) {
+          if(this.formorder.purchaseman == ""){
             this.$notify({
               title: "警告",
-              message: "请先填写*必要信息!",
+              message: "请选择采购人员!",
               type: "warning",
               position: "top-left",
             });
             ifnum = false;
             return false;
           }
-          item.baseOpenings.forEach((items) => {
-            if (items.depotName == item.depot) {
-              if (items.expectNumber < item.productNum) {
-                ElMessage.warning({
-                  message:
-                    "警告,产品:" + item.productName + "的预计可用库存不足!",
-                  type: "warning",
-                });
-                ifnum = false;
-              }
-            }
-          });
+
+          if(item.productId == ""){
+            this.$notify({
+              title: "警告",
+              message: "请选择正确的产品!",
+              type: "warning",
+              position: "top-left",
+            });
+            ifnum = false;
+            return false;
+          }
+
+          if (
+            item.depot == null
+          ) {
+            this.$notify({
+              title: "警告",
+              message: "请选择产品购入的公司仓库!",
+              type: "warning",
+              position: "top-left",
+            });
+            ifnum = false;
+            return false;
+          }
         });
       }
       if (ifnum != false) {
@@ -595,26 +584,27 @@ export default {
     },
   },
   created: function () {
-    const sale = JSON.parse(sessionStorage.getItem("saledeliver"));
-    if (sale != null) {
+    const purchase = JSON.parse(sessionStorage.getItem("receipt"));
+    if (purchase != null) {
       this.issale=true
-      this.productdata = sale.product;
-      this.formorder = sale.order;
-      this.formorder.deliveryId = "XSCKD" + Date.now();
+      this.productdata = purchase.product;
+      this.formorder = purchase.order;
+      this.formorder.id = "CGRKD" + Date.now();
+      this.formorder.inboundDate = purchase.order.deliceryDate;
+
     }
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
     this.axios({
-      url: "http://localhost:8088/frameproject/roleusers/" + 3,
+      url: "http://localhost:8088/frameproject/personnel/ofpeople",
       method: "get",
       headers: {
         JWTDemo: state.userInfo.token,
       },
     })
       .then(function (response) {
-        response.data.data.forEach((item) => {
-          _this.headeroptions2.push({ salesmen: item.userName });
-        });
+        _this.headeroptions1 = response.data.data.vendors;
+        _this.headeroptions2 = response.data.data.purchasemans;
       })
       .catch(function (error) {
         console.log(error);

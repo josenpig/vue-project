@@ -12,7 +12,12 @@
       <el-dialog title="角色修改" v-model="dialogFormVisible" width="35%">
         <el-form :model="form">
           <el-form-item label="角色名称：">
-            <el-input v-model="form.roleName" style="width: 250px" />
+            <el-input
+              v-model.trim="form.roleName"
+              maxlength="8"
+              show-word-limit
+              style="width: 250px"
+            />
           </el-form-item>
           <el-form-item label="菜单权限：" />
           <el-tree
@@ -30,6 +35,36 @@
           <span class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="changeok()">确 定</el-button>
+          </span>
+        </template>
+      </el-dialog>
+      <!-- 新增 -->
+      <el-dialog title="角色新增" v-model="dialogaddVisible" width="35%">
+        <el-form :model="add">
+          <el-form-item label="角色名称：">
+            <el-input
+              v-model.trim="add.roleName"
+              maxlength="8"
+              show-word-limit
+              style="width: 250px"
+            />
+          </el-form-item>
+          <el-form-item label="菜单权限：" />
+          <el-tree
+            style="margin-left: 100px; margin-top: -50px"
+            :data="newadd"
+            :props="defaultProps"
+            @check-change="handleCheckChange1"
+            node-key="menuId"
+            :default-checked-keys="[1]"
+            show-checkbox
+            ref="tree1"
+          ></el-tree>
+        </el-form>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="dialogaddVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addnewok()">确 定</el-button>
           </span>
         </template>
       </el-dialog>
@@ -107,7 +142,8 @@ export default {
     return {
       //表单数据
       tableData: [], //所有角色
-      all: [], //所有菜单
+      all: [], //所有菜
+      newadd: [],
       current: [], //当前具有菜单id
       initial: [], //当前具有菜单
       defaultProps: {
@@ -116,14 +152,25 @@ export default {
         value: "menuId",
       },
       dialogFormVisible: false,
+      dialogaddVisible: false,
+      //修改
       form: {
         roleId: "", //角色id
         roleName: "", //角色名
+        delFlag: "", //删除标识
         updatedBy: "", //更新人
         menus: [], //最新菜单
       },
+      //新增
+      add: {
+        roleName: "", //角色名
+        founder: "", //创建人
+        menus: [], //菜单
+      },
+
       name: "", //选中行的角色名
-      condition: {}, //查询条件
+      condition: { roleName: "" }, //查询条件
+      vagueorderid: "",
       //分页
       pagesize: 5,
       max: 0,
@@ -131,8 +178,29 @@ export default {
     };
   },
   methods: {
-    addnew() {},
-    update() {
+    //模糊查询
+    join() {
+      this.condition.roleName = this.vagueorderid;
+      this.findpage();
+    },
+    //删除角色
+    delet(index) {
+      this.$confirm(
+        "是否确认删除角色名为‘" + this.tableData[index].roleName + "’的数据项",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        }
+      ).then(() => {
+        this.form.delFlag = -1;
+        this.form.roleId = this.tableData[index].roleId;
+        this.update(-1);
+      });
+    },
+    //修改完成
+    update(type) {
       const state = JSON.parse(sessionStorage.getItem("state"));
       this.form.updatedBy = state.userInfo.userName;
       var _this = this;
@@ -148,34 +216,38 @@ export default {
         },
       })
         .then(function (response) {
-          if (response.data.data == true) {
-            ElMessage.success({
-              message: "角色信息已被修改",
-              type: "success",
-            });
-            _this.findpage();
+          if (type == -1) {
+            if (response.data.data != false) {
+              ElMessage.success({
+                message: "角色信息已被删除",
+                type: "success",
+              });
+            } else {
+              ElMessage.warning({
+                message: "该角色下存在用户无法删除",
+                type: "warning",
+              });
+            }
+          } else {
+            if (response.data.data == true) {
+              ElMessage.success({
+                message: "角色信息已被修改",
+                type: "success",
+              });
+            } else {
+              ElMessage.warning({
+                message: "角色信息修改失败",
+                type: "warning",
+              });
+            }
           }
+          _this.findpage();
         })
         .catch(function (error) {
           console.log(error);
         });
     },
-    delet(index) {
-      this.$confirm(
-        "是否确认删除用户名为‘" + this.tableData[index].userName + "’的数据项",
-        "提示",
-        {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
-        }
-      ).then(() => {
-        this.$message({
-          type: "success",
-          message: "删除成功!",
-        });
-      });
-    },
+    //修改
     changeall(index) {
       this.current = [];
       this.form.roleId = this.tableData[index].roleId;
@@ -194,16 +266,46 @@ export default {
         .then(function (response) {
           //添加当前角色具有菜单id
           response.data.data.menus.forEach((item) => {
-            _this.current.push(item.menuId);
+            if (item.menuType == 'C') {
+              _this.current.push(item.menuId);
+            }
           });
+          _this.all = response.data.data.allmenus; //添加所有菜单
           _this.initial = response.data.data.menus; //添加当前角色具有菜单
           _this.form.menus = response.data.data.menus; //添加当前角色具有菜单
-          _this.all = response.data.data.allmenus; //添加所有菜单
+          _this.all[0].disabled = true;
         })
         .catch(function (error) {
           console.log(error);
         });
       this.dialogFormVisible = true;
+    },
+    //新增
+    addnew() {
+      this.add = {
+        roleName: "", //角色名
+        founder: "", //创建人
+        menus: [], //菜单
+      };
+      const state = JSON.parse(sessionStorage.getItem("state"));
+      var _this = this;
+      this.axios({
+        url: "http://localhost:8088/frameproject/systempower/findmenus",
+        method: "post",
+        params: { roleId: 0 },
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.newadd = response.data.data.allmenus; //添加所有菜单
+          _this.add.menus.push(_this.newadd[0]);
+          _this.newadd[0].disabled = true;
+          _this.dialogaddVisible = true;
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
     //条件分页查询
     findpage() {
@@ -222,7 +324,8 @@ export default {
         },
       })
         .then(function (response) {
-          _this.tableData = response.data.data;
+          _this.tableData = response.data.data.rows;
+          _this.max = response.data.data.total;
         })
         .catch(function (error) {
           console.log(error);
@@ -238,9 +341,66 @@ export default {
         .getCheckedNodes()
         .concat(this.$refs.tree.getHalfCheckedNodes());
     },
+    //获取所有选中及半选中的值
+    handleCheckChange1() {
+      this.add.menus = this.$refs.tree1
+        .getCheckedNodes()
+        .concat(this.$refs.tree1.getHalfCheckedNodes());
+    },
+    //确认新增
+    addnewok() {
+      if (this.add.roleName == "") {
+        ElMessage.warning({
+          message: "角色名不能为空",
+          type: "warning",
+        });
+      } else {
+        const state = JSON.parse(sessionStorage.getItem("state"));
+        this.add.founder = state.userInfo.userName;
+        var _this = this;
+        this.axios({
+          url: "http://localhost:8088/frameproject/systempower/addnewrole",
+          method: "post",
+          data: {
+            menus: JSON.stringify(_this.add.menus),
+            roles: JSON.stringify(_this.add),
+          },
+          headers: {
+            JWTDemo: state.userInfo.token,
+          },
+        })
+          .then(function (response) {
+            if (response.data.data == true) {
+              ElMessage.success({
+                message: "角色信息添加成功",
+                type: "success",
+              });
+              _this.findpage();
+            } else {
+              ElMessage.warning({
+                message: "角色信息添加失败",
+                type: "warning",
+              });
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        _this.dialogaddVisible = false;
+      }
+    },
+    //确认修改
     changeok() {
-      //判断数据是否发生改变
-      if (this.initial == this.form.menus && this.form.roleName == this.name) {
+      if (this.form.roleName == "") {
+        ElMessage.warning({
+          message: "角色名不能为空",
+          type: "warning",
+        });
+      } else if (
+        this.initial == this.form.menus &&
+        this.form.roleName == this.name
+      ) {
+        //判断数据是否发生改变
         this.dialogFormVisible = false;
       } else if (
         this.initial == this.form.menus &&
@@ -248,10 +408,11 @@ export default {
       ) {
         this.form.menus = [];
         this.update();
+        this.dialogFormVisible = false;
       } else {
         this.update();
+        this.dialogFormVisible = false;
       }
-      this.dialogFormVisible = false;
     },
   },
   created: function () {
