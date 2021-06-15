@@ -45,14 +45,16 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column type="selection" width="55" />
-				<el-table-column label="操作" width="120">
+				<el-table-column fixed label="操作" width="150">
 					<template #default="scope">
-						<el-button size="small" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.productId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						<el-button size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;padding: 7px;">禁用</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;padding: 7px;">启用</el-button>
 					</template>
 				</el-table-column>
-				<el-table-column prop="productName" label="产品名称" sortable width="120" />
-				<el-table-column prop="productId" label="产品编号" sortable width="120" />
+				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
+				<el-table-column  prop="productName" label="产品名称" sortable width="120" />
 				<el-table-column prop="productSpec" label="规格"  width="120" />
 				<el-table-column prop="ingredient" label="成分"  width="120" />
 				<el-table-column prop="gramHeavy" label="克重"  width="120" />
@@ -61,7 +63,8 @@
 				<el-table-column prop="opingNumber" label="初期数量" sortable width="120" />
 				<el-table-column prop="state" label="状态" sortable width="120">
 					<template #default="scope">
-						<span>{{scope.row.state==1?"已启用":"禁用"}}</span>
+						<span v-if="scope.row.state==0" style="color: orangered;">禁用</span>
+						<span v-if="scope.row.state==1" style="color: seagreen;">启用</span>
 					</template>
 				</el-table-column>
 				<!---->
@@ -75,7 +78,7 @@
 		</div>
 		<!-- 表尾分页显示 -->
 		<div class="salelist-footer">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
+			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 10px"
 			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
 			</el-pagination>
 		</div>
@@ -316,7 +319,8 @@
 		height: 100%;
 		float: left;
 		background-color: white;
-		margin-right: 20px;
+		margin: -17px;
+		border-right: 1px solid gainsboro;
 	}
 
 	.product {

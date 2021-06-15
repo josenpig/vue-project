@@ -193,13 +193,13 @@
           </template>
         </el-table-column>
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpec" label="产品规格" width="120" />
+        <el-table-column prop="productSpe" label="产品规格" width="120" />
         <el-table-column prop="productType" label="产品分类" width="120" />
         <el-table-column prop="productUnit" label="产品单位" width="120" />
-        <el-table-column prop="pdNum" label="盘点数量" width="120">
+        <el-table-column prop="inventoryNum" label="盘点数量" width="120">
           <template #default="scope">
             <el-input-number
-              v-model="productdata[scope.$index].pdNum"
+              v-model="productdata[scope.$index].inventoryNum"
               :controls="false"
               placeholder=0
             />
@@ -207,7 +207,7 @@
         </el-table-column>
         <el-table-column prop="systemNum" label="系统数量" width="120" />
 
-        <el-table-column prop="pdyk" label="盘盈盘亏" width="120">
+        <el-table-column prop="inventoryPl" label="盘盈盘亏" width="120">
           <template #default="scope">
             {{ calcyk(scope.$index) }}
           </template>
@@ -262,14 +262,14 @@ export default {
         {
           productName: "", //
           productId: "", //
-          productSpec: "", //
+          productSpe: "", //
           productType: "", //
           productUnit: "", //
           systemNum: 0, //
-          productPurchaseUnit: "", //
-          remark: "", //
-          pdyk:0,
-          pdNum:0
+          inventoryNum: 0, //
+          inventoryPl: "", //
+          productPurchaseUnit:0,
+          remark:0
         },
       ],
       //抄送对象信息
@@ -314,16 +314,16 @@ export default {
     //计算盘盈盘亏
     calcyk:function(){
       return function(id){
-       this.productdata[id].pdyk=
-       this.productdata[id].pdNum-this.productdata[id].systemNum;
-       return this.productdata[id].pdNum-this.productdata[id].systemNum;
+       this.productdata[id].inventoryPl=
+       this.productdata[id].inventoryNum-this.productdata[id].systemNum;
+       return this.productdata[id].inventoryNum-this.productdata[id].systemNum;
       }
     }  
     ,
     calccounter:function(){
       var k=0;
       for(var i=0;i<this.productdata.length;i++){
-        if(this.productdata[i].pdNum!=0){
+        if(this.productdata[i].inventoryNum!=0){
           k++;
         }
       }
@@ -502,26 +502,18 @@ export default {
           (this.formorder.depotName == "") ||
           item.productId == "" ||
           this.formorder.depotId == "" ||
-          item.pdNum==0
+          item.inventoryNum==0
         ) {
           this.$notify({
             title: "警告",
             message: "请先填写*必要信息!",
             type: "warning",
           });
-          ifnum = false;
           return false;
         }
         
       });
-      if (ifnum != false) {
-        this.formorder.orderTime = dayjs(this.formorder.orderTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.deliveryTime = dayjs(this.formorder.deliveryTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.founder = state.userInfo.userName;
+        this.formorder.inventorypeople = state.userInfo.userName;
         this.axios({
           url: "http://localhost:8088/frameproject/stockInventory/add/" + type,
           method: "post",
@@ -536,7 +528,7 @@ export default {
           .then(function (response) {
             if(response.data.code==200){
             sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Sale");
+            _this.$router.push("/Inventory");
             }
           })
           .catch(function (error) {
@@ -544,7 +536,6 @@ export default {
           });
       }
     },
-  },
   created: function () {
     
     const state = JSON.parse(sessionStorage.getItem("state"));
@@ -557,7 +548,6 @@ export default {
       },
     })
       .then(function (response) {
-          console.log(response)
           _this.depotlist=response.data.data.depots
           _this.isdialog=true;
       })
@@ -565,227 +555,7 @@ export default {
         console.log(error);
       });
   },
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
-//     enterdepot(){
-//       this.isdialog=false;
-//       for (let i=0; i<this.depotlist.length; i++){
-//         if(this.depotlist[i].depotId==this.value){
-//           this.depot=this.depotlist[i];
-//         }
-//       }
-//       this.formorder.depotName=this.depot.depotName;
-//     },
-//     exitdepot(){
-//       this.isdialog=false;
-//       this.value=null;
-//     }
-//     ,  
-//     handleCurrentChange(val) {
-//       this.dialogopen(val, this.pagesize);
-//     },
-//     //选择产品
-//     dialogopen() {
-//       const state = JSON.parse(sessionStorage.getItem("state"));
-//       const _this = this;
-//       var fd = {
-//         currentPage: this.currentPage,
-//         pageSize: this.pagesize,
-//       };
-//       this.axios({
-//         url: "http://localhost:8088/frameproject/baseProduct/allsaleproduct",
-//         method: "get",
-//         processData: false,
-//         params: fd,
-//         headers: {
-//           JWTDemo: state.userInfo.token,
-//         },
-//       })
-//         .then(function (response) {
-//           _this.stockdata = response.data.data.rows;
-//           _this.max = response.data.data.total;
-//         })
-//         .catch(function (error) {
-//           console.log(error);
-//         });
-//       this.dialogTableVisible = true;
-//     },
-//     //添加销售产品
-//     addproduct() {
-//       var productlist = [];
-//       this.productdata.forEach((item) => {
-//         productlist.push(item.productId);
-//         console.log(item)
-//       });
-//       this.joinstockdata.forEach((item) => {
-//         if (productlist.indexOf(item.productId) == -1) {
-//           item.productNum = 1;
-//           this.productdata.push(item);
-//         }
-//       });
-//       for (var i = this.productdata.length - 1; i >= 0; i--) {
-//         if (
-//           this.productdata[i].productId == "" &&
-//           this.productdata.length > 1
-//         ) {
-//           this.productdata.splice(i, 1);
-//         }
-//       }
-//       this.dialogTableVisible = false;
-//     },
-//     //新增一行
-//     addrow(productdata, event) {
-//       productdata.push({
-//         productId: "", //产品编号
-//         productName: "", //产品名称
-//         remark: "", //备注
-//         productSpec: "", //规格
-//         productUnit: "", //单位
-//         productNum: "", //数量
-//         saleUnitPrice: "", //销售单价
-//         saleMoney: "", //销售金额
-//         depot: "", //仓库
-//         ingredient: "", //成分
-//         gramHeavy: "", //克量
-//         productDescribe: "", //产品描述
-//       });
-//     },
-//     //移除一行
-//     delrow(index, rows) {
-//       if (this.productdata.length > 1) {
-//         rows.splice(index, 1); //删掉该行
-//       }
-//     },
-//     //提交审批（生成订单）
-//     examine(type) {
-//       const state = JSON.parse(sessionStorage.getItem("state"));
-//       const _this = this;
-//       //判断库存是否足够
-//       var ifnum = true;
-//       this.productdata.forEach((item) => {
-//         if (
-//           this.formorder.salesmen == "" ||
-//           item.productId == "" ||
-//           item.depot == null
-//         ) {
-//           this.$notify({
-//             title: "警告",
-//             message: "请先填写*必要信息!",
-//             type: "warning",
-//             position: "top-left",
-//           });
-//           ifnum = false;
-//           return false;
-//         }
-//         item.baseOpenings.forEach((items) => {
-//           if (items.depotName == item.depot) {
-//             if (items.expectNumber < item.productNum) {
-//               ElMessage.warning({
-//                 message:
-//                   "仓库："+item.depot+"  中产品：" + item.productName + "的预计可用库存不足!",
-//                 type: "warning",
-//               });
-//               ifnum = false;
-//             }
-//           }
-//         });
-//       });
-//       if (ifnum != false) {
-//         this.formorder.orderTime = dayjs(this.formorder.orderTime).format(
-//           "YYYY-MM-DD HH:mm:ss"
-//         );
-//         this.formorder.deliveryTime = dayjs(this.formorder.deliveryTime).format(
-//           "YYYY-MM-DD HH:mm:ss"
-//         );
-//         this.formorder.founder = state.userInfo.userName;
-//         this.axios({
-//           url: "http://localhost:8088/frameproject/saleorder/add/" + type,
-//           method: "post",
-//           data: {
-//             order: JSON.stringify(_this.formorder), //_this.formorder ,
-//             orderdetails: JSON.stringify(_this.productdata), //_this.productdata//
-//           },
-//           headers: {
-//             JWTDemo: state.userInfo.token,
-//           },
-//         })
-//           .then(function (response) {
-//             sessionStorage.setItem("orderid", response.data.data);
-//             _this.$router.push("/Sale");
-//           })
-//           .catch(function (error) {
-//             console.log(error);
-//           });
-//       }
-//     },
-//   },
-//   created: function () {
-    
-//     const state = JSON.parse(sessionStorage.getItem("state"));
-//     const _this = this;
-//     this.axios({
-//       url: "http://localhost:8088/frameproject/stockInventory/allDepot",
-//       method: "get",
-//       headers: {
-//         JWTDemo: state.userInfo.token,
-//       },
-//     })
-//       .then(function (response) {
-//           console.log(response)
-//           _this.depotlist=response.data.data.depots
-//           _this.isdialog=true;
-//       })
-//       .catch(function (error) {
-//         console.log(error);
-//       });
-//   },
-// }
 }
 </script>
 
