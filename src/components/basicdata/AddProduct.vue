@@ -25,12 +25,12 @@
 				<div>
 					<span class="must">*</span>
 					<span class="font">销售价格</span>
-					<el-input v-model="input" class="inpStyle"></el-input>
+					<el-input-number v-model="form.ratio" :precision="2" :step="1" :min="0" style="margin-left: 30px;"/>
 				</div>
 				<div>
 					<span class="must">*</span>
 					<span class="font">采购价格</span>
-					<el-input v-model="input" class="inpStyle"></el-input>
+					<el-input-number v-model="form.ratio" :precision="2" :step="1" :min="0" style="margin-left: 30px;"/>
 				</div>
 				<div>
 					<span class="must">*</span>

@@ -2,10 +2,34 @@
 
 	<!-- 类别列表 -->
 	<div class="typelabel">
-		<h4 class="title">类别列表</h4>
-		<div class="type">
-			<items v-for="(model, index) in list" :model="model" :key="index"></items>
+		<h4 class="title">产品分类</h4>
+		<div >
+			<div>
+				<el-button @click="findByType(AllId)" class="allType">
+					<i class="el-icon-caret-bottom" style="padding-right: 5px;"></i>全部
+					<a @click="append(AllId)" style="float: right;">
+						<i class="el-icon-circle-plus-outline"></i>
+						<span style="font-size: 10px;">新增子分类</span>
+					</a>
+					</el-button>
+			</div>
+			<el-tree :data="ProType" node-key="1000" @node-click="findByType" :expand-on-click-node="false" style="font-size: 15px;padding: 5px 0px;">
+				<template #default="{ node, data }">
+					<span class="custom-tree-node">
+						<span>{{ node.label }}</span>
+						<span style="padding: 20px;">
+							<a @click="append(data)" style="padding: 8px;">
+								<i class="el-icon-circle-plus-outline"></i>
+							</a>
+							<a @click="remove(node, ProType)">
+								<i class="el-icon-delete"></i>
+							</a>
+						</span>
+					</span>
+				</template>
+			</el-tree>
 		</div>
+
 	</div>
 
 	<!-- 主内容 -->
@@ -54,10 +78,10 @@
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
-				<el-table-column  prop="productName" label="产品名称" sortable width="120" />
-				<el-table-column prop="productSpec" label="规格"  width="120" />
-				<el-table-column prop="ingredient" label="成分"  width="120" />
-				<el-table-column prop="gramHeavy" label="克重"  width="120" />
+				<el-table-column prop="productName" label="产品名称" sortable width="120" />
+				<el-table-column prop="productSpec" label="规格" width="120" />
+				<el-table-column prop="ingredient" label="成分" width="120" />
+				<el-table-column prop="gramHeavy" label="克重" width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
 				<el-table-column prop="opingNumber" label="初期数量" sortable width="120" />
@@ -68,7 +92,7 @@
 					</template>
 				</el-table-column>
 				<!---->
-				<el-table-column prop="remarks" label="备注"  width="120" />
+				<el-table-column prop="remarks" label="备注" width="120" />
 				<el-table-column prop="purchaseMoney" label="采购单价" sortable width="120" />
 				<el-table-column prop="purchaseUnitPrice" label="销售单价" sortable width="120" />
 				<el-table-column prop="userName" label="创建人" sortable width="120" />
@@ -86,47 +110,14 @@
 </template>
 
 <script>
-	import items from './Items.vue'
-	import {
-		mapState
-	} from "vuex";
 	export default {
 		name: "product",
 		data() {
 			return {
-				//分类数据-test
-				list: [{
-						"id": 1,
-						"menuName": "type1",
-						"childTree": [{
-							"id": 101,
-							"menuName": "type1-1",
-							"childTree": [{
-								"id": 10101,
-								"menuName": "type1-1-1",
-								"childTree": [{
-									"id": 1010101,
-									"menuName": "type1-1-1-1"
-								}]
-							}]
-						}, {
-							"id": 102,
-							"menuName": "type1-2",
-							"childTree": [{
-								"id": 10201,
-								"menuName": "type1-2-1",
-							}]
-						}]
-					},
-					{
-						"id": 2,
-						"menuName": "type2"
-					},
-					{
-						"id": 3,
-						"menuName": "type3"
-					}
-				],
+				AllId:'',
+				
+				// 分类数据
+				ProType: [],
 
 				//表单数据
 				tableData: [],
@@ -136,20 +127,21 @@
 				currentPage: 1,
 
 				//搜索条件
-				SearchType:[{
+				SearchType: [{
 					label: "产品名称"
-				},{
+				}, {
 					label: "产品编号"
 				}],
 				SearchContent: '',
 
 				//选中数据
 				select: "产品名称",
-				
+
 				//多选产品
 				selectPro: []
 			}
 		},
+
 		methods: {
 			//添加产品
 			ToAdd() {
@@ -158,6 +150,26 @@
 			//改变页码数
 			handleCurrentChange(val) {
 				this.findpage(val, this.pagesize);
+			},
+			//查询所有产品分类
+			findAllProType() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseProductType/findProType",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.ProType = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
 			},
 			//分页查询
 			findpage() {
@@ -227,15 +239,15 @@
 					var pid = {
 						id: id
 					};
-						this.axios({
-								url: "http://localhost:8088/frameproject/baseProduct/delProduct",
-								method: "get",
-								processData: false,
-								params: pid,
-								headers: {
-									JWTDemo: state.userInfo.token,
-								},
-							})
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseProduct/delProduct",
+							method: "get",
+							processData: false,
+							params: pid,
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
 						.then(function(response) {
 							console.log(response.data.data);
 						})
@@ -252,7 +264,7 @@
 			},
 			//批量删除产品
 			batchDel() {
-				this.$confirm('此操作将永久删除下列'+this.selectPro.length+':条产品, 是否继续?', '提示', {
+				this.$confirm('此操作将永久删除下列' + this.selectPro.length + ':条产品, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
@@ -262,7 +274,7 @@
 						message: '删除成功'
 					});
 					var ids = new Array()
-					this.selectPro.forEach(v=>{
+					this.selectPro.forEach(v => {
 						ids.push(v.productId)
 					})
 					const state = JSON.parse(sessionStorage.getItem("state"));
@@ -277,12 +289,12 @@
 							},
 						})
 						.then(function(response) {
-							console.log( response.data.data)
+							console.log(response.data.data)
 						})
 						.catch(function(error) {
 							console.log(error);
 						});
-					
+
 					location.reload();
 				}).catch(() => {
 					this.$message({
@@ -294,38 +306,138 @@
 			//复选框
 			handleSelectionChange(val) {
 				this.selectPro = val
-			}
+			},
+			//禁用或启用
+			disableOrEnable(val) {
+				var _this = this;
+				var able;
+				if (val.state == 1) {
+					able = '禁用'
+				};
+				if (val.state == 0) {
+					able = '启用'
+				};
+				this.$confirm('是否' + able + '该产品！', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					console.log(val)
+					var Dstate = {
+						Did: val.productId,
+						Dstate: val.state
+					};
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseProduct/disableOrEnable",
+							method: "get",
+							processData: false,
+							params: Dstate,
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data);
+							if (response.data.data) {
+								_this.$message({
+									type: 'success',
+									message: able + '成功'
+								});
+							}
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消' + able
+					});
+				});
+			},
+			//根据分类查询商品
+			findByType(data) {
+				console.log(data)
+
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pageSize: this.pagesize,
+					id: data.id,
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseProduct/findAllProduct/ByTpye",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data.rows)
+						_this.tableData = response.data.data.rows;
+						_this.max = response.data.data.total;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+					
+			},
+
+			append(node, data) {
+				console.log("append:")
+				console.log(node.id)
+			},
+
+			remove(node, data) {
+				console.log("remove:")
+				console.log(node.id)
+			},
+
 		},
-		components: {
-			items
-		},
+		components: {},
 		created() {
 			this.findpage()
+			this.findAllProType()
 		}
 	};
 </script>
 
 <style lang="scss">
+	.product {
+		width: 75%;
+		float: right
+	}
+
 	.title {
-		color: lightblue;
-		background-color: rgb(249, 249, 249);
+		color: #459df5;
+		background-color: #f9f9f9;
 		height: 30px;
 		padding: 15px;
 		margin-top: 0px;
 	}
 
+	.allType {
+		padding: 4px;
+		width: 222px;
+		text-align: left;
+		font-size: 17px;
+		color: white;
+		background: lightblue;
+	}
+
 	.typelabel {
-		width: 23%;
+		width: 22%;
 		height: 100%;
 		float: left;
 		background-color: white;
 		margin: -17px;
-		border-right: 1px solid gainsboro;
-	}
-
-	.product {
-		width: 75%;
-		float: right
+		border-right: 2px solid gainsboro;
 	}
 
 	.r-float {
