@@ -202,12 +202,21 @@ export default {
     },
   },
   methods: {
+    //付款
+    goreceipt() {
+      var receipt = {
+        type: "订单付款",
+        orderId: this.formorder.id,
+      };
+      sessionStorage.setItem("receipt", JSON.stringify(receipt));
+      this.$router.push("/Addpayment");
+    },
     //审批
     approval(type) {
       if (type == 2) {
         var obj={order:this.formorder,product:this.productdata}
-        sessionStorage.setItem("saledeliver",JSON.stringify(obj));
-        this.$router.push("/Adddeliver");
+        sessionStorage.setItem("receipt",JSON.stringify(obj));
+        this.$router.push("/AddPurchaseReceipt");
       } else {
         const state = JSON.parse(sessionStorage.getItem("state"));
         const orderid = sessionStorage.getItem("orderid");
@@ -223,7 +232,7 @@ export default {
         })
           .then(() => {
             this.axios({
-              url: "http://localhost:8088/frameproject/saleorder/approval",
+              url: "http://localhost:8088/frameproject/purchaseOrder/approval",
               method: "get",
               processData: false,
               params: fd,
