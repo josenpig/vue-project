@@ -13,7 +13,7 @@
             <!-- 操作员 -->
             <br /><br />
             <span>操作员:</span>
-            <el-select v-model="operator"  filterable>
+            <el-select v-model="operator"  filterable @change="findpage()">
               <el-option 
                    v-for="item in operators"
                     :key="item.userName"
@@ -21,12 +21,10 @@
                     :value="item.userName">
               </el-option>
             </el-select>
-			<!--操作类别 -->
-			<span>操作类别:</span>
-			<el-select v-model="value1"  filterable>
-			  <el-option>
-			  </el-option>
-			</el-select>
+			<!--操作内容 -->
+			<span>操作内容:</span>
+		   <el-input v-model="input" placeholder="请输入内容" ></el-input>
+       <el-button type="primary" icon="el-icon-search" @click="findpage()">搜索</el-button>
             <!-- 操作时间 -->
             <div class="block">
             <span class="demonstration">操作时间:</span>
@@ -35,6 +33,7 @@
              align="right"
              type="date"
              placeholder="选择日期"
+             @change="findpage()"
             :disabled-date="disabledDate"
             :shortcuts="shortcuts"
           >
@@ -83,6 +82,7 @@
 </template>
 
 <script>
+import { defineComponent, ref } from 'vue'
 import {
 		ElMessage
 	} from 'element-plus'
@@ -110,7 +110,7 @@ import {
             return date
           })(),
         }],
-        value2: '',
+        value2:'',
         //表单数据
         tableData:[],
         //分页
@@ -119,41 +119,16 @@ import {
 	    	currentPage: 1,
         operator:"",//操作员
         operators:[],
+        input: ref(''),
         };
     },
     methods: {
 			//改变页码数
 			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize);
+				this.findpage(val, this.pagesize,this.value2,this.operator,this.input);
 			},
-			//分页查询
-			findpage() {
-				const state = JSON.parse(sessionStorage.getItem("state"));
-				var _this = this;
-				var fd = {
-					currentPage: this.currentPage,
-					pageSize: this.pagesize,
-				};
-				this.axios({
-						url: "http://localhost:8088/frameproject/operationlog/findAllLog",
-						method: "get",
-						processData: false,
-						params: fd,
-						headers: {
-							JWTDemo: state.userInfo.token,
-						},
-					})
-					.then(function(response) {
-						_this.tableData = response.data.data.rows;
-						_this.max = response.data.data.total;
-                        console.log(response.data.data.rows);
-                        console.log(response.data.data.total)
-					})
-					.catch(function(error) {
-						console.log(error);
-					});
-			},
-      findusername(){
+       //获取操作员
+     findusername(){
 				const state = JSON.parse(sessionStorage.getItem("state"));
         var _this = this;
         this.axios({
@@ -171,7 +146,36 @@ import {
           });
 
       },
-      
+			//分页查询
+			findpage() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pagesize: this.pagesize,
+          createtime:this.value2,
+          input: this.input,
+          operator:this.operator,
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/operationlog/findoperationlogbycondition",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						_this.tableData = response.data.data.rows;
+						_this.max = response.data.data.total;
+                        console.log(response.data.data.rows);
+                        console.log(response.data.data.total)
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
     },
     computed: {},
 		created() {
@@ -245,9 +249,14 @@ import {
 	margin-top:0px;
 	
 }
-
+.el-input{
+  width: 210px;
+}
 .block{
 	float: left;
+}
+.el-button{
+  margin-left: 10px;
 }
 
 </style>
