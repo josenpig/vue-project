@@ -95,7 +95,8 @@
             <el-option
               v-for="item in headeroptions2"
               :key="item.userName"
-              :value="item.userName"
+              :value="item.userId"
+              :label="item.userName"
             >
             </el-option>
           </el-select>
@@ -664,7 +665,7 @@ export default {
         })
           .then(function (response) {
             sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Receipt");
+            _this.$router.push("/Writeoff");
           })
           .catch(function (error) {
             console.log(error);

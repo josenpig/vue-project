@@ -24,7 +24,7 @@
         <!-- 编号 -->
         <el-form-item label="编号:">
           <el-input
-            v-model="formorder.receiptId"
+            v-model="formorder.paymentId"
             readonly="readonly"
           ></el-input>
         </el-form-item>
@@ -32,7 +32,7 @@
         <el-form-item label="付款日期:" class="form-input">
           <el-date-picker
             type="date"
-            v-model="formorder.receiptTime"
+            v-model="formorder.paymentTime"
             placeholder="选择日期"
             :clearable="false"
           >
@@ -41,7 +41,7 @@
         <!-- 供应商 -->
         <el-form-item label="*供应商:">
           <el-select
-            v-model="formorder.customer"
+            v-model="formorder.vendor"
             size="mini"
             filterable
             :disabled="tfhas"
@@ -59,7 +59,7 @@
         <!-- 付款人员 -->
         <el-form-item label="*付款人员:" class="form-input">
           <el-select
-            v-model="formorder.payee"
+            v-model="formorder.drawee"
             size="mini"
             filterable
             placeholder="请选择付款人员"
@@ -67,7 +67,8 @@
             <el-option
               v-for="item in headeroptions2"
               :key="item.userName"
-              :value="item.userName"
+              :value="item.userId"
+              :label="item.userName"
             >
             </el-option>
           </el-select>
@@ -75,13 +76,13 @@
         <!-- 付款类别 -->
         <el-form-item label="付款类别:">
           <el-select
-            v-model="formorder.incomeType"
+            v-model="formorder.paymentType"
             placeholder="请选择"
             :disabled="tfhas"
             @change="changetype()"
           >
             <el-option
-              v-for="item in incomeType"
+              v-for="item in paymentType"
               :key="item.value"
               :value="item.value"
             >
@@ -117,14 +118,14 @@
           border
         >
           <el-table-column type="selection" width="50" />
-          <el-table-column prop="saleId" label="单据编号" width="200" />
-          <el-table-column prop="saleType" label="单据类型" />
-          <el-table-column prop="saleTime" label="单据日期" />
-          <el-table-column prop="receiptMoney" label="应付金额" />
-          <el-table-column prop="receivedMoney" label="已收金额" />
+          <el-table-column prop="purchaseId" label="单据编号" width="200" />
+          <el-table-column prop="purchaseType" label="单据类型" />
+          <el-table-column prop="purchaseTime" label="单据日期" />
+          <el-table-column prop="payableMoney" label="应付金额" />
+          <el-table-column prop="paidMoney" label="已付金额" />
           <el-table-column
-            prop="uncollectedMoney"
-            label="未收金额"
+            prop="unpaidMoney"
+            label="未付金额"
             width="120"
           />
         </el-table>
@@ -147,10 +148,10 @@
     </el-dialog>
     <!-- 内容表体 -->
     <el-divider content-position="left">{{
-      formorder.incomeType == "应付付款" ? "应付单据列表:" : "销售订单列表:"
+      formorder.paymentType == "应付付款" ? "应付单据列表:" : "采购订单列表:"
     }}</el-divider>
     <div class="addpayment-main">
-      <!-- 销售产品信息table -->
+      <!-- 采购产品信息table -->
       <el-table :data="billdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
         <el-table-column type="index" width="40" fixed />
@@ -177,18 +178,18 @@
           </template>
         </el-table-column>
         <!-- 单据详细信息 -->
-        <el-table-column prop="saleId" label="单据编号" width="200" />
-        <el-table-column prop="saleType" label="单据类型" />
-        <el-table-column prop="saleTime" label="单据日期" />
-        <el-table-column prop="receiptMoney" label="应付款金额" />
-        <el-table-column prop="receivedMoney" label="已收金额" />
-        <el-table-column prop="uncollectedMoney" label="未收金额" />
+        <el-table-column prop="purchaseId" label="单据编号" width="200" />
+        <el-table-column prop="purchaseType" label="单据类型" />
+        <el-table-column prop="purchaseTime" label="单据日期" />
+        <el-table-column prop="payableMoney" label="应付款金额" />
+        <el-table-column prop="paidMoney" label="已付金额" />
+        <el-table-column prop="unpaidMoney" label="未付金额" />
         <el-table-column prop="thisMoney" label="本次付款">
           <template #default="scope">
             <el-input-number
               v-model="billdata[scope.$index].thisMoney"
               :controls="false"
-              :max="billdata[scope.$index].uncollectedMoney"
+              :max="billdata[scope.$index].unpaidMoney"
               :precision="2"
             />
           </template>
@@ -278,7 +279,7 @@
       </el-alert>
     </div>
     <div class="addpayment-footer">
-      本次预收金额：<el-input v-model="ciaMoney" readonly style="width: 15%" />
+      本次预付金额：<el-input v-model="ciaMoney" readonly style="width: 15%" />
       <el-divider></el-divider>
       <p style="font-size: 14px">
         抄送对象
@@ -325,26 +326,26 @@ export default {
       //订单信息
       formorder: {
         //表头单据信息
-        receiptId: "SKD" + Date.now(), //单据编号
-        receiptTime: new Date(), //单据时间
-        customer: "", //供应商
-        payee: "", //付款人员
-        incomeType: "应付付款", //付款类别
-        receiptMoney: "", //付款金额
-        ciaMoney: "", //预收金额
-        ciaBalance: "", //预收余额
+        paymentId: "FKD" + Date.now(), //单据编号
+        paymentTime: new Date(), //单据时间
+        vendor: "", //供应商
+        drawee: "", //付款人员
+        paymentType: "应付付款", //付款类别
+        paymentMoney: "", //付款金额
+        piaMoney: "", //预付金额
+        piaBalance: "", //预付余额
         founder: "", //订单创建人
         remarks: "", //订单备注
       },
       //表体单据信息
       billdata: [
         {
-          saleId: "", //单据编号
-          saleType: "", //单据类型
-          saleTime: "", //单据日期
-          receiptMoney: "", //应付款金额
-          receivedMoney: "", //已收金额
-          uncollectedMoney: "", //未收金额
+          purchaseId: "", //单据编号
+          purchaseType: "", //单据类型
+          purchaseTime: "", //单据日期
+          payableMoney: "", //应付款金额
+          paidMoney: "", //已付金额
+          unpaidMoney: "", //未付金额
           thisMoney: 0.00, //本次付款
         },
       ],
@@ -361,12 +362,12 @@ export default {
       footeroptions: [],
       notice: [], //抄送对象
       options: [], //资金账户
-      incomeType: [{ value: "应付付款" }, { value: "订单付款" }],
+      paymentType: [{ value: "应付付款" }, { value: "订单付款" }],
       tfhas: false,
       //条件查询订单
       condition: {
-        customer: "",
-        saleId: "",
+        vendor: "",
+        purchaseId: "",
       },
       //分页
       pagesize: 5,
@@ -389,15 +390,14 @@ export default {
       this.accountdata.forEach((item) => {
         allmoney += item.thisMoney;
       });
-      this.formorder.receiptMoney = allmoney;
+      this.formorder.payableMoney = allmoney;
       return allmoney;
     },
     //预付款
     ciaMoney: function () {
-      if (this.formorder.incomeType == "应付付款") {
+      if (this.formorder.paymentType == "应付付款") {
         this.formorder.ciaMoney = this.accounttotal - this.billtotal;
         return this.accounttotal - this.billtotal;
-        //ciaBalance:"",
       } else {
         this.formorder.ciaMoney = this.accounttotal;
         return this.accounttotal;
@@ -425,17 +425,17 @@ export default {
     changetype() {
       this.billdata = [
         {
-          saleId: "", //单据编号
+          purchaseId: "", //单据编号
           thisMoney: "0.00", //本次付款
         },
       ];
     },
     findbill() {
-      this.condition.customer = this.formorder.customer;
+      this.condition.vendor = this.formorder.vendor;
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       var url = "";
-      this.formorder.incomeType == "应付付款"
+      this.formorder.paymentType == "应付付款"
         ? (url =
             "http://localhost:8088/frameproject/capitalReceivable/finddeliverypage")
         : (url =
@@ -454,12 +454,12 @@ export default {
       })
         .then(function (response) {
           response.data.data.rows.forEach((item) => {
-            if (item.saleId.match(/^[a-z|A-Z]+/gi) == "XSCKD") {
-              item.saleType = "销售出库单";
-            } else if (item.saleId.match(/^[a-z|A-Z]+/gi) == "XSTHD") {
-              item.saleType = "销售退货单";
+            if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == "XSCKD") {
+              item.purchaseType = "采购出库单";
+            } else if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == "XSTHD") {
+              item.purchaseType = "采购退货单";
             } else {
-              item.saleType = "销售订单";
+              item.purchaseType = "采购订单";
             }
           });
           _this.stockdata = response.data.data.rows;
@@ -471,7 +471,7 @@ export default {
     },
     //选择订单
     dialogopen() {
-      if (this.formorder.customer == "") {
+      if (this.formorder.vendor == "") {
         ElMessage.warning({
           message: "请先选择一位供应商",
           type: "warning",
@@ -485,16 +485,16 @@ export default {
     addproduct() {
       var productlist = [];
       this.billdata.forEach((item) => {
-        productlist.push(item.saleId);
+        productlist.push(item.purchaseId);
       });
       this.joinstockdata.forEach((item) => {
-        if (productlist.indexOf(item.saleId) == -1) {
-          item.thisMoney = item.uncollectedMoney;
+        if (productlist.indexOf(item.purchaseId) == -1) {
+          item.thisMoney = item.unpaidMoney;
           this.billdata.push(item);
         }
       });
       for (var i = this.billdata.length - 1; i >= 0; i--) {
-        if (this.billdata[i].saleId == "" && this.billdata.length > 1) {
+        if (this.billdata[i].purchaseId == "" && this.billdata.length > 1) {
           this.billdata.splice(i, 1);
         }
       }
@@ -527,9 +527,9 @@ export default {
         this.accountdata.forEach((item) => {
           if (
             item.fundAccount == "" ||
-            this.formorder.payee == "" ||
-            this.formorder.customer == "" ||
-            (this.billdata.length == 1 && this.billdata[0].saleId == "")
+            this.formorder.drawee == "" ||
+            this.formorder.vendor == "" ||
+            (this.billdata.length == 1 && this.billdata[0].purchaseId == "")
           ) {
             this.$notify({
               title: "警告",
@@ -541,17 +541,17 @@ export default {
         });
       }
       this.billdata.forEach((item) => {
-        if (item.thisMoney > item.uncollectedMoney && tfok == true) {
+        if (item.thisMoney > item.unpaidMoney && tfok == true) {
           this.$notify({
             title: "警告",
-            message: "本次付款金额不能大于未收金额",
+            message: "本次付款金额不能大于未付金额",
             type: "warning",
           });
           tfok = false;
-        } else if (item.uncollectedMoney == 0 && tfok == true) {
+        } else if (item.unpaidMoney == 0 && tfok == true) {
           this.$notify({
             title: "警告",
-            message: "订单" + item.saleId + "的未收金额不足",
+            message: "订单" + item.purchaseId + "的未付金额不足",
             type: "warning",
           });
           tfok = false;
@@ -575,11 +575,11 @@ export default {
         this.formorder.ciaBalance = this.formorder.ciaMoney;
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalReceipt/addpayment/" +
+            "http://localhost:8088/frameproject/capitalPayable/addpayment/" +
             type,
           method: "post",
           data: {
-            receipt: JSON.stringify(_this.formorder),
+            payment: JSON.stringify(_this.formorder),
             bill: JSON.stringify(_this.billdata),
             account: JSON.stringify(_this.accountdata),
           },
@@ -588,8 +588,9 @@ export default {
           },
         })
           .then(function (response) {
-            sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Receipt");
+            console.log(response.data.data);
+            // sessionStorage.setItem("orderid", response.data.data);
+            // _this.$router.push("/Receipt");
           })
           .catch(function (error) {
             console.log(error);
@@ -602,33 +603,33 @@ export default {
       const _this = this;
       this.tfhas = true;
       var url = "";
-      this.formorder.incomeType = receipt.type;
+      this.formorder.paymentType = receipt.type;
       receipt.type == "应付付款"
         ? (this.type = "应付单据列表:")
-        : (this.type = "销售订单:");
+        : (this.type = "采购订单:");
       receipt.type == "应付付款"
         ? (url =
-            "http://localhost:8088/frameproject/capitalReceivable/deliverythisReceipt")
+            "http://localhost:8088/frameproject/capitalPayable/deliverythisReceipt")
         : (url =
-            "http://localhost:8088/frameproject/capitalReceivable/salethisReceipt");
+            "http://localhost:8088/frameproject/capitalPayable/purchasethisReceipt");
       this.axios({
         url: url,
         method: "get",
-        params: { saleId: receipt.orderId },
+        params: { purchaseId: receipt.orderId },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "XSCKD") {
-            response.data.data.saleType = "销售出库单";
-          } else if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "XSTHD") {
-            response.data.data.saleType = "销售退货单";
+          if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "CGCKD") {
+            response.data.data.purchaseType = "采购出库单";
+          } else if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "CGTHD") {
+            response.data.data.purchaseType = "采购退货单";
           } else {
-            response.data.data.saleType = "销售订单";
+            response.data.data.purchaseType = "采购订单";
           }
-          response.data.data.thisMoney = response.data.data.uncollectedMoney;
-          _this.formorder.customer = response.data.data.customer;
+          response.data.data.thisMoney = response.data.data.unpaidMoney;
+          _this.formorder.vendor = response.data.data.vendor;
           _this.billdata.push(response.data.data);
           _this.billdata.splice(0, 1);
         })
@@ -640,7 +641,7 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       this.axios({
-        url: "http://localhost:8088/frameproject/capitalReceivable/findaccount",
+        url: "http://localhost:8088/frameproject/capitalPayable/findaccount",
         method: "get",
         processData: false,
         headers: {
