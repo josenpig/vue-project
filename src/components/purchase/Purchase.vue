@@ -19,7 +19,7 @@
         <el-button size="mini" @click="dialogVisible = true"
           >查看关联单据</el-button
         >
-        <el-button size="mini" v-if="formorder.vettingState == 1"
+        <el-button size="mini" v-if="formorder.vettingState == 1" @click="goreceipt()"
           >付款</el-button
         >
         <el-button

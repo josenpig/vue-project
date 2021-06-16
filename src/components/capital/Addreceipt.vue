@@ -67,7 +67,8 @@
             <el-option
               v-for="item in headeroptions2"
               :key="item.userName"
-              :value="item.userName"
+              :value="item.userId"
+              :label="item.userName"
             >
             </el-option>
           </el-select>
@@ -397,7 +398,6 @@ export default {
       if (this.formorder.incomeType == "应收收款") {
         this.formorder.ciaMoney = this.accounttotal - this.billtotal;
         return this.accounttotal - this.billtotal;
-        //ciaBalance:"",
       } else {
         this.formorder.ciaMoney = this.accounttotal;
         return this.accounttotal;

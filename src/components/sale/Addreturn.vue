@@ -348,10 +348,11 @@ export default {
       })
         .then(function (response) {
           _this.productdata = response.data.data.deliverydetails;
-          _this.formorder = response.data.data.delivery;
-          _this.formorder.remarks = "";
-          _this.formorder.returnTime = new Date();
-          _this.formorder.returnId = "XSTHD" + Date.now(); //单据编号
+          _this.formorder.salesmen=response.data.data.delivery.salesmen
+          _this.formorder.customer=response.data.data.delivery.customer
+          _this.formorder.contacts=response.data.data.delivery.contacts
+          _this.formorder.contactsAddress=response.data.data.delivery.contactsAddress
+          _this.formorder.contactsPhone=response.data.data.delivery.contactsPhone
           for (var i = 0; i < _this.productdata.length; i++) {
             _this.productdata[i].returnNum = _this.productdata[i].productNum;
           }

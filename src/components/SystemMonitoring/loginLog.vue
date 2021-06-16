@@ -11,10 +11,11 @@
        <el-collapse accordion>
          <br/>
          <br/>
-      <p><el-form>
-        <div>
+         
+      <el-form>
+        
             <!-- 登陆时间 -->
-            <div class="block">
+            <p class="block block1">
              <span class="demonstration">登陆日期:</span>
              <el-date-picker
                v-model="value2"
@@ -27,9 +28,10 @@
                :shortcuts="shortcuts"
     >
               </el-date-picker>
-            </div>
+            </p>
             <br/>
             <!--操作员--->
+            <p class="block">
     <el-form-item>
       <el-from-label>操作员：    </el-from-label>
           <el-select v-model="operator"  placeholder="请选择操作员"  @change="findlogbyOperator()">
@@ -41,10 +43,21 @@
             ></el-option>
           </el-select>
         </el-form-item>
-  </div>
-     
+            </p>
+            <p class="block">
+    <el-form-item>
+      <el-from-label>操作员类别：    </el-from-label>
+          <el-select v-model="operatorType"  placeholder="请选择操作员类别"  @change="findlogbyOperator()">
+            <el-option
+                    v-for="item in operatorTypes"
+                    :key="item.roleName"
+                    :label="item.roleName"
+                    :value="item.roleName"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+            </p>          
       </el-form>
-      </p>
        </el-collapse>
     </div>
     <!-- 表体内容 -->
@@ -122,13 +135,15 @@ import store from "../../store";
         //表头单据信息
         operator:"",//操作员
         operators:[],
+        operatorType:"",//操作员类别
+        operatorTypes:[],
       
       };
     },
     methods: {
 			//改变页码数
 			handleCurrentChange(val) {
-				this.findlogbyOperator(this.operator,val, this.pagesize,this.value2);
+				this.findlogbyOperator(this.operator,val, this.pagesize,this.value2,this.operatorType);
 			},
       //获取操作员
      findusername(){
@@ -149,6 +164,25 @@ import store from "../../store";
           });
 
       },
+      //获取操作员类别
+     finduserrole(){
+				const state = JSON.parse(sessionStorage.getItem("state"));
+        var _this = this;
+        this.axios({
+          url:"http://localhost:8088/frameproject/personnel/ofpeople",
+          method:"get",
+          processData: false,
+          headers:{
+            JWTDemo:state.userInfo.token,
+          }
+          }).then(function(response){
+            _this.operatorTypes=response.data.data.sysRoles;
+            console.log(response.data.data.sysRoles)
+          }).catch(function(error){
+             console.log(error)
+          });
+
+      },
       //通过操作员查询登录记录||查询所有||通过日期查询
       findlogbyOperator(){
         const state = JSON.parse(sessionStorage.getItem("state"));
@@ -158,10 +192,10 @@ import store from "../../store";
          operator : this.operator,
          currentPage: this.currentPage,
          pagesize: this.pagesize,
+         operatorType:this.operatorType,
         };
-        
         this.axios({
-          url : "http://localhost:8088/frameproject/operationlog/findlogbyOperator",
+          url : "http://localhost:8088/frameproject/operationlog/findloginlogbycondition",
           methods : "get",
           processData : false,
           params : params,
@@ -181,9 +215,11 @@ import store from "../../store";
     },
     computed: {}
 		,created() {
-      this.handleCurrentChange();
+      this.handleCurrentChange(); 
+      this.finduserrole();
       this.findusername();
       this.findlogbyOperator();
+     
    },
  }
 </script>
@@ -247,5 +283,14 @@ import store from "../../store";
   background-color: white;
   text-align: center;
 }
-
+.block{
+  float: left;
+  margin-left: 10px;
+}
+.block1{
+ margin-top: 37px;
+}
+.el-collapse{
+  height: 120px;
+}
 </style>
