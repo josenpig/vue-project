@@ -74,7 +74,11 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options2" :value="item.userName">
+              <el-option
+                v-for="item in options2"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
             <!-- 销售人员 -->
@@ -86,7 +90,11 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options3" :value="item.userName">
+              <el-option
+                v-for="item in options3"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
           </div>
@@ -218,34 +226,34 @@
 
 <script>
 export default {
-  name: "Receivable",
+  name: 'Receivable',
   data() {
     return {
       //默认展开
-      activeNames: "1",
+      activeNames: '1',
       //筛选框
-      billdate: "全部", //单据日期
-      collection: "全部", //收款日期
-      status: "全部", //结案状态
-      customtime2: "",//自定义时间
+      billdate: '全部', //单据日期
+      collection: '全部', //收款日期
+      status: '全部', //结案状态
+      customtime2: '', //自定义时间
       options1: [],
       options2: [],
       options3: [],
       options4: [],
-      value1: "", //客户
-      value2: "", //创建人
-      value3: "", //销售人员
+      value1: '', //客户
+      value2: '', //创建人
+      value3: '', //销售人员
       //条件查询数据
-      vagueorderid: "",
+      vagueorderid: '',
       condition: {
-        orderId: "", //订单id
-        deliveryTime: "", //交货日期
-        dtimeState: "",
-        dtimeEnd: "",
-        approvalState: "", //审批状态
-        customer: "", //客户
-        founder: "", //创建人
-        salesmen: "", //销售人
+        orderId: '', //订单id
+        deliveryTime: '', //交货日期
+        dtimeState: '',
+        dtimeEnd: '',
+        approvalState: '', //审批状态
+        customer: '', //客户
+        founder: '', //创建人
+        salesmen: '', //销售人
       },
       //表单数据
       tableData: [],
@@ -253,109 +261,109 @@ export default {
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     paging: function () {
-      return this.tableData.length > 0 ? true : false;
+      return this.tableData.length > 0 ? true : false
     },
     custom2: function () {
-      return this.collection == "自定义" ? true : false;
+      return this.collection == '自定义' ? true : false
     },
     all: function () {
       return [
-        "出库日期: " + this.collection,
-        "审批状态: " + this.status,
-        "客户: " + this.value1,
-        "创建人: " + this.value2,
-        "销售人员: " + this.value3,
-      ];
+        '出库日期: ' + this.collection,
+        '审批状态: ' + this.status,
+        '客户: ' + this.value1,
+        '创建人: ' + this.value2,
+        '销售人员: ' + this.value3,
+      ]
     },
   },
   methods: {
-     goadd() {
-      this.$router.push("/Addsale");
+    goadd() {
+      this.$router.push('/Addsale')
     },
     findpage() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      var _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/saledelivery/conditionpage",
-        method: "post",
+        url: 'http://localhost:8088/frameproject/saledelivery/conditionpage',
+        method: 'post',
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
-          condition:JSON.stringify(_this.condition),
+          condition: JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.tableData = response.data.data.rows;
-          _this.max = response.data.data.total;
+          _this.tableData = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //改变页码数
     handleCurrentChange(val) {
-      this.findpage(val, this.pagesize);
+      this.findpage(val, this.pagesize)
     },
     goadd() {
-      this.$router.push("/Adddeliver");
+      this.$router.push('/Adddeliver')
     },
     //条件查询
     qbc() {
-      this.condition.deliveryTime = this.collection;
-      this.condition.approvalState = this.status;
-      this.condition.customer = this.value1;
-      this.condition.founder = this.value2;
-      this.condition.salesmen = this.value3;
+      this.condition.deliveryTime = this.collection
+      this.condition.approvalState = this.status
+      this.condition.customer = this.value1
+      this.condition.founder = this.value2
+      this.condition.salesmen = this.value3
       if (this.customtime2 != null) {
-        this.condition.dtimeState = this.customtime2[0];
-        this.condition.dtimeEnd = this.customtime2[1];
-      }else{
-        this.condition.dtimeState = null;
-        this.condition.dtimeEnd = null;
+        this.condition.dtimeState = this.customtime2[0]
+        this.condition.dtimeEnd = this.customtime2[1]
+      } else {
+        this.condition.dtimeState = null
+        this.condition.dtimeEnd = null
       }
-      this.findpage();
+      this.findpage()
     },
     //订单模糊查询
     join() {
-      this.condition.orderId = this.vagueorderid;
-      this.findpage();
+      this.condition.orderId = this.vagueorderid
+      this.findpage()
     },
     findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.options1 = response.data.data.customers;
-          _this.options2 = response.data.data.notifiers;
-          _this.options3 = response.data.data.salemans;
+          _this.options1 = response.data.data.customers
+          _this.options2 = response.data.data.notifiers
+          _this.options3 = response.data.data.salemans
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].deliveryId);
-      this.$router.push("/Deliver");
+      sessionStorage.setItem('orderid', this.tableData[val].deliveryId)
+      this.$router.push('/Deliver')
     },
   },
   created: function () {
-    this.findsaleman();
-    this.findpage();
+    this.findsaleman()
+    this.findpage()
   },
-};
+}
 </script>
 
 <style>
