@@ -1,30 +1,27 @@
 <template>
   <!-- 主内容 -->
-  <div class="sale">
+  <div class="deliver">
     <!-- 标题 -->
-    <div class="sale-page-tag">
-      <span style="float: left; margin-top: 10px">采购订单</span>
+    <div class="deliver-page-tag">
+      <span style="float: left; margin-top: 10px">销售出库单</span>
       <el-steps
-        :active="formorder.vettingState+1+formorder.orderState"
+        :active="formorder.approvalState + 1"
         finish-status="success"
         simple
         style="width: 50%; float: left"
       >
         <el-step title="提交订单"></el-step>
-        <el-step title="一级审批"></el-step>
-        <el-step title="生成入库"></el-step>
+        <el-step title="二级审批"></el-step>
+        <el-step title="订单收款"></el-step>
       </el-steps>
-      <div class="sale-shenpi">
+      <div class="deliver-shenpi">
         <!-- 提交 -->
         <el-button size="mini" @click="dialogVisible = true"
           >查看关联单据</el-button
         >
-        <el-button size="mini" v-if="formorder.vettingState == 1"
-          >付款</el-button
-        >
         <el-button
           size="mini"
-          v-if="formorder.vettingState == 0"
+          v-if="formorder.approvalState == 0"
           v-has="{ action: 'approval' }"
           @click="approval(-1)"
           >驳回</el-button
@@ -32,24 +29,17 @@
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.vettingState == -2"
+          v-if="formorder.approvalState == -2"
           @click="approval(0)"
           >提交审批</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.vettingState == 0"
+          v-if="formorder.approvalState == 0"
           v-has="{ action: 'approval' }"
           @click="approval(1)"
           >审批通过</el-button
-        >
-        <el-button
-          type="primary"
-          size="mini"
-          v-if="formorder.vettingState == 1 && formorder.orderState == 0"
-          @click="approval(2)"
-          >生成入库单</el-button
         >
       </div>
     </div>
@@ -60,16 +50,16 @@
       :before-close="handleClose"
     >
       <div style="float: left">
-        <span v-if="formorder.deliveryId == null">关联采购入库单：无</span>
-        <span v-else>关联采购入库单：{{ formorder.receiptOrderId }}</span>
+        <span v-if="formorder.orderId == null">关联销售订单：无</span>
+        <span v-else>关联销售订单：{{ formorder.orderId }}</span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">关联采购退货单：无</span>
-        <span v-else>关联采购退货单：{{ formorder.exitOrderId }}</span>
+        <span v-if="formorder.returnId == null">关联销售退货单：无</span>
+        <span v-else>关联销售退货单：{{ formorder.returnId }}</span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
         <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.paymentOrder }}</span>
+        <span v-else>关联收款单：{{ formorder.receiptId }}</span>
       </div>
 
       <template #footer>
@@ -81,27 +71,16 @@
       </template>
     </el-dialog>
     <!-- 表单头部 -->
-    <div class="sale-header">
+    <div class="deliver-header">
       <el-row :gutter="20">
-        <el-col :span="4"
-          ><div>单据编号：{{ formorder.id }}</div></el-col
-        >
-        <el-col :span="4"
-          ><div>单据日期：{{ formorder.documentsDate }}</div></el-col
-        >
-        <el-col :span="4"
-          ><div>交货时间：{{ formorder.deliceryDate }}</div></el-col
-        >
-        <el-col :span="4"
-          ><div>供应商：{{ formorder.vendorName }}</div></el-col
-        >
-        <el-col :span="4"
-          ><div>采购员：{{ formorder.buyerName }}</div></el-col
-        >
+        <el-col :span="5">单据编号：{{ formorder.deliveryId }}</el-col>
+        <el-col :span="5">交货时间：{{ formorder.deliveryTime }}</el-col>
+        <el-col :span="5">客户：{{ formorder.customer }}</el-col>
+        <el-col :span="5">销售人员：{{ formorder.salesmen }}</el-col>
       </el-row>
     </div>
     <!-- 内容表体 -->
-    <div class="sale-main">
+    <div class="deliver-main">
       <!-- 销售产品信息table -->
       <el-table :data="productdata" style="width: 100%" border stripe>
         <!-- 产品详细信息 -->
@@ -109,15 +88,18 @@
         <el-table-column prop="productName" label="产品名称" width="200" />
         <el-table-column prop="productId" label="产品编号" width="120" />
         <el-table-column prop="remark" label="备注" width="120" />
+        <el-table-column prop="productSpec" label="规格" width="120" />
         <el-table-column prop="productUnit" label="单位" width="120" />
         <el-table-column prop="productNum" label="数量" width="120" />
         <el-table-column
-          prop="purchaseUnitPrice"
-          label="采购单价(元)"
+          prop="saleUnitPrice"
+          label="销售单价(元)"
           width="120"
         />
-        <el-table-column prop="purchaseMoney" label="采购金额(元)" width="120" />
-        <el-table-column prop="depotName" label="仓库" width="120" />
+        <el-table-column prop="saleMoney" label="销售金额(元)" width="120" />
+        <el-table-column prop="depot" label="仓库" width="120" />
+        <el-table-column prop="ingredient" label="成分" width="120" />
+        <el-table-column prop="gramHeavy" label="克量" width="120" />
         <el-table-column
           :show-overflow-tooltip="true"
           prop="productDescribe"
@@ -131,13 +113,13 @@
           center
           :closable="false"
         >
-          采购订单总金额：{{ total }}元
+          订单销售总金额：{{ total }}元
         </el-alert>
       </span>
       <!-- 备注 -->
 
       <el-divider content-position="left">订单备注</el-divider>
-      <div class="sale-remarks">
+      <div class="deliver-remarks">
         <el-input
           readonly="readonly"
           type="textarea"
@@ -148,24 +130,33 @@
       </div>
       <el-divider content-position="left">其他信息</el-divider>
       <!-- 表单表尾 -->
-      <div class="sale-footer">
+      <div class="deliver-footer">
         <el-row :gutter="24">
-          <el-col :span="8"
-            ><div>优惠率(%)：{{ formorder.disrate }} %</div></el-col
-          >
-          <el-col :span="8"
-            ><div>优惠金额(元)： {{ formorder.dismoney }}元</div></el-col
-          >
-          <el-col :span="8"
-            ><div>应收款(元)： {{ formorder.receivables }}元</div></el-col
-          >
+          <el-col :span="5">优惠率(%)：{{ formorder.disrate }} %</el-col>
+          <el-col :span="6">优惠金额(元)： {{ formorder.dismoney }}元</el-col>
+          <el-col :span="6">应收款(元)： {{ formorder.receivables }}元</el-col>
         </el-row>
         <el-row :gutter="24">
-          <el-col :span="8"
-            ><div>创建人：{{ formorder.founder }}</div></el-col
+          <el-col :span="5">客户联系人：{{ formorder.contacts }}</el-col>
+          <el-col :span="6"
+            >客户联系人电话：{{ formorder.contactsPhone }}</el-col
           >
-          <el-col :span="8"
-            ><div>创建时间：{{ formorder.foundTime }}</div></el-col
+          <el-col :span="6">客户地址：{{ formorder.contactsAddress }}</el-col>
+        </el-row>
+        <el-row :gutter="24">
+          <el-col :span="5">创建人：{{ formorder.founder }}</el-col>
+          <el-col :span="6">创建时间：{{ formorder.foundTime }}</el-col>
+        </el-row>
+        <el-row
+          :gutter="24"
+          v-if="formorder.approvalState == 1 || formorder.approvalState == -1"
+        >
+          <el-col :span="5">二级审批人：{{ formorder.approver }}</el-col>
+          <el-col :span="6"
+            >二级审批时间：{{ formorder.lastApprovalTime }}</el-col
+          >
+          <el-col :span="6"
+            >二级审批备注：{{ formorder.approvalRemarks }}</el-col
           >
         </el-row>
       </div>
@@ -181,7 +172,7 @@ export default {
     sessionStorage.removeItem("orderid");
     next();
   },
-  name: "Purchase",
+  name: "Sale",
   data() {
     return {
       dialogVisible: false,
@@ -192,90 +183,74 @@ export default {
     };
   },
   computed: {
-    //采购总金额
     total: function () {
       var allmoney = 0;
       this.productdata.forEach((money) => {
-        allmoney += money.purchaseMoney;
+        allmoney += money.saleMoney;
       });
       return Math.round(allmoney * 1000) / 1000;
     },
   },
   methods: {
-    //付款
-    goreceipt() {
-      var receipt = {
-        type: "订单付款",
-        orderId: this.formorder.id,
-      };
-      sessionStorage.setItem("receipt", JSON.stringify(receipt));
-      this.$router.push("/Addpayment");
-    },
-    //审批
+    //提交审批
     approval(type) {
-      if (type == 2) {
-        var obj={order:this.formorder,product:this.productdata}
-        sessionStorage.setItem("receipt",JSON.stringify(obj));
-        console.log(JSON.parse(sessionStorage.getItem("receipt")))
-        this.$router.push("/AddPurchaseReceipt");
-      } else {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const orderid = sessionStorage.getItem("orderid");
-        var _this = this;
-        var fd = {
-          id: orderid,
-          type: type,
-          user: state.userInfo.userName,
-        };
-        this.$prompt("请输入备注", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-        })
-          .then(() => {
-            this.axios({
-              url: "http://localhost:8088/frameproject/purchaseOrder/approval",
-              method: "get",
-              processData: false,
-              params: fd,
-              headers: {
-                JWTDemo: state.userInfo.token,
-              },
-            })
-              .then(function (response) {
-                if (response.data.code == 200) {
-                  _this.$notify({
-                    title: "操作成功",
-                    message: "订单信息已被修改",
-                    type: "success",
-                  });
-                  _this.showorder();
-                }
-              })
-              .catch(function (error) {
-                console.log(error);
-              });
+      const state = JSON.parse(sessionStorage.getItem("state"));
+      const orderid = sessionStorage.getItem("orderid");
+      var _this = this;
+      this.$prompt("请输入备注", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+      })
+        .then(({ value }) => {
+          var fd = {
+            orderid: orderid,
+            type: type,
+            user: state.userInfo.userName,
+            approvalremarks: value,
+          };
+          this.axios({
+            url: "http://localhost:8088/frameproject/saledelivery/approval",
+            method: "get",
+            processData: false,
+            params: fd,
+            headers: {
+              JWTDemo: state.userInfo.token,
+            },
           })
-          .catch(() => {});
-      }
+            .then(function (response) {
+              if (response.data.code == 200) {
+                _this.$notify({
+                  title: "操作成功",
+                  message: "订单信息已被修改",
+                  type: "success",
+                });
+                _this.showorder();
+              }
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+        .catch(() => {});
     },
     showorder() {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const orderid = sessionStorage.getItem("orderid");
       const _this = this;
       if (orderid == null) {
-        this.$router.push("/AddPurchase");
+        this.$router.push("/Deliverlist");
       } else {
         this.axios({
-          url: "http://localhost:8088/frameproject/purchaseOrder/find/" + orderid,
+          url:
+            "http://localhost:8088/frameproject/purchaseReceipt/find/" + orderid,
           method: "get",
           headers: {
             JWTDemo: state.userInfo.token,
           },
         })
           .then(function (response) {
-            console.log(response)
-            _this.formorder = response.data.data.purchaseOrder;
-            _this.productdata = response.data.data.list;
+            _this.formorder = response.data.data.delivery;
+            _this.productdata = response.data.data.deliverydetails;
           })
           .catch(function (error) {
             console.log(error);
@@ -291,12 +266,18 @@ export default {
 </script>
 
 <style lang="scss">
-.sale {
+.deliver {
   width: 100%;
   background-color: white;
 }
 /* 顶部 */
-.sale-page-tag {
+.deliver .el-carousel__arrow--right,
+.el-notification.right {
+  top: 110px !important;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+.deliver-page-tag {
   height: 40px;
   padding-bottom: 10px;
   padding-left: 10px;
@@ -304,57 +285,60 @@ export default {
   font-size: 18px;
   background: #e9eef3// #f5f7fa;
 }
-.sale-shenpi {
+.deliver-shenpi {
   float: right;
   line-height: 35px;
 }
 /* 内容表头 */
-.sale-header {
+.deliver-header {
   padding: 15px 15px;
   border-bottom: #e9eef3 5px solid;
-  background-color: white;
+  background-color: #f7fbfe;
   font-size: 13px;
   font-weight: bold;
 }
-.sale .el-steps--simple {
+.deliver .el-steps--simple {
   background: none !important;
 }
 /* 内容表体 */
-.sale-main {
+.deliver-main {
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.sale .cell {
+.deliver .cell {
   text-align: center;
   color: black !important;
   font-size: 8px !important;
 }
-.sale-main .el-input__inner {
+.deliver-main .el-input__inner {
   border: 0;
 }
 
-.sale th {
+.deliver th {
   color: black !important;
   background-color: #e8e8e8 !important;
 }
-.sale-remarks {
+.deliver-remarks {
   margin-top: 15px;
   height: 100%;
   width: 100%;
 }
-.sale-footer .el-col {
+.deliver-footer .el-col {
   margin-bottom: 20px !important;
 }
-.sale .el-textarea .el-textarea__inner {
+.deliver .el-textarea .el-textarea__inner {
   resize: none;
   border: 0;
 }
-.sale .el-alert__description {
-  font-size: 15px !important;
+.deliver .el-alert__description {
+  font-size: 14px !important;
   color: black;
 }
 /* 内容表尾 */
-.sale-footer {
+.deliver-footer {
+  font-weight: bold;
+  font-size: 14px;
+  color: #666666;
   padding: 20px 15px;
   background-color: white;
 }

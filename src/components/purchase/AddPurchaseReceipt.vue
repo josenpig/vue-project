@@ -518,6 +518,7 @@ export default {
       var ifnum = true;
       const receipt = JSON.parse(sessionStorage.getItem("receipt")); //获取是否绑定采购订单
       //如果采购入库单不来自采购订单 则判断库存是否足够
+      console.log(receipt)
       if (receipt == null) {
         this.productdata.forEach((item) => {
           if(this.formorder.purchaseman == ""){
@@ -543,7 +544,7 @@ export default {
           }
 
           if (
-            item.depot == null
+            item.depotName == null
           ) {
             this.$notify({
               title: "警告",
@@ -557,16 +558,16 @@ export default {
         });
       }
       if (ifnum != false) {
-        this.formorder.deliveryTime = dayjs(this.formorder.deliveryTime).format(
+        this.formorder.deliveryTime = dayjs(this.formorder.inboundDate).format(
            "YYYY-MM-DD HH:mm:ss"
         );
-        this.formorder.founder = state.userInfo.userName;
+        this.formorder.createPeople = state.userInfo.userName;
         this.axios({
-          url: "http://localhost:8088/frameproject/saledelivery/add/" + type,
+          url: "http://localhost:8088/frameproject/purchaseReceipt/add/" + type,
           method: "post",
           data: {
-            delivery: JSON.stringify(_this.formorder), //_this.formorder ,
-            deliverydetails: JSON.stringify(_this.productdata), //_this.productdata//
+            receipt: JSON.stringify(_this.formorder), //_this.formorder ,
+            receiptdetails: JSON.stringify(_this.productdata), //_this.productdata//
           },
           headers: {
             JWTDemo: state.userInfo.token,
@@ -574,8 +575,8 @@ export default {
         })
           .then(function (response) {
             sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Deliver");
-            sessionStorage.removeItem("saledeliver");
+            _this.$router.push("/PurchaseReceipt");
+            sessionStorage.removeItem("receipt");
           })
           .catch(function (error) {
             console.log(error);
@@ -585,13 +586,14 @@ export default {
   },
   created: function () {
     const purchase = JSON.parse(sessionStorage.getItem("receipt"));
+    console.log(purchase.product)
     if (purchase != null) {
       this.issale=true
       this.productdata = purchase.product;
       this.formorder = purchase.order;
       this.formorder.id = "CGRKD" + Date.now();
+      this.formorder.associatedOrder = purchase.product[0].purchaseOrderId;
       this.formorder.inboundDate = purchase.order.deliceryDate;
-
     }
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
