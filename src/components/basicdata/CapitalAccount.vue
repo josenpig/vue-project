@@ -4,7 +4,7 @@
 		<!-- 标题 -->
 		<div class="page-tag">
 			<span>资金账户设置</span>
-			<div class="shenpi">
+			<div style="float: right;">
 				<!-- 新增资金账户 -->
 				<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 110px;">
 					<i class="el-icon-plus"></i> 新增资金账户
@@ -45,7 +45,7 @@
 							</el-dialog>
 							
 						</el-form-item>
-						<el-form-item label="初期金额" :label-width="formLabelWidth">
+						<el-form-item label="初期金额 &nbsp;" :label-width="formLabelWidth">
 							<el-input-number v-model="form.initialAmount" :precision="2" :step="0.1" :min="0"></el-input-number>
 						</el-form-item>
 					</el-form>

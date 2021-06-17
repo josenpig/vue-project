@@ -95,15 +95,15 @@
 			return {
 				//新增产品单
 				proForm: {
-					productId: '1', //产品编号
-					productName: '1', //产品名称
-					ingredient: '1', //成份
-					productSpec: '1', //规格
-					gramHeavy: '1', //克重
-					unitId: '1', //单位id： 连接单位表
-					productTypeId: '1', //产品分类id： 连接分类表
-					purchaseUnitPrice: 2, //销售单价
-					purchaseMoney: 2, //采购单价
+					productId: '', //产品编号
+					productName: '', //产品名称
+					ingredient: '', //成份
+					productSpec: '', //规格
+					gramHeavy: '', //克重
+					unitId: '', //单位id： 连接单位表
+					productTypeId: '', //产品分类id： 连接分类表
+					purchaseUnitPrice: , //销售单价
+					purchaseMoney: , //采购单价
 					remarks: '', //备注
 					productDescribe: '', //产品描述
 					pictureId: 1, //图片id： 连接图片表
@@ -290,6 +290,7 @@
 									});
 									_this.form = {}
 									_this.judge = {}
+									_this.$router.push("/Product")
 								})
 								.catch(function(error) {
 									console.log(error);

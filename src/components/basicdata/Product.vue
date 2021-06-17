@@ -3,7 +3,7 @@
 	<!-- 类别列表 -->
 	<div class="typelabel">
 		<h4 class="title">产品分类</h4>
-		<div >
+		<div>
 			<div>
 				<el-button @click="findByType(AllId)" class="allType">
 					<i class="el-icon-caret-bottom" style="padding-right: 5px;"></i>全部
@@ -11,7 +11,7 @@
 						<i class="el-icon-circle-plus-outline"></i>
 						<span style="font-size: 10px;">新增子分类</span>
 					</a>
-					</el-button>
+				</el-button>
 			</div>
 			<el-tree :data="ProType" node-key="1000" @node-click="findByType" :expand-on-click-node="false" style="font-size: 15px;padding: 5px 0px;">
 				<template #default="{ node, data }">
@@ -46,6 +46,85 @@
 		</div>
 		<!-- 表单头部 -->
 
+		<div>
+			<!-- 修改产品 -->
+			<el-dialog title="修改产品" v-model="updateDialogFormVisible">
+				<hr style="margin-bottom: 20px;" />
+				<el-form :model="form">
+					<el-form-item label="产品编号" :label-width="formLabelWidth">
+						<el-input :disabled="true" v-model="updateForm.productId" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="产品名称" :label-width="formLabelWidth">
+						<el-input v-model="updateForm.productName" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="成分" :label-width="formLabelWidth">
+						<el-input v-model="updateForm.ingredient" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="规格" :label-width="formLabelWidth">
+						<el-input v-model="updateForm.productSpec" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="克重" :label-width="formLabelWidth">
+						<el-input v-model="updateForm.gramHeavy" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="单位" :label-width="formLabelWidth">
+						<el-select v-model="updateForm.unitId" placeholder="请选择单位 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
+							<el-option v-for="item in unit" :label="item.unitName" :value="item.unitId"></el-option>
+						</el-select>
+
+						<!-- 新增单位 -->
+						<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;margin-left: 20px;">
+							<i class="el-icon-plus"></i> 新增单位
+						</el-button>
+						
+						<el-dialog title="新增单位" v-model="dialogFormVisible">
+							<hr style="margin-bottom: 20px;" />
+							<el-form :model="form">
+								<el-form-item label="单位名称" :label-width="formLabelWidth">
+									<el-input @change="pdName(form.unitName)" v-model="form.unitName" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+								</el-form-item>
+							</el-form>
+							<template #footer>
+								<span class="dialog-footer">
+									<el-button @click="dialogFormVisible = false">取 消</el-button>
+									<el-button type="primary" @click="Add">确 定</el-button>
+								</span>
+							</template>
+						</el-dialog>
+
+					</el-form-item>
+					<el-form-item label="产品分类" :label-width="formLabelWidth">
+						<el-select v-model="updateForm.productTypeId" placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
+							<el-option v-for="item in ProTypeList" :label="item.label" :value="item.id"></el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item label="销售单价" :label-width="formLabelWidth">
+						<el-input-number v-model="updateForm.purchaseUnitPrice" :precision="2" :step="1" :min="0"></el-input-number>
+					</el-form-item>
+					<el-form-item label="采购单价" :label-width="formLabelWidth">
+						<el-input-number v-model="updateForm.purchaseMoney" :precision="2" :step="1" :min="0"></el-input-number>
+					</el-form-item>
+					<el-form-item label="产品描述" :label-width="formLabelWidth">
+						<el-input v-model="updateForm.productDescribe" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="备注" :label-width="formLabelWidth">
+						<el-input v-model="updateForm.remarks" autocomplete="off"></el-input>
+					</el-form-item>
+					<el-form-item label="产品状态" :label-width="formLabelWidth">
+						<span v-if="updateForm.state==0" style="background-color: coral;color: white;padding: 15px;">禁用</span>
+						<span v-if="updateForm.state==1" style="background-color: skyblue;color: white;padding: 15px;">启用</span>
+						<el-button v-if="updateForm.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;margin-left: 40px;">禁用</el-button>
+						<el-button v-if="updateForm.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;margin-left: 40px">启用</el-button>
+					</el-form-item>
+				</el-form>
+				<template #footer>
+					<span class="dialog-footer">
+						<el-button @click="updateDialogFormVisible = false">取 消</el-button>
+						<el-button type="primary" @click="update">确 定</el-button>
+					</span>
+				</template>
+			</el-dialog>
+		</div>
+
 		<!--批量删除-->
 		<div style="float: left;padding-top: 15px;">
 			<el-button size="mini" @click="batchDel"><i class="el-icon-close"></i> 批量删除</el-button>
@@ -72,7 +151,7 @@
 				<el-table-column fixed label="操作" width="150">
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
 						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;padding: 7px;">禁用</el-button>
 						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;padding: 7px;">启用</el-button>
 					</template>
@@ -91,10 +170,9 @@
 						<span v-if="scope.row.state==1" style="color: seagreen;">启用</span>
 					</template>
 				</el-table-column>
-				<!---->
 				<el-table-column prop="remarks" label="备注" width="120" />
-				<el-table-column prop="purchaseMoney" label="采购单价" sortable width="120" />
-				<el-table-column prop="purchaseUnitPrice" label="销售单价" sortable width="120" />
+				<el-table-column prop="purchaseMoney" label="采购单价(元)" sortable width="120" />
+				<el-table-column prop="purchaseUnitPrice" label="销售单价(元)" sortable width="120" />
 				<el-table-column prop="userName" label="创建人" sortable width="120" />
 				<el-table-column prop="creationTime" label="创建时间" sortable width="150" />
 				<el-table-column prop="updateTime" label="更新时间" sortable width="150" />
@@ -110,15 +188,19 @@
 </template>
 
 <script>
+	import {
+		ElMessage
+	} from 'element-plus'
 	export default {
 		name: "product",
 		data() {
 			return {
-				AllId:'',
-				
+				AllId: '',
+				formLabelWidth: '120px',
 				// 分类数据
 				ProType: [],
-
+				//不封装 分类数据
+				ProTypeList:[],
 				//表单数据
 				tableData: [],
 				//分页
@@ -138,7 +220,34 @@
 				select: "产品名称",
 
 				//多选产品
-				selectPro: []
+				selectPro: [],
+				
+				//单位数据
+				unit:[],
+				//新增单位信息弹框
+				dialogFormVisible: false,
+				//修改产品信息弹框
+				updateDialogFormVisible: false,
+				//新增单位表单
+				form: {
+					unitName: '' //单位名称
+				},
+				//修改产品表单
+				updateForm: {
+					productId: '', //产品编号
+					productName: '', //产品名称
+					ingredient: '', //成份
+					productSpec: '', //规格
+					gramHeavy: '', //克重
+					unitId: '', //单位id： 连接单位表
+					productTypeId: '', //产品分类id： 连接分类表
+					purchaseUnitPrice: '', //销售单价
+					purchaseMoney: '', //采购单价
+					remarks: '', //备注
+					productDescribe: '', //产品描述
+					state: '' //产品状态
+				}
+				
 			}
 		},
 
@@ -166,6 +275,26 @@
 					.then(function(response) {
 						console.log(response.data.data)
 						_this.ProType = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//查询所有产品分类返回不封装list
+			findAllProTypeToList() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseProductType/findProType/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.ProTypeList = response.data.data;
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -231,14 +360,11 @@
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功'
-					});
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var pid = {
 						id: id
 					};
+					var _this = this
 					this.axios({
 							url: "http://localhost:8088/frameproject/baseProduct/delProduct",
 							method: "get",
@@ -249,12 +375,23 @@
 							},
 						})
 						.then(function(response) {
-							console.log(response.data.data);
+							console.log("删除是否成功：" + response.data.data);
+							if (response.data.data) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: '该产品已存在相关单据记录，无法删除！',
+									type: 'success'
+								});
+							}
 						})
 						.catch(function(error) {
 							console.log(error);
 						});
-					this.tableData.splice(index, 1);
 				}).catch(() => {
 					this.$message({
 						type: 'info',
@@ -264,15 +401,11 @@
 			},
 			//批量删除产品
 			batchDel() {
-				this.$confirm('此操作将永久删除下列' + this.selectPro.length + ':条产品, 是否继续?', '提示', {
+				this.$confirm('此操作将永久删除下列 ' + this.selectPro.length + ' 条产品, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功'
-					});
 					var ids = new Array()
 					this.selectPro.forEach(v => {
 						ids.push(v.productId)
@@ -289,13 +422,23 @@
 							},
 						})
 						.then(function(response) {
-							console.log(response.data.data)
+							console.log("批量删除是否成功：" + response.data.data);
+							if (response.data.data == null) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: response.data.data,
+									type: 'success'
+								});
+							}
 						})
 						.catch(function(error) {
 							console.log(error);
 						});
-
-					location.reload();
 				}).catch(() => {
 					this.$message({
 						type: 'info',
@@ -386,24 +529,143 @@
 					.catch(function(error) {
 						console.log(error);
 					});
-					
-			},
 
+			},
+			//查询单位列表
+			findAllUnit() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseUnit/findAllUnit/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.unit = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
+			//新增产品子分类--待
 			append(node, data) {
 				console.log("append:")
 				console.log(node.id)
 			},
-
+			//删除分类--待
 			remove(node, data) {
 				console.log("remove:")
 				console.log(node.id)
 			},
+			
+			//判断单位名称是否重复
+			pdName(val) {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var UnitName = {
+					UnitName: val
+				}
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseUnit/judgeUnitName",
+						method: "get",
+						processData: false,
+						params: UnitName,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log("单位名称不重复是否通过:" + response.data)
+						_this.judge = response.data
+						if(!response.data){
+							ElMessage.warning({
+								message: '单位名称重复！',
+								type: 'success'
+							});
+						}
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//添加单位
+			Add() {
+				console.log(this.form)
+				if (this.form.unitName == null || this.form.unitName == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					this.pdName(this.form.unitName)
+					setTimeout(() => {
+						if (this.judge) {
+							const state = JSON.parse(sessionStorage.getItem("state"));
+							var _this = this;
+							this.dialogFormVisible = false
+							//添加仓库
+							this.axios({
+									url: "http://localhost:8088/frameproject/baseUnit/addUnit",
+									method: "post",
+									processData: false,
+									data: {
+										Unit: JSON.stringify(_this.form)
+									},
+									headers: {
+										JWTDemo: state.userInfo.token,
+									},
+								})
+								.then(function(response) {
+									console.log(response.data.data)
+									ElMessage.success({
+										message: '添加成功',
+										type: 'success'
+									});
+									_this.form = {}
+									_this.judge = {}
+									_this.findAllUnit()
+								})
+								.catch(function(error) {
+									console.log(error);
+								});
+						} else {
+							ElMessage.warning({
+								message: '单位名称重复！',
+								type: 'success'
+							});
+						}
+					}, 200)
+				}
+			},
+			//打开修改框
+			openupdate(val) {
+				this.updateDialogFormVisible = true;
+			
+				this.updateForm.productId = val.productId
+				this.updateForm.productName = val.productName
+				this.updateForm.ingredient = val.ingredient
+				this.updateForm.productSpec = val.productSpec
+				this.updateForm.gramHeavy = val.gramHeavy
+				this.updateForm.productSpec = val.productSpec
+				this.updateForm.unitId = val.unitId
+				this.updateForm.productTypeId = val.productTypeId
+				this.updateForm.purchaseUnitPrice = val.purchaseUnitPrice
+				this.updateForm.purchaseMoney = val.purchaseMoney
+				this.updateForm.remarks = val.remarks
+				this.updateForm.productDescribe = val.productDescribe
+				this.updateForm.pictureId = val.pictureId
+				this.updateForm.state = val.state
+			}
 
 		},
 		components: {},
 		created() {
 			this.findpage()
 			this.findAllProType()
+			this.findAllUnit()
+			this.findAllProTypeToList()
 		}
 	};
 </script>
