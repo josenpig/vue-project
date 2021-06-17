@@ -83,7 +83,7 @@
         @selection-change="handleSelectionChange"
         stripe
       >
-        <el-table-column fixed label="操作" width="150">
+        <el-table-column fixed label="操作" width="200">
           <template #default="scope">
             <el-button
               type="text"
@@ -97,7 +97,7 @@
         </el-table-column>
         <el-table-column
           prop="id"
-          label="销售订单编号"
+          label="采购订单编号"
           fixed
           width="200"
         >
@@ -126,8 +126,8 @@
           label="优惠后应收款(元)"
           width="150"
         />
-        <el-table-column prop="ostate" label="订单已收款(元)" width="120" />
-        <el-table-column prop="inboundState" label="出库状态" width="120">
+        <el-table-column prop="ostate" label="订单已收款(元)" width="200" />
+        <el-table-column prop="inboundState" label="出库状态" width="200">
           <template #default="scope">
             <span v-if="tableData[scope.$index].inboundState == 0">
               未出库
@@ -135,15 +135,15 @@
             <span v-else> 完全出库 </span>
           </template>
         </el-table-column>
-        <el-table-column prop="contact" label="联系人" width="120" />
-        <el-table-column prop="createPeople" label="创建人" width="120" />
+        <el-table-column prop="contact" label="联系人" width="200" />
+        <el-table-column prop="createPeople" label="创建人" width="200" />
         <el-table-column
           prop="createDate"
           label="创建时间"
           sortable
           width="200"
         />
-        <el-table-column prop="vettingState" label="审批状态" width="120">
+        <el-table-column prop="vettingState" label="审批状态" width="200">
           <template #default="scope">
             <span v-if="tableData[scope.$index].vettingState == 0">
               待一级审批
@@ -299,8 +299,8 @@ export default {
     //   this.findpage(val, this.pagesize);
     // },
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].orderId);
-      this.$router.push("/Sale");
+      sessionStorage.setItem("orderid", this.tableData[val].id);
+      this.$router.push("/Purchase");
     },
   },
 
