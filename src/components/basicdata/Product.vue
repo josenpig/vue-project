@@ -112,8 +112,8 @@
 					<el-form-item label="产品状态" :label-width="formLabelWidth">
 						<span v-if="updateForm.state==0" style="background-color: coral;color: white;padding: 15px;">禁用</span>
 						<span v-if="updateForm.state==1" style="background-color: skyblue;color: white;padding: 15px;">启用</span>
-						<el-button v-if="updateForm.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;margin-left: 40px;">禁用</el-button>
-						<el-button v-if="updateForm.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;margin-left: 40px">启用</el-button>
+						<el-button v-if="updateForm.state==1" @click="disableOrEnable(updateForm,1)" round style="background-color: coral;color: white;margin-left: 40px;">禁用</el-button>
+						<el-button v-if="updateForm.state==0" @click="disableOrEnable(updateForm,1)" round style="background-color: lightgreen ;color: white;margin-left: 40px">启用</el-button>
 					</el-form-item>
 				</el-form>
 				<template #footer>
@@ -152,8 +152,8 @@
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;padding: 7px;">禁用</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;padding: 7px;">启用</el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row,0)" round style="background-color: coral;color: white;padding: 7px;">禁用</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row,0)" round style="background-color: lightgreen ;color: white;padding: 7px;">启用</el-button>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
@@ -318,6 +318,7 @@
 						},
 					})
 					.then(function(response) {
+						console.log(response.data.data.rows)
 						_this.tableData = response.data.data.rows;
 						_this.max = response.data.data.total;
 					})
@@ -451,7 +452,7 @@
 				this.selectPro = val
 			},
 			//禁用或启用
-			disableOrEnable(val) {
+			disableOrEnable(val,index) {
 				var _this = this;
 				var able;
 				if (val.state == 1) {
@@ -460,7 +461,11 @@
 				if (val.state == 0) {
 					able = '启用'
 				};
-				this.$confirm('是否' + able + '该产品！', '提示', {
+				var remind="";
+				if(index==1){
+					remind='设置默认账户会导致之前修改的信息丢失，如果在此之前修改了账户信息请先提交修改！              '
+				}
+				this.$confirm(remind+'是否 "' + able + '" 该产品！', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
@@ -486,7 +491,7 @@
 							if (response.data.data) {
 								_this.$message({
 									type: 'success',
-									message: able + '成功'
+									message: able + ' 成功'
 								});
 							}
 							_this.findpage()
@@ -657,6 +662,47 @@
 				this.updateForm.productDescribe = val.productDescribe
 				this.updateForm.pictureId = val.pictureId
 				this.updateForm.state = val.state
+			},
+			//修改产品信息---
+			update() {
+				console.log(this.updateForm)
+				if (
+					this.updateForm.productName == '' ||
+					this.updateForm.ingredient == '' ||
+					this.updateForm.unitId == '' ||
+					this.updateForm.productTypeId == '' ||
+					this.updateForm.purchaseUnitPrice == '' ||
+					this.updateForm.purchaseMoney == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.dialogFormVisible = false
+					//修改资金账户
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseProduct/updateProduct",
+							method: "post",
+							processData: false,
+							data: {
+								Product: JSON.stringify(_this.updateForm)
+							},
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data)
+							ElMessage.success({
+								message: '修改成功',
+								type: 'success'
+							});
+							_this.updateDialogFormVisible = false;
+							_this.findpage()
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}
 			}
 
 		},

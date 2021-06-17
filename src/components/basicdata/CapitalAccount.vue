@@ -479,7 +479,7 @@
 			//设为默认账户
 			setState(id,index) {
 				var _this = this;
-				var remind;
+				var remind="";
 				if(index==1){
 					remind='设置默认账户会导致之前修改的信息丢失，如果在此之前修改了账户信息请先提交修改！              '
 				}
