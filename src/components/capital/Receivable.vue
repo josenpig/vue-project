@@ -22,6 +22,7 @@
           </template>
           <div>
             <!-- 单据日期 -->
+            <div style="height: 25px">
             <span>单据日期:</span>
             <el-radio-group v-model="billdate" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
@@ -33,7 +34,7 @@
             </el-radio-group>
             <div
               v-show="custom1"
-              style="top: 178px; left: 730px; position: absolute"
+              style="top: -45px; left: 485px; position: relative"
             >
               <el-date-picker
                 v-model="customtime1"
@@ -41,11 +42,14 @@
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                @change="qbc()"
               >
               </el-date-picker>
             </div>
+          </div>
             <!-- 收款日期 -->
             <br />
+            <div style="height: 25px">
             <span>收款日期:</span>
             <el-radio-group v-model="collection" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
@@ -57,7 +61,7 @@
             </el-radio-group>
             <div
               v-show="custom2"
-              style="top: 228px; left: 730px; position: absolute"
+              style="top: -45px; left: 485px; position: relative"
             >
               <el-date-picker
                 v-model="customtime2"
@@ -65,10 +69,11 @@
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                @change="qbc()"
               >
               </el-date-picker>
             </div>
-
+            </div>
             <!-- 结案状态 -->
             <br />
             <span>结案状态:</span>
@@ -87,7 +92,12 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options1" :value="item.customerName">
+              <el-option
+                v-for="item in options1"
+                :key="item.customerNumber"
+                :label="item.customerName"
+                :value="item.customerNumber"
+              >
               </el-option>
             </el-select>
             <!-- 创建人 -->
@@ -101,6 +111,7 @@
             >
               <el-option
                 v-for="item in options2"
+                :key="item.userId"
                 :value="item.userId"
                 :label="item.userName"
               >
@@ -117,6 +128,7 @@
             >
               <el-option
                 v-for="item in options3"
+                :key="item.userId"
                 :value="item.userId"
                 :label="item.userName"
               >
@@ -318,6 +330,7 @@ export default {
         this.condition.dtimeState = null
         this.condition.dtimeEnd = null
       }
+      console.log(this.condition);
       this.findpage()
     },
     findsaleman() {

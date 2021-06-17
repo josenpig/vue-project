@@ -23,8 +23,8 @@
             </el-tag>
           </template>
           <div>
-            <!-- 单据日期 -->
-            <span>单据日期:</span>
+            <!-- 收款日期 -->
+            <span>收款日期:</span>
             <el-radio-group v-model="billdate" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
@@ -46,30 +46,14 @@
               >
               </el-date-picker>
             </div>
-            <!-- 收款日期 -->
+            <!-- 收款类型 -->
             <br />
-            <span>收款日期:</span>
+            <span>收款类型:</span>
             <el-radio-group v-model="collection" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="今天"></el-radio-button>
-              <el-radio-button label="昨天"></el-radio-button>
-              <el-radio-button label="本周"></el-radio-button>
-              <el-radio-button label="本月"></el-radio-button>
-              <el-radio-button label="自定义"></el-radio-button>
+              <el-radio-button label="应收收款"></el-radio-button>
+              <el-radio-button label="订单收款"></el-radio-button>
             </el-radio-group>
-            <div
-              v-show="custom2"
-              style="top: 228px; left: 730px; position: absolute"
-            >
-              <el-date-picker
-                v-model="customtime2"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-              >
-              </el-date-picker>
-            </div>
 
             <!-- 结案状态 -->
             <br />
@@ -83,19 +67,34 @@
             <br /><br />
             <span>客户:</span>
             <el-select v-model="value1" size="small" filterable @change="qbc()">
-              <el-option v-for="item in options1" :value="item.label">
+              <el-option
+                v-for="item in options1"
+                :key="item.customerNumber"
+                :label="item.customerName"
+                :value="item.customerNumber"
+              >
+              </el-option>
+            </el-select>
+            <!-- 收款人 -->
+            <span>收款人:</span>
+            <el-select v-model="value2" size="small" filterable @change="qbc()">
+              <el-option
+                v-for="item in options2"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
             <!-- 创建人 -->
             <span>创建人:</span>
             <el-select v-model="value3" size="small" filterable @change="qbc()">
-              <el-option v-for="item in options3" :value="item.label">
-              </el-option>
-            </el-select>
-            <!-- 销售人员 -->
-            <span>销售人员:</span>
-            <el-select v-model="value4" size="small" filterable @change="qbc()">
-              <el-option v-for="item in options4" :value="item.label">
+              <el-option
+                v-for="item in options3"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
           </div>
@@ -110,7 +109,12 @@
         @selection-change="handleSelectionChange"
         stripe
       >
-        <el-table-column prop="receiptId" label="收款单据编号" fixed width="200">
+        <el-table-column
+          prop="receiptId"
+          label="收款单据编号"
+          fixed
+          width="200"
+        >
           <template #default="scope">
             <el-button type="text" @click="goorder(scope.$index)">{{
               tableData[scope.$index].receiptId
@@ -131,13 +135,9 @@
         />
         <el-table-column prop="payee" label="收款人" width="120" />
         <el-table-column prop="incomeType" label="收款类别" width="120" />
-        <el-table-column
-          prop="receiptMoney"
-          label="收款金额(元)"
-          width="150"
-        />
+        <el-table-column prop="receiptMoney" label="收款金额(元)" width="150" />
         <el-table-column prop="ciaMoney" label="预收金额(元)" width="120" />
-        <el-table-column prop="ciaBalance" label="预收余额(元)" width="120"/>
+        <el-table-column prop="ciaBalance" label="预收余额(元)" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
         <el-table-column prop="remarks" label="单据备注" width="120" />
         <el-table-column prop="approvalState" label="审批状态" width="120">
@@ -154,7 +154,7 @@
             <span v-else> 审批通过 </span>
           </template>
         </el-table-column>
-        <el-table-column prop="approver" label="当前审批人" width="120"/>
+        <el-table-column prop="approver" label="当前审批人" width="120" />
         <el-table-column
           prop="lastApprovalTime"
           label="最后审批时间"
@@ -181,106 +181,138 @@
 
 <script>
 export default {
-  name: "Receivable",
+  name: 'Receivable',
   data() {
     return {
       //默认展开
-      activeNames: "1",
+      activeNames: '1',
       //筛选框
-      billdate: "全部", //单据日期
-      collection: "全部", //收款日期
-      status: "全部", //结案状态
-      customtime1: "", //自定义时间
-      customtime2: "",
+      billdate: '全部', //收款日期
+      collection: '全部', //收款日期
+      status: '全部', //结案状态
+      customtime1: '', //自定义时间
+      customtime2: '',
       options1: [],
       options2: [],
       options3: [],
-      options4: [],
-      value1: "全部", //客户
-      value2: "全部", //仓库
-      value3: "全部", //创建人
-      value4: "全部", //销售人员
+      value1: '', //客户
+      value2: '', //收款人
+      value3: '', //创建人
       //表单数据
       tableData: [],
       //条件查询数据
       condition: {
-        orderTime: "",
-        deliveryTime: "",
-
-        customer: "",
-        founder: "",
-        salesmen: "",
+        deliveryId:'',
+        deliveryTime: '',
+        incomeType: '',
+        customer: '',
+        founder: '',
+        payee: '',
       },
       //分页
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     paging: function () {
-      return this.tableData.length > 0 ? true : false;
+      return this.tableData.length > 0 ? true : false
     },
     custom1: function () {
-      return this.billdate == "自定义" ? true : false;
-    },
-    custom2: function () {
-      return this.collection == "自定义" ? true : false;
+      return this.billdate == '自定义' ? true : false
     },
     all: function () {
+      var value1 = ''
+      this.options1.forEach((item) => {
+        if (item.customerNumber == this.value1) {
+          value1 = item.customerName
+        }
+      })
+      var value2 = ''
+      this.options2.forEach((item) => {
+        if (item.userId == this.value2) {
+          value2 = item.userName
+        }
+      })
+      var value3 = ''
+      this.options3.forEach((item) => {
+        if (item.userId == this.value3) {
+          value3 = item.userName
+        }
+      })
       return [
-        "单据日期: " + this.billdate,
-        "收款日期: " + this.collection,
-        "结案状态: " + this.status,
-        "客户: " + this.value1,
-        "仓库: " + this.value2,
-        "创建人: " + this.value3,
-        "销售人员: " + this.value4,
-      ];
+        '收款日期: ' + this.billdate,
+        '收款类型: ' + this.collection,
+        '审批状态: ' + this.status,
+        '客户: ' + value1,
+        '收款人: ' +value2,
+        '创建人: ' +value3,
+      ]
     },
   },
   methods: {
-    findpage() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      var _this = this;
+    findsaleman() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/capitalReceipt/conditionpage",
-        method: "post",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.options1 = response.data.data.customers
+          _this.options2 = response.data.data.notifiers
+          _this.options3 = response.data.data.salemans
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    findpage() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/capitalReceipt/conditionpage',
+        method: 'post',
         processData: false,
         data: {
           currentPage: this.currentPage,
           pageSize: this.pagesize,
-          condition: "",
+          condition: '',
         },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.tableData=response.data.data.rows
-          _this.max=response.data.data.total
+          _this.tableData = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //改变页码数
     handleCurrentChange(val) {
-      this.findpage(val, this.pagesize);
+      this.findpage(val, this.pagesize)
     },
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].receiptId);
-      this.$router.push("/Receipt");
+      sessionStorage.setItem('orderid', this.tableData[val].receiptId)
+      this.$router.push('/Receipt')
     },
     qbc() {
-      this.condition.orderTime = this.billdate;
-      console.log(this.condition);
+      this.condition.orderTime = this.billdate
+      console.log(this.condition)
     },
   },
   created: function () {
-    this.findpage();
+    this.findpage()
+    this.findsaleman()
   },
-};
+}
 </script>
 
 <style>
