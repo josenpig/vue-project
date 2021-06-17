@@ -76,6 +76,7 @@
         />
         <el-table-column prop="operator"   label="操作员" width="255" />
         <el-table-column prop="typeofoperator"   label="操作员类别" width="255" />
+        <el-table-column prop="logintype"   label="登录方式" width="255" />
       </el-table>
     </div>
     <!-- 表尾分页显示 -->

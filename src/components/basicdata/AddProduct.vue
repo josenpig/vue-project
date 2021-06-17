@@ -2,87 +2,82 @@
 	<h3>新增产品</h3>
 	<div class="button">
 		<el-button size="small" @click="ToPro" class="button-no" type="primary">取消</el-button>
-		<el-button size="small" class="button-ok" type="primary">保存</el-button>
+		<el-button size="small" @click="Add" class="button-ok" type="primary">保存</el-button>
 	</div>
 	<el-tabs type="border-card">
-		<el-tab-pane label="用户管理">
-			<div class="tab">
-				<div>
-					<span class="must">*</span>
-					<span class="font">产品名称</span>
-					<el-input v-model="input" class="inpStyle"></el-input>
-				</div>
-				<div>
-					<span class="must">*</span>
-					<span class="font">产品编号</span>
-					<el-input v-model="input" class="inpStyle"></el-input>
-				</div>
-				<div>
-					<span class="must">*</span>
-					<span class="font">规格</span>
-					<el-input v-model="input" class="inpStyle" style="padding-left: 58px;"></el-input>
-				</div>
-				<div>
-					<span class="must">*</span>
-					<span class="font">销售价格</span>
-					<el-input-number v-model="form.ratio" :precision="2" :step="1" :min="0" style="margin-left: 30px;"/>
-				</div>
-				<div>
-					<span class="must">*</span>
-					<span class="font">采购价格</span>
-					<el-input-number v-model="form.ratio" :precision="2" :step="1" :min="0" style="margin-left: 30px;"/>
-				</div>
-				<div>
-					<span class="must">*</span>
-					<span class="font">单位</span>
-					<el-select v-model="form.unit" placeholder="请选择" style="padding-left: 58px;">
-						<el-option v-for="item in unitList" :key="item.value" :label="item.label" :value="item.value">
-						</el-option>
+		<el-tab-pane label="产品管理">
+			
+			<el-form :model="proForm">
+				<el-form-item label="* 产品编号  " :label-width="formLabelWidth">
+					<el-input @change="pdID" v-model="proForm.productId" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
+				</el-form-item>
+				<el-form-item label="* 产品名称 " :label-width="formLabelWidth">
+					<el-input v-model="proForm.productName" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
+				</el-form-item>
+				<el-form-item label="* 产品成分 " :label-width="formLabelWidth">
+					<el-input v-model="proForm.ingredient" autocomplete="off" placeholder="(必填)"></el-input>
+				</el-form-item>
+				<el-form-item label="* 产品规格 " :label-width="formLabelWidth">
+					<el-input v-model="proForm.productSpec" autocomplete="off" placeholder="(必填)"></el-input>
+				</el-form-item>
+				<el-form-item label=" 克重 &nbsp;&nbsp;&nbsp;" :label-width="formLabelWidth">
+					<el-input v-model="proForm.gramHeavy" autocomplete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="* 产品单位 " :label-width="formLabelWidth">
+					<el-select v-model="proForm.unitId" placeholder="请选择产品单位  (必选)">
+						<el-option v-for="item in unit" :label="item.unitName" :value="item.unitId"></el-option>
 					</el-select>
-				</div>
-				<div>
-					<span class="must">*</span>
-					<span class="font">分类</span>
-					<el-select v-model="form.type" placeholder="请选择" style="padding-left: 58px;">
-						<el-option v-for="item in proType" :key="item.value" :label="item.label" :value="item.value">
-						</el-option>
+				</el-form-item>
+				<el-form-item label="* 产品分类 " :label-width="formLabelWidth">
+					<el-select v-model="proForm.productTypeId" placeholder="请选择产品分类  (必选)">
+						<el-option v-for="item in proType" :label="item.label" :value="item.id"></el-option>
 					</el-select>
-				</div>
-				<div>
-					<span class="font">&nbsp;&nbsp;备注</span>
-					<p></p>
-					<el-input class="bz" style="margin-top: -35px;padding-left: 92px;" type="textarea" :rows="5" v-model="textarea">
-					</el-input>
-				</div>
-				<div>
-					<span class="font">&nbsp;&nbsp;图片</span>
-					<div style="margin: -25px 90px">
-						<el-button size="small" type="primary">点击上传</el-button>
-					</div>
-				</div>
-			</div>
+				</el-form-item>
+				<el-form-item label="* 销售单价 " :label-width="formLabelWidth">
+					<el-input-number v-model="proForm.purchaseUnitPrice" :precision="2" :step="1" :min="0"></el-input-number>
+				</el-form-item>
+				<el-form-item label="* 采购单价 " :label-width="formLabelWidth">
+					<el-input-number v-model="proForm.purchaseMoney" :precision="2" :step="1" :min="0"></el-input-number>
+				</el-form-item>
+				<el-form-item label="产品描述" :label-width="formLabelWidth">
+					<el-input v-model="proForm.productDescribe" autocomplete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="  备注 &nbsp;&nbsp; " :label-width="formLabelWidth">
+					<el-input v-model="proForm.remarks" autocomplete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="  图片 &nbsp;&nbsp;" :label-width="formLabelWidth">
+					<el-button size="small" type="primary">点击上传</el-button>
+				</el-form-item>
+			</el-form>
+			
 		</el-tab-pane>
+
+		<!--////////初期库存////////////-->
 		<el-tab-pane label="初期库存">
-			<el-button type="primary" icon="el-icon-plus" style="margin-bottom: 10px;" @click="handleAddDetails">添加</el-button>
 			<!-- 表体内容 -->
 			<div>
-				<el-table :data="cusDate" style="width: 100%" @selection-change="handleSelectionChange" border stripe>
-					<el-table-column prop="customer" label="仓库" sortable width="406">
+				<el-table :data=" stockForm" style="width: 100%" @selection-change="handleSelectionChange" border stripe>
+					<el-table-column prop="depotName" label="仓库" sortable width="406">
 						<template #default="scope">
-							<el-select v-model="scope.row.customer" style="width:150px">
-								<el-option v-for="item in charge" :key="item.value" :label="item.label" :value="item.value">
+							<el-select v-model=" stockForm[scope.$index].depotName" style="width:150px">
+								<el-option v-for="item in depot" :key="item.depotName" :label="item.depotName" :value="item.depotName">
 								</el-option>
 							</el-select>
 						</template>
 					</el-table-column>
-					<el-table-column prop="number" label="初期库存" sortable width="300">
+					<el-table-column prop="openingNumber" label="初期库存" sortable width="300">
 						<template #default="scope">
-							<el-input v-model="scope.row.number"></el-input>
+							<el-input-number v-model=" stockForm[scope.$index].openingNumber" :precision="0" :step="1" :min="0"></el-input-number>
 						</template>
 					</el-table-column>
-					<el-table-column prop="date" label="操作" width="280">
+					<el-table-column label="操作" width="100" fixed>
 						<template #default="scope">
-							<el-button type="danger" size="small " icon="el-icon-delete" @click="handleDeleteDetails(scope.$index, scope.row)" circle></el-button>
+							<el-tooltip content="新增" placement="top">
+								<el-button size="mini" icon="el-icon-plus" @click="addrow()" type="primary" circle />
+							</el-tooltip>
+							<el-tooltip content="删除" placement="top">
+								<el-button size="mini" icon="el-icon-delete" @click="delrow(scope.$index,  stockForm)" type="primary" circle />
+							</el-tooltip>
 						</template>
 					</el-table-column>
 				</el-table>
@@ -92,68 +87,229 @@
 </template>
 
 <script>
+	import {
+		ElMessage
+	} from 'element-plus'
 	export default {
 		data() {
 			return {
-				unitList: [{
-					value: '选项1',
-					label: '单位1'
-				}, {
-					value: '选项2',
-					label: '单位2'
-				}, {
-					value: '选项3',
-					label: '单位3'
-				}],
-				proType: [{
-					value: '选项1',
-					label: '分类1'
-				}, {
-					value: '选项2',
-					label: '分类2'
-				}, {
-					value: '选项3',
-					label: '分类3'
-				}],
-				charge: [{
-					value: '选项1',
-					label: '仓库1'
-				}, {
-					value: '选项2',
-					label: '仓库2'
-				}],
-				selcharge: '',
-				cusDate: [{
-					customer: '',
-					number: ''
-				}],
-				form: {
-					type: '',
-					unit: ''
+				//新增产品单
+				proForm: {
+					productId: '1', //产品编号
+					productName: '1', //产品名称
+					ingredient: '1', //成份
+					productSpec: '1', //规格
+					gramHeavy: '1', //克重
+					unitId: '1', //单位id： 连接单位表
+					productTypeId: '1', //产品分类id： 连接分类表
+					purchaseUnitPrice: 2, //销售单价
+					purchaseMoney: 2, //采购单价
+					remarks: '', //备注
+					productDescribe: '', //产品描述
+					pictureId: 1, //图片id： 连接图片表
 				},
 
+				//库存数据
+				 stockForm: [{
+					depotName: '', //仓库名称
+					openingNumber: 0 ,//期初数量
+				}],
+
+				//单位数据
+				unit: [],
+
+				//产品分类数据
+				proType: [],
+
+				//仓库数据
+				depot: [],
+
+				//判断
+				judge: '',
+
+				formLabelWidth: '120px'
 			}
 		},
-		computed: {},
 		methods: {
-			//取消添加
+			//返回
 			ToPro() {
 				this.$router.push("/Product")
 			},
-			handleAddDetails() {
-				if (this.cusDate == undefined) {
-					this.cusDate = new Array();
-				}
-				let obj = {};
-				obj.customer = " ";
-				obj.number = " ";
-
-				this.cusDate.push(obj);
+			
+			//新增一行
+			addrow() {
+				this. stockForm.push({
+					depotName: '', //仓库名称
+					openingNumber: 0 //期初数量
+				});
 			},
-			handleDeleteDetails(index, row) {
-				this.cusDate.splice(index,1);
+			//移除一行
+			delrow(index, rows) {
+				console.log(this. stockForm)
+				if (this. stockForm.length > 1) {
+					rows.splice(index, 1); //删掉该行
+				}
+			},
+			
+			//查询所有单位
+			findAllUnit() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseUnit/findAllUnit/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.unit = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
+			//查询所有产品分类
+			findAllProType() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseProductType/findProType/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.proType = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
+			//查询所有仓库
+			findAllDepot() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseDepot/findAllDepot/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.depot = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
+			//判断产品ID是否重复
+			pdID() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var id = {
+					id: this.proForm.productId
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseProduct/judgeProductId",
+						method: "get",
+						processData: false,
+						params: id,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log("pid不重复是否通过:" + response.data)
+						_this.judge = response.data
+						if (response.data==false) {
+							ElMessage.warning({
+								message: '产品ID重复',
+								type: 'success'
+							});
+						}else{
+							// _this.AddCustomer()
+							console.log(response.data)
+						}
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
+			//添加产品-提交表单
+			Add() {
+				console.log(this.proForm)
+				console.log(this.stockForm)
+				if (this.proForm.productId == '' ||
+					this.proForm.productName == '' ||
+					this.proForm.ingredient == '' ||
+					this.proForm.unitId == '' ||
+					this.proForm.productTypeId == '' ||
+					this.proForm.purchaseUnitPrice == '' ||
+					this.proForm.purchaseMoney == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					this.pdID()
+					setTimeout(() => {
+						if (this.judge) {
+							const state = JSON.parse(sessionStorage.getItem("state"));
+							var _this = this;
+							var user = state.userInfo.userName;
+							this.dialogFormVisible = false
+							//添加仓库
+							this.axios({
+									url: "http://localhost:8088/frameproject/baseProduct/addProduct",
+									method: "post",
+									processData: false,
+									data: {
+										User: JSON.stringify(user),
+										Product: JSON.stringify(_this.proForm),
+										Stock: JSON.stringify(_this.stockForm)
+									},
+									headers: {
+										JWTDemo: state.userInfo.token,
+									},
+								})
+								.then(function(response) {
+									console.log(response.data.data)
+									ElMessage.success({
+										message: '添加成功',
+										type: 'success'
+									});
+									_this.form = {}
+									_this.judge = {}
+								})
+								.catch(function(error) {
+									console.log(error);
+								});
+						} else {
+							ElMessage.warning({
+								message: '产品ID重复！',
+								type: 'success'
+							});
+						}
+					}, 200)
+				}
 			}
-		}
+		},
+		computed: {},
+			created() {
+				this.findAllUnit()
+				this.findAllProType()
+				this.findAllDepot()
+			}
 	}
 </script>
 
