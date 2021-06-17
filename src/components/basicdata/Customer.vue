@@ -64,7 +64,7 @@
 							<el-input :disabled="true" v-model="updateForm.customerNumber" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
 						<el-form-item label="* 客户名称 *" :label-width="formLabelWidth">
-							<el-input :disabled="true" v-model="updateForm.customerName" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
+							<el-input v-model="updateForm.customerName" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
 						<el-form-item label="* 客户类型 *" :label-width="formLabelWidth">
 							<el-select v-model="updateForm.customerType" placeholder="请选择客户类型  (必选)">
