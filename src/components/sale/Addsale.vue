@@ -36,7 +36,6 @@
             v-model="formorder.orderTime"
             placeholder="选择日期"
             :clearable="false"
-            :disabledDate="tfdis(formorder.orderTime)"
           >
           </el-date-picker>
         </el-form-item>
@@ -61,8 +60,9 @@
           >
             <el-option
               v-for="item in headeroptions1"
-              :key="item.customerName"
-              :value="item.customerName"
+              :key="item.customerNumber"
+              :label="item.customerName"
+              :value="item.customerNumber"
             >
             </el-option>
           </el-select>
@@ -77,7 +77,7 @@
           >
             <el-option
               v-for="item in headeroptions2"
-              :key="item.userName"
+              :key="item.userId"
               :value="item.userId"
               :label="item.userName"
             >
@@ -258,11 +258,7 @@
         </el-table-column>
         <el-table-column prop="ingredient" label="成分" width="120" />
         <el-table-column prop="gramHeavy" label="克量" width="120" />
-        <el-table-column prop="remark" label="备注" width="120">
-          <template #default="scope">
-            <el-input v-model="productdata[scope.$index].remark" />
-          </template>
-        </el-table-column>
+        <el-table-column prop="remark" label="产品备注" width="120"/>
         <el-table-column
           prop="productDescribe"
           label="产品描述"
@@ -484,17 +480,12 @@ export default {
     },
   },
   methods: {
-    tfdis(time) {
-      if(Date.now()-1000*3600*24 > time.getTime()){
-        this.formorder.orderTime=new Date()
-      }
-    },
     handleSelectionChange(val) {
       this.joinstockdata = val;
     },
     setcontacts() {
       this.headeroptions1.forEach((item) => {
-        if (item.customerName == this.formorder.customer) {
+        if (item.customerNumber == this.formorder.customer) {
           this.formorder.contacts = item.contact;
           this.formorder.contactsPhone = item.contactNumber;
           this.formorder.contactsAddress = item.contactAddress;

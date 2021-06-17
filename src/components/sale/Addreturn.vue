@@ -58,8 +58,9 @@
           >
             <el-option
               v-for="item in headeroptions2"
-              :key="item.customerName"
-              :value="item.customerName"
+              :key="item.customerNumber"
+              :label="item.customerName"
+              :value="item.customerNumber"
             >
             </el-option>
           </el-select>
@@ -220,10 +221,10 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
-  name: "Addsale",
+  name: 'Addsale',
   data() {
     return {
       // 表单头部下拉列表信息
@@ -233,28 +234,28 @@ export default {
       //订单信息
       formorder: {
         //表头单据信息
-        returnId: "XSTHD" + Date.now(), //单据编号
+        returnId: 'XSTHD' + Date.now(), //单据编号
         returnTime: new Date(), //退货时间
-        deliveryId: "", //关联出库单编号
-        customer: "", //客户
-        salesmen: "", //销售人员
-        remarks: "", // 订单备注
+        deliveryId: '', //关联出库单编号
+        customer: '', //客户
+        salesmen: '', //销售人员
+        remarks: '', // 订单备注
         //表尾买家信息
         disrate: 0, //优惠率
         dismoney: 0, //优惠金额
         receivables: 0, //应收款
-        contacts: "", //客户联系人
-        contactsPhone: "", //客户联系人电话
-        contactsAddress: "", //客户地址
+        contacts: '', //客户联系人
+        contactsPhone: '', //客户联系人电话
+        contactsAddress: '', //客户地址
         //订单信息额外
-        founder: "",
+        founder: '',
       },
       //表体销售商品信息
       productdata: [],
       //抄送对象信息
       footeroptions: [],
       notice: [], //抄送对象
-    };
+    }
   },
   computed: {
     //单个商品销售总价
@@ -265,101 +266,107 @@ export default {
             this.productdata[id].saleUnitPrice *
               this.productdata[id].returnNum *
               1000
-          ) / 1000;
+          ) / 1000
         return (
           Math.round(
             this.productdata[id].saleUnitPrice *
               this.productdata[id].returnNum *
               1000
           ) / 1000
-        );
-      };
+        )
+      }
     },
     //销售总金额
     total: function () {
-      var allmoney = 0;
+      var allmoney = 0
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].returnNum;
+          this.productdata[i].saleUnitPrice * this.productdata[i].returnNum
       }
-      this.formorder.receivables =-
-        Math.round(
+      this.formorder.receivables =
+        -Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
             1000
-        ) / 1000;
+        ) / 1000
       return (
         -Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) * 100
         ) / 100
-      );
+      )
     },
     //销售优惠金额
     distotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].returnNum;
+          this.productdata[i].saleUnitPrice * this.productdata[i].returnNum
       }
       this.formorder.dismoney =
         Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
-        100;
+        100
       return (
         Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
         100
-      );
+      )
     },
   },
   methods: {
     //移除一行
     delrow(index, rows) {
       if (this.productdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     setcontacts() {
-      this.formorder.deliveryId = "";
-      this.customercanreturn = [];
-      this.productdata = [];
-      this.headeroptions1.forEach((item) => {
-        if (this.formorder.customer == item.customer) {
-          this.customercanreturn.push(item);
-        }
-      });
+      this.formorder.deliveryId = ''
+      this.customercanreturn = []
+      this.productdata = []
+      var name = ''
       this.headeroptions2.forEach((item) => {
-        if (item.customerName == this.formorder.customer) {
-          this.formorder.contacts = item.contact;
-          this.formorder.contactsPhone = item.contactNumber;
-          this.formorder.contactsAddress = item.contactAddress;
+        if (item.customerNumber == this.formorder.customer) {
+          name = item.customerName
+          this.formorder.contacts = item.contact
+          this.formorder.contactsPhone = item.contactNumber
+          this.formorder.contactsAddress = item.contactAddress
         }
-      });
+      })
+      this.headeroptions1.forEach((item) => {
+        if (name == item.customer) {
+          this.customercanreturn.push(item)
+        }
+      })
     },
     //选择销售出库单
     setdeliveryId() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
         url:
-          "http://localhost:8088/frameproject/saledelivery/find/" +
+          'http://localhost:8088/frameproject/saledelivery/find/' +
           this.formorder.deliveryId,
-        method: "get",
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.productdata = response.data.data.deliverydetails;
-          _this.formorder.salesmen=response.data.data.delivery.salesmen
-          _this.formorder.customer=response.data.data.delivery.customer
-          _this.formorder.contacts=response.data.data.delivery.contacts
-          _this.formorder.contactsAddress=response.data.data.delivery.contactsAddress
-          _this.formorder.contactsPhone=response.data.data.delivery.contactsPhone
+          _this.productdata = response.data.data.deliverydetails
+          _this.formorder.salesmen = response.data.data.delivery.salesmen
+          _this.headeroptions2.forEach((item) => {
+            if (item.customerName == response.data.data.delivery.customer) {
+              _this.formorder.customer = item.customerNumber
+              _this.formorder.contactsAddress = item.contactAddress
+              _this.formorder.contactsPhone = item.contactNumber
+              _this.formorder.contacts =item.contact
+            }
+          })
           for (var i = 0; i < _this.productdata.length; i++) {
-            _this.productdata[i].returnNum = _this.productdata[i].productNum;
+            _this.productdata[i].returnNum = _this.productdata[i].productNum
           }
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //提交审批
     examine(type) {
@@ -399,47 +406,47 @@ export default {
       }
     },
     finddeliveryId() {
-      const _this = this;
-      const state = JSON.parse(sessionStorage.getItem("state"));
+      const _this = this
+      const state = JSON.parse(sessionStorage.getItem('state'))
       this.axios({
-        url: "http://localhost:8088/frameproject/saledelivery/findcanreturn",
-        method: "post",
+        url: 'http://localhost:8088/frameproject/saledelivery/findcanreturn',
+        method: 'post',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.headeroptions1 = response.data.data;
-          _this.customercanreturn = _this.headeroptions1;
+          _this.headeroptions1 = response.data.data
+          _this.customercanreturn = _this.headeroptions1
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.headeroptions2 = response.data.data.customers;
-          _this.footeroptions = response.data.data.notifiers;
+          _this.headeroptions2 = response.data.data.customers
+          _this.footeroptions = response.data.data.notifiers
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
   },
   created: function () {
-    this.finddeliveryId();
-    this.findsaleman();
+    this.finddeliveryId()
+    this.findsaleman()
   },
-};
+}
 </script>
 
 <style lang="scss">
