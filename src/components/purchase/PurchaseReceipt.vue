@@ -5,7 +5,7 @@
     <div class="deliver-page-tag">
       <span style="float: left; margin-top: 10px">销售出库单</span>
       <el-steps
-        :active="formorder.approvalState + 1"
+        :active="formorder.state + 1"
         finish-status="success"
         simple
         style="width: 50%; float: left"
@@ -21,7 +21,7 @@
         >
         <el-button
           size="mini"
-          v-if="formorder.approvalState == 0"
+          v-if="formorder.state == 0"
           v-has="{ action: 'approval' }"
           @click="approval(-1)"
           >驳回</el-button
@@ -29,14 +29,14 @@
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == -2"
+          v-if="formorder.state == -2"
           @click="approval(0)"
           >提交审批</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == 0"
+          v-if="formorder.state == 0"
           v-has="{ action: 'approval' }"
           @click="approval(1)"
           >审批通过</el-button
@@ -50,16 +50,16 @@
       :before-close="handleClose"
     >
       <div style="float: left">
-        <span v-if="formorder.orderId == null">关联销售订单：无</span>
-        <span v-else>关联销售订单：{{ formorder.orderId }}</span>
+        <span v-if="formorder.associatedOrder == null">关联采购订单：无</span>
+        <span v-else>关联采购订单：{{ formorder.associatedOrder }}</span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">关联销售退货单：无</span>
-        <span v-else>关联销售退货单：{{ formorder.returnId }}</span>
+        <span v-if="formorder.exitOrderId == null">关联销售退货单：无</span>
+        <span v-else>关联销售退货单：{{ formorder.exitOrderId }}</span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.receiptId }}</span>
+        <span v-if="formorder.paymentOrder == null">关联收款单：无</span>
+        <span v-else>关联收款单：{{ formorder.paymentOrder }}</span>
       </div>
 
       <template #footer>
@@ -73,10 +73,10 @@
     <!-- 表单头部 -->
     <div class="deliver-header">
       <el-row :gutter="20">
-        <el-col :span="5">单据编号：{{ formorder.deliveryId }}</el-col>
-        <el-col :span="5">交货时间：{{ formorder.deliveryTime }}</el-col>
-        <el-col :span="5">客户：{{ formorder.customer }}</el-col>
-        <el-col :span="5">销售人员：{{ formorder.salesmen }}</el-col>
+        <el-col :span="5">单据编号：{{ formorder.id }}</el-col>
+        <el-col :span="5">入库时间：{{ formorder.inboundDate }}</el-col>
+        <el-col :span="5">供应商：{{ formorder.vendorName }}</el-col>
+        <el-col :span="5">采购人员：{{ formorder.buyerName }}</el-col>
       </el-row>
     </div>
     <!-- 内容表体 -->
@@ -86,25 +86,26 @@
         <!-- 产品详细信息 -->
         <el-table-column type="index" width="40" />
         <el-table-column prop="productName" label="产品名称" width="200" />
-        <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="remark" label="备注" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
-        <el-table-column prop="productNum" label="数量" width="120" />
+        <el-table-column prop="productId" label="产品编号" width="200" />
+        <el-table-column prop="productUnit" label="单位" width="200" />
+        <el-table-column prop="productNum" label="数量" width="200" />
         <el-table-column
-          prop="saleUnitPrice"
-          label="销售单价(元)"
-          width="120"
+          prop="purchaseUnitPrice"
+          label="采购单价(元)"
+          width="200"
         />
-        <el-table-column prop="saleMoney" label="销售金额(元)" width="120" />
-        <el-table-column prop="depot" label="仓库" width="120" />
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
+        <el-table-column
+          prop="purchaseUnitPrice"
+          label="计划价(元)"
+          width="200"
+        />
+        <el-table-column prop="purchaseMoney" label="采购金额(元)" width="200" />
+        <el-table-column prop="depotName" label="仓库" width="200" />
         <el-table-column
           :show-overflow-tooltip="true"
           prop="productDescribe"
           label="产品描述"
-          width="150"
+          width="200"
         /> </el-table
       ><span>
         <el-alert
@@ -136,27 +137,18 @@
           <el-col :span="6">优惠金额(元)： {{ formorder.dismoney }}元</el-col>
           <el-col :span="6">应收款(元)： {{ formorder.receivables }}元</el-col>
         </el-row>
-        <el-row :gutter="24">
-          <el-col :span="5">客户联系人：{{ formorder.contacts }}</el-col>
-          <el-col :span="6"
-            >客户联系人电话：{{ formorder.contactsPhone }}</el-col
-          >
-          <el-col :span="6">客户地址：{{ formorder.contactsAddress }}</el-col>
-        </el-row>
+        
         <el-row :gutter="24">
           <el-col :span="5">创建人：{{ formorder.founder }}</el-col>
           <el-col :span="6">创建时间：{{ formorder.foundTime }}</el-col>
         </el-row>
         <el-row
           :gutter="24"
-          v-if="formorder.approvalState == 1 || formorder.approvalState == -1"
+          v-if="formorder.state == 1 || formorder.state == -1"
         >
-          <el-col :span="5">二级审批人：{{ formorder.approver }}</el-col>
+          <el-col :span="5">二级审批人：{{ formorder.vettingName }}</el-col>
           <el-col :span="6"
-            >二级审批时间：{{ formorder.lastApprovalTime }}</el-col
-          >
-          <el-col :span="6"
-            >二级审批备注：{{ formorder.approvalRemarks }}</el-col
+            >二级审批时间：{{ formorder.lastVettingTime }}</el-col
           >
         </el-row>
       </div>
@@ -172,7 +164,7 @@ export default {
     sessionStorage.removeItem("orderid");
     next();
   },
-  name: "Sale",
+  name: "PurchaseReceipt",
   data() {
     return {
       dialogVisible: false,
@@ -186,7 +178,7 @@ export default {
     total: function () {
       var allmoney = 0;
       this.productdata.forEach((money) => {
-        allmoney += money.saleMoney;
+        allmoney += money.purchaseMoney;
       });
       return Math.round(allmoney * 1000) / 1000;
     },
@@ -206,10 +198,9 @@ export default {
             orderid: orderid,
             type: type,
             user: state.userInfo.userName,
-            approvalremarks: value,
           };
           this.axios({
-            url: "http://localhost:8088/frameproject/saledelivery/approval",
+            url: "http://localhost:8088/frameproject/purchaseReceipt/approval",
             method: "get",
             processData: false,
             params: fd,
@@ -238,7 +229,7 @@ export default {
       const orderid = sessionStorage.getItem("orderid");
       const _this = this;
       if (orderid == null) {
-        this.$router.push("/Deliverlist");
+        this.$router.push("/PurchaseReceiptList");
       } else {
         this.axios({
           url:
@@ -249,8 +240,9 @@ export default {
           },
         })
           .then(function (response) {
-            _this.formorder = response.data.data.delivery;
-            _this.productdata = response.data.data.deliverydetails;
+            console.log(response)
+            _this.formorder = response.data.data.receipt;
+            _this.productdata = response.data.data.receiptDetails;
           })
           .catch(function (error) {
             console.log(error);

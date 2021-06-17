@@ -60,7 +60,8 @@
             <el-option
               v-for="item in headeroptions1"
               :key="item.vendorName"
-              :value="item.vendorName"
+              :value="item.vendorId"
+              :label="item.vendorName"
             >
             </el-option>
           </el-select>
@@ -76,7 +77,8 @@
             <el-option
               v-for="item in headeroptions2"
               :key="item.userName"
-              :value="item.userName"
+              :value="item.userId"
+              :label="item.userName"
             >
             </el-option>
           </el-select>
@@ -610,11 +612,8 @@ export default {
       },
     })
       .then(function (response) {
-        // response.data.data.forEach((item) => {
-          // _this.headeroptions2.push({ buyerName: item.userName });
           _this.headeroptions1 = response.data.data.vendors;
           _this.headeroptions2 = response.data.data.purchasemans;
-        // });
       })
       .catch(function (error) {
         console.log(error);

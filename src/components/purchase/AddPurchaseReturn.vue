@@ -39,51 +39,43 @@
           >
           </el-date-picker>
         </el-form-item>
-        <!-- 关联出库单编号 -->
-        <el-form-item label="关联入库单编号:">
-          <el-select
-            v-model="formorder.deliveryId"
-            size="mini"
-            filterable
-            placeholder="请选择关联入库单编号"
-            @change="deliveryId()"
-          >
-            <el-option
-              v-for="item in headeroptions1"
-              :key="item.deliveryId"
-              :value="item.deliveryId"
-            >
-            </el-option>
-          </el-select>
+        <!-- 采购人员 -->
+        <el-form-item label="*采购人员:" class="form-input">
+          <el-input
+            v-model="formorder.salesmen"
+            readonly
+            placeholder="*采购员"
+          />
         </el-form-item>
         <!-- 客户 -->
-        <el-form-item label="供应商:">
+        <el-form-item label="*供应商:">
           <el-select
             v-model="formorder.customer"
             size="mini"
             filterable
             placeholder="请选择供应商"
+            @change="setcontacts()"
           >
             <el-option
               v-for="item in headeroptions2"
-              :key="item.customer"
-              :value="item.customer"
+              :key="item.customerName"
+              :value="item.customerName"
             >
             </el-option>
           </el-select>
         </el-form-item>
-        <!-- 销售人员 -->
-        <el-form-item label="采购人员:" class="form-input">
+        <!-- 关联出库单编号 -->
+        <el-form-item label="*关联入库单编号:">
           <el-select
-            v-model="formorder.salesmen"
+            v-model="formorder.deliveryId"
             size="mini"
-            filterable
-            placeholder="请选择采购员"
+            placeholder="请选择关联入库单编号"
+            @change="setdeliveryId()"
           >
             <el-option
-              v-for="item in headeroptions3"
-              :key="item.salesmen"
-              :value="item.salesmen"
+              v-for="item in customercanreturn"
+              :key="item.deliveryId"
+              :value="item.deliveryId"
             >
             </el-option>
           </el-select>
@@ -93,7 +85,7 @@
     <!-- 表单表体 -->
     <!-- 内容表体 -->
     <div class="addreturn-main">
-      <!-- 销售产品信息table -->
+      <!-- 采购产品信息table -->
       <el-table :data="productdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
         <el-table-column type="index" width="40" fixed />
@@ -133,8 +125,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="depot" label="仓库" width="120" />
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
+
         <el-table-column
           prop="productDescribe"
           label="产品描述"
@@ -186,21 +177,6 @@
             readonly="readonly"
           ></el-input>
         </el-form-item>
-        <!-- 客户联系人 -->
-        <el-form-item label="供应商联系人:">
-          <el-input v-model="formorder.contacts" readonly="readonly"></el-input>
-        </el-form-item>
-        <!-- 联系人电话 -->
-        <el-form-item label="联系人电话:" class="form-input">
-          <el-input
-            v-model="formorder.contactsPhone"
-            readonly="readonly"
-          ></el-input>
-        </el-form-item>
-        <!-- 客户地址 -->
-        <el-form-item label="供应商地址:" class="form-input">
-          <el-input v-model="formorder.contactsAddress"></el-input>
-        </el-form-item>
       </el-form>
       <el-divider></el-divider>
       <p style="font-size: 14px">
@@ -218,8 +194,8 @@
       >
         <el-option
           v-for="item in footeroptions"
-          :key="item.value"
-          :value="item.value"
+          :key="item.userName"
+          :value="item.userName"
         >
         </el-option>
       </el-select>
@@ -231,29 +207,34 @@
 import { ElMessage } from "element-plus";
 import store from "../../store";
 export default {
-  name: "AddPurchaseReturn",
+  name: "Addsale",
   data() {
     return {
       // 表单头部下拉列表信息
       headeroptions1: [], //关联入库单
       headeroptions2: [], //供应商
-      headeroptions3: [], //采购人
+      customercanreturn: [], //客户可退货单
       //订单信息
       formorder: {
         //表头单据信息
-        returnId: "CGTHD" + Date.now(), //单据编号
-        returnTime: new Date(), //退货时间
-        deliveryId: "", //关联入库单编号
-        customer: "", //供应商
-        salesmen: "", //采购人员
+        id: "CGTHD" + Date.now(), //单据编号
+        exitDate: new Date(), //退货时间
+        receiptOrder: "", //关联入库单编号
+        purchaseOrder:"",
+        vendorName:"",
+        buyerName:"",
+        
+
+        customer: "", //客户
+        salesmen: "", //销售人员
         remarks: "", // 订单备注
         //表尾买家信息
         disrate: 0, //优惠率
         dismoney: 0, //优惠金额
         receivables: 0, //应收款
-        contacts: "", //供应商联系人
-        contactsPhone: "", //供应商联系人电话
-        contactsAddress: "", //供应商地址
+        contacts: "", //客户联系人
+        contactsPhone: "", //客户联系人电话
+        contactsAddress: "", //客户地址
         //订单信息额外
         founder: "",
       },
@@ -283,25 +264,25 @@ export default {
         );
       };
     },
-    //采购总金额
+    //销售总金额
     total: function () {
       var allmoney = 0;
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
           this.productdata[i].saleUnitPrice * this.productdata[i].returnNum;
       }
-      this.formorder.receivables =
+      this.formorder.receivables =-
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
             1000
         ) / 1000;
       return (
-        Math.round(
+        -Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) * 100
         ) / 100
       );
     },
-    //采购优惠金额
+    //销售优惠金额
     distotal: function () {
       var allmoney = 0;
       for (var i = 0; i < this.productdata.length; i++) {
@@ -324,8 +305,25 @@ export default {
         rows.splice(index, 1); //删掉该行
       }
     },
+    setcontacts() {
+      this.formorder.deliveryId = "";
+      this.customercanreturn = [];
+      this.productdata = [];
+      this.headeroptions1.forEach((item) => {
+        if (this.formorder.customer == item.customer) {
+          this.customercanreturn.push(item);
+        }
+      });
+      this.headeroptions2.forEach((item) => {
+        if (item.customerName == this.formorder.customer) {
+          this.formorder.contacts = item.contact;
+          this.formorder.contactsPhone = item.contactNumber;
+          this.formorder.contactsAddress = item.contactAddress;
+        }
+      });
+    },
     //选择销售出库单
-    deliveryId() {
+    setdeliveryId() {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       this.axios({
@@ -339,11 +337,13 @@ export default {
       })
         .then(function (response) {
           _this.productdata = response.data.data.deliverydetails;
-          _this.formorder = response.data.data.delivery;
-          _this.formorder.returnTime = new Date();
-          _this.formorder.returnId = "XSTHD" + Date.now(); //单据编号
-          for(var i=0;i<_this.productdata.length;i++){
-            _this.productdata[i].returnNum=_this.productdata[i].productNum
+          _this.formorder.salesmen=response.data.data.delivery.salesmen
+          _this.formorder.customer=response.data.data.delivery.customer
+          _this.formorder.contacts=response.data.data.delivery.contacts
+          _this.formorder.contactsAddress=response.data.data.delivery.contactsAddress
+          _this.formorder.contactsPhone=response.data.data.delivery.contactsPhone
+          for (var i = 0; i < _this.productdata.length; i++) {
+            _this.productdata[i].returnNum = _this.productdata[i].productNum;
           }
         })
         .catch(function (error) {
@@ -352,30 +352,40 @@ export default {
     },
     //提交审批
     examine(type) {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      this.formorder.returnTime = dayjs(this.formorder.orderTime).format(
-        "YYYY-MM-DD HH:mm:ss"
-      );
-      this.formorder.founder = state.userInfo.userName;
-      this.axios({
-        url: "http://localhost:8088/frameproject/salereturn/add/" + type,
-        method: "post",
-        data: {
-          order: JSON.stringify(_this.formorder), //_this.formorder ,
-          orderdetails: JSON.stringify(_this.productdata), //_this.productdata//
-        },
-        headers: {
-          JWTDemo: state.userInfo.token,
-        },
-      })
-        .then(function (response) {
-          sessionStorage.setItem("orderid", response.data.data);
-          _this.$router.push("/Return");
-        })
-        .catch(function (error) {
-          console.log(error);
+      if (this.formorder.customer == "" || this.formorder.deliveryId == "") {
+        this.$notify({
+          title: "警告",
+          message: "请先填写*必要信息!",
+          type: "warning",
         });
+      } else {
+        const state = JSON.parse(sessionStorage.getItem("state"));
+        const _this = this;
+        this.formorder.returnTime = dayjs(this.formorder.orderTime).format(
+          "YYYY-MM-DD HH:mm:ss"
+        );
+        this.formorder.founder = state.userInfo.userName;
+        this.axios({
+          url: "http://localhost:8088/frameproject/salereturn/add/" + type,
+          method: "post",
+          data: {
+            order: JSON.stringify(_this.formorder), //_this.formorder ,
+            orderdetails: JSON.stringify(_this.productdata), //_this.productdata//
+          },
+          headers: {
+            JWTDemo: state.userInfo.token,
+          },
+        })
+          .then(function (response) {
+            if (response.data.code == 200) {
+              sessionStorage.setItem("orderid", response.data.data);
+              _this.$router.push("/Return");
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
     },
     finddeliveryId() {
       const _this = this;
@@ -388,9 +398,8 @@ export default {
         },
       })
         .then(function (response) {
-          response.data.data.forEach((item) => {
-            _this.headeroptions1.push({ deliveryId: item.deliveryId });
-          });
+          _this.headeroptions1 = response.data.data;
+          _this.customercanreturn = _this.headeroptions1;
         })
         .catch(function (error) {
           console.log(error);
@@ -400,16 +409,15 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       this.axios({
-        url: "http://localhost:8088/frameproject/roleusers/" + 3,
+        url: "http://localhost:8088/frameproject/personnel/ofpeople",
         method: "get",
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          response.data.data.forEach((item) => {
-            _this.headeroptions3.push({ salesmen: item.userName });
-          });
+          _this.headeroptions2 = response.data.data.customers;
+          _this.footeroptions = response.data.data.notifiers;
         })
         .catch(function (error) {
           console.log(error);
@@ -429,6 +437,12 @@ export default {
   background-color: white;
 }
 /* 顶部 */
+.addreturn .el-carousel__arrow--right,
+.el-notification.right {
+  top: 110px !important;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
 .addreturn-page-tag {
   height: 40px;
   padding: 0 10px;
