@@ -50,8 +50,9 @@
           >
             <el-option
               v-for="item in headeroptions1"
-              :key="item.customerName"
-              :value="item.customerName"
+              :key="item.customerNumber"
+              :label="item.customerName"
+              :value="item.customerNumber"
             >
             </el-option>
           </el-select>
@@ -148,7 +149,7 @@
     </el-dialog>
     <!-- 内容表体 -->
     <el-divider content-position="left">{{
-      formorder.incomeType == "应收收款" ? "应收单据列表:" : "销售订单列表:"
+      formorder.incomeType == '应收收款' ? '应收单据列表:' : '销售订单列表:'
     }}</el-divider>
     <div class="addreceipt-main">
       <!-- 销售产品信息table -->
@@ -189,7 +190,6 @@
             <el-input-number
               v-model="billdata[scope.$index].thisMoney"
               :controls="false"
-              :max="billdata[scope.$index].uncollectedMoney"
               :precision="2"
             />
           </template>
@@ -305,19 +305,19 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("receipt");
-    next();
+    sessionStorage.removeItem('receipt')
+    next()
   },
-  name: "Addreceipt",
+  name: 'Addreceipt',
   data() {
     return {
       //订单div
       dialogTableVisible: false,
-      findstock: "", //库存产品名称查询
+      findstock: '', //库存产品名称查询
       stockdata: [], //库存产品--信息
       joinstockdata: [], //已选库存产品
       // 表单头部下拉列表信息
@@ -326,35 +326,35 @@ export default {
       //订单信息
       formorder: {
         //表头单据信息
-        receiptId: "SKD" + Date.now(), //单据编号
+        receiptId: 'SKD' + Date.now(), //单据编号
         receiptTime: new Date(), //单据时间
-        customer: "", //客户
-        payee: "", //收款人员
-        incomeType: "应收收款", //收款类别
-        receiptMoney: "", //收款金额
-        ciaMoney: "", //预收金额
-        ciaBalance: "", //预收余额
-        founder: "", //订单创建人
-        remarks: "", //订单备注
+        customer: '', //客户
+        payee: '', //收款人员
+        incomeType: '应收收款', //收款类别
+        receiptMoney: '', //收款金额
+        ciaMoney: '', //预收金额
+        ciaBalance: '', //预收余额
+        founder: '', //订单创建人
+        remarks: '', //订单备注
       },
       //表体单据信息
       billdata: [
         {
-          saleId: "", //单据编号
-          saleType: "", //单据类型
-          saleTime: "", //单据日期
-          receiptMoney: "", //应收款金额
-          receivedMoney: "", //已收金额
-          uncollectedMoney: "", //未收金额
+          saleId: '', //单据编号
+          saleType: '', //单据类型
+          saleTime: '', //单据日期
+          receiptMoney: '', //应收款金额
+          receivedMoney: '', //已收金额
+          uncollectedMoney: '', //未收金额
           thisMoney: 0.00, //本次收款
         },
       ],
       //表体本次收款信息
       accountdata: [
         {
-          fundAccount: "", //资金账户
-          settlementTypeName: "", //账户收款类型
-          settlementType: "", //账户收款类型
+          fundAccount: '', //资金账户
+          settlementTypeName: '', //账户收款类型
+          settlementType: '', //账户收款类型
           thisMoney: 0.00, //本次收款
         },
       ],
@@ -362,87 +362,87 @@ export default {
       footeroptions: [],
       notice: [], //抄送对象
       options: [], //资金账户
-      incomeType: [{ value: "应收收款" }, { value: "订单收款" }],
+      incomeType: [{ value: '应收收款' }, { value: '订单收款' }],
       tfhas: false,
       //条件查询订单
       condition: {
-        customer: "",
-        saleId: "",
+        customer: '',
+        saleId: '',
       },
       //分页
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     //单据收款
     billtotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.billdata.forEach((item) => {
-        allmoney += item.thisMoney;
-      });
-      return allmoney;
+        allmoney += item.thisMoney
+      })
+      return allmoney
     },
     //账户收款
     accounttotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.accountdata.forEach((item) => {
-        allmoney += item.thisMoney;
-      });
-      this.formorder.receiptMoney = allmoney;
-      return allmoney;
+        allmoney += item.thisMoney
+      })
+      this.formorder.receiptMoney = allmoney
+      return allmoney
     },
     //预收款
     ciaMoney: function () {
-      if (this.formorder.incomeType == "应收收款") {
-        this.formorder.ciaMoney = this.accounttotal - this.billtotal;
-        return this.accounttotal - this.billtotal;
+      if (this.formorder.incomeType == '应收收款') {
+        this.formorder.ciaMoney = this.accounttotal - this.billtotal
+        return this.accounttotal - this.billtotal
       } else {
-        this.formorder.ciaMoney = this.accounttotal;
-        return this.accounttotal;
+        this.formorder.ciaMoney = this.accounttotal
+        return this.accounttotal
       }
     },
     //已选产品
     thisrow: function () {
-      return this.joinstockdata.length;
+      return this.joinstockdata.length
     },
   },
   methods: {
     handleSelectionChange(val) {
-      this.joinstockdata = val;
+      this.joinstockdata = val
     },
     //新增一行
     addrow() {
       this.accountdata.push({
-        fundAccount: "",
-        settlementTypeName: "",
-        settlementType: "",
-        thisMoney:0.00,
-      });
+        fundAccount: '',
+        settlementTypeName: '',
+        settlementType: '',
+        thisMoney: 0.00,
+      })
     },
     //改变收款方式
     changetype() {
       this.billdata = [
         {
-          saleId: "", //单据编号
-          thisMoney: "0.00", //本次收款
+          saleId: '', //单据编号
+          thisMoney: 0.00, //本次收款
         },
-      ];
+      ]
     },
     findbill() {
-      this.condition.customer = this.formorder.customer;
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      var url = "";
-      this.formorder.incomeType == "应收收款"
+      this.condition.customer = this.formorder.customer
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      var url = ''
+      this.formorder.incomeType == '应收收款'
         ? (url =
-            "http://localhost:8088/frameproject/capitalReceivable/finddeliverypage")
+            'http://localhost:8088/frameproject/capitalReceivable/finddeliverypage')
         : (url =
-            "http://localhost:8088/frameproject/capitalReceivable/findsalepage");
+            'http://localhost:8088/frameproject/capitalReceivable/findsalepage')
       this.axios({
         url: url,
-        method: "post",
+        method: 'post',
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
@@ -454,130 +454,130 @@ export default {
       })
         .then(function (response) {
           response.data.data.rows.forEach((item) => {
-            if (item.saleId.match(/^[a-z|A-Z]+/gi) == "XSCKD") {
-              item.saleType = "销售出库单";
-            } else if (item.saleId.match(/^[a-z|A-Z]+/gi) == "XSTHD") {
-              item.saleType = "销售退货单";
+            if (item.saleId.match(/^[a-z|A-Z]+/gi) == 'XSCKD') {
+              item.saleType = '销售出库单'
+            } else if (item.saleId.match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
+              item.saleType = '销售退货单'
             } else {
-              item.saleType = "销售订单";
+              item.saleType = '销售订单'
             }
-          });
-          _this.stockdata = response.data.data.rows;
-          _this.max = response.data.data.total;
+          })
+          _this.stockdata = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //选择订单
     dialogopen() {
-      if (this.formorder.customer == "") {
+      if (this.formorder.customer == '') {
         ElMessage.warning({
-          message: "请先选择一位客户",
-          type: "warning",
-        });
+          message: '请先选择一位客户',
+          type: 'warning',
+        })
       } else {
-        this.findbill();
-        this.dialogTableVisible = true;
+        this.findbill()
+        this.dialogTableVisible = true
       }
     },
     //添加订单
     addproduct() {
-      var productlist = [];
+      var productlist = []
       this.billdata.forEach((item) => {
-        productlist.push(item.saleId);
-      });
+        productlist.push(item.saleId)
+      })
       this.joinstockdata.forEach((item) => {
         if (productlist.indexOf(item.saleId) == -1) {
-          item.thisMoney = item.uncollectedMoney;
-          this.billdata.push(item);
+          item.thisMoney = item.uncollectedMoney
+          this.billdata.push(item)
         }
-      });
+      })
       for (var i = this.billdata.length - 1; i >= 0; i--) {
-        if (this.billdata[i].saleId == "" && this.billdata.length > 1) {
-          this.billdata.splice(i, 1);
+        if (this.billdata[i].saleId == '' && this.billdata.length > 1) {
+          this.billdata.splice(i, 1)
         }
       }
-      this.dialogTableVisible = false;
+      this.dialogTableVisible = false
     },
     //移除一行
     delrow(index, rows) {
       if (this.billdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     //移除一行
     delrow1(index, rows) {
       if (this.accountdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     settype(index) {
       this.options.forEach((item) => {
         if (item.capitalId == this.accountdata[index].fundAccount) {
-          this.accountdata[index].settlementTypeName = item.settlementType;
-          this.accountdata[index].settlementType = item.settlementTypeId;
+          this.accountdata[index].settlementTypeName = item.settlementType
+          this.accountdata[index].settlementType = item.settlementTypeId
         }
-      });
+      })
     },
     //提交审批（生成订单）
     examine(type) {
-      var tfok = true;
+      var tfok = true
       if (tfok == true) {
         this.accountdata.forEach((item) => {
           if (
-            item.fundAccount == "" ||
-            this.formorder.payee == "" ||
-            this.formorder.customer == "" ||
-            (this.billdata.length == 1 && this.billdata[0].saleId == "")
+            item.fundAccount == '' ||
+            this.formorder.payee == '' ||
+            this.formorder.customer == '' ||
+            (this.billdata.length == 1 && this.billdata[0].saleId == '')
           ) {
             this.$notify({
-              title: "警告",
-              message: "请先填写*必要信息!",
-              type: "warning",
-            });
-            tfok = false;
+              title: '警告',
+              message: '请先填写*必要信息!',
+              type: 'warning',
+            })
+            tfok = false
           }
-        });
+        })
       }
       this.billdata.forEach((item) => {
         if (item.thisMoney > item.uncollectedMoney && tfok == true) {
           this.$notify({
-            title: "警告",
-            message: "本次收款金额不能大于未收金额",
-            type: "warning",
-          });
-          tfok = false;
+            title: '警告',
+            message: '本次收款金额不能大于未收金额',
+            type: 'warning',
+          })
+          tfok = false
         } else if (item.uncollectedMoney == 0 && tfok == true) {
           this.$notify({
-            title: "警告",
-            message: "订单" + item.saleId + "的未收金额不足",
-            type: "warning",
-          });
-          tfok = false;
+            title: '警告',
+            message: '订单' + item.saleId + '的未收金额不足',
+            type: 'warning',
+          })
+          tfok = false
         }
-      });
+      })
       if (this.accounttotal < this.billtotal && tfok == true) {
         this.$notify({
-          title: "警告",
-          message: "账户总计收款不能小于单据总计收款",
-          type: "warning",
-        });
-        tfok = false;
+          title: '警告',
+          message: '账户总计收款不能小于单据总计收款',
+          type: 'warning',
+        })
+        tfok = false
       }
       if (tfok == true) {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const _this = this;
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const _this = this
         this.formorder.receiptTime = dayjs(this.formorder.receiptTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.founder = state.userInfo.userName;
-        this.formorder.ciaBalance = this.formorder.ciaMoney;
+          'YYYY-MM-DD HH:mm:ss'
+        )
+        this.formorder.founder = state.userInfo.userName
+        this.formorder.ciaBalance = this.formorder.ciaMoney
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalReceipt/addreceipt/" +
+            'http://localhost:8088/frameproject/capitalReceipt/addreceipt/' +
             type,
-          method: "post",
+          method: 'post',
           data: {
             receipt: JSON.stringify(_this.formorder),
             bill: JSON.stringify(_this.billdata),
@@ -588,101 +588,101 @@ export default {
           },
         })
           .then(function (response) {
-            sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Receipt");
+            sessionStorage.setItem('orderid', response.data.data)
+            _this.$router.push('/Receipt')
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
     findcan() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const receipt = JSON.parse(sessionStorage.getItem("receipt"));
-      const _this = this;
-      this.tfhas = true;
-      var url = "";
-      this.formorder.incomeType = receipt.type;
-      receipt.type == "应收收款"
-        ? (this.type = "应收单据列表:")
-        : (this.type = "销售订单:");
-      receipt.type == "应收收款"
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const receipt = JSON.parse(sessionStorage.getItem('receipt'))
+      const _this = this
+      this.tfhas = true
+      var url = ''
+      this.formorder.incomeType = receipt.type
+      receipt.type == '应收收款'
+        ? (this.type = '应收单据列表:')
+        : (this.type = '销售订单:')
+      receipt.type == '应收收款'
         ? (url =
-            "http://localhost:8088/frameproject/capitalReceivable/deliverythisReceipt")
+            'http://localhost:8088/frameproject/capitalReceivable/deliverythisReceipt')
         : (url =
-            "http://localhost:8088/frameproject/capitalReceivable/salethisReceipt");
+            'http://localhost:8088/frameproject/capitalReceivable/salethisReceipt')
       this.axios({
         url: url,
-        method: "get",
+        method: 'get',
         params: { saleId: receipt.orderId },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "XSCKD") {
-            response.data.data.saleType = "销售出库单";
-          } else if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "XSTHD") {
-            response.data.data.saleType = "销售退货单";
+          if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == 'XSCKD') {
+            response.data.data.saleType = '销售出库单'
+          } else if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
+            response.data.data.saleType = '销售退货单'
           } else {
-            response.data.data.saleType = "销售订单";
+            response.data.data.saleType = '销售订单'
           }
-          response.data.data.thisMoney = response.data.data.uncollectedMoney;
-          _this.formorder.customer = response.data.data.customer;
-          _this.billdata.push(response.data.data);
-          _this.billdata.splice(0, 1);
+          response.data.data.thisMoney = response.data.data.uncollectedMoney
+          _this.formorder.customer = response.data.data.customer
+          _this.billdata.push(response.data.data)
+          _this.billdata.splice(0, 1)
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     findoptions() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/capitalReceivable/findaccount",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/capitalReceivable/findaccount',
+        method: 'get',
         processData: false,
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.options = response.data.data;
+          _this.options = response.data.data
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.headeroptions1 = response.data.data.customers;
-          _this.headeroptions2 = response.data.data.salemans;
-          _this.footeroptions = response.data.data.notifiers;
+          _this.headeroptions1 = response.data.data.customers
+          _this.headeroptions2 = response.data.data.salemans
+          _this.footeroptions = response.data.data.notifiers
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
   },
   created: function () {
-    const receipt = JSON.parse(sessionStorage.getItem("receipt"));
+    const receipt = JSON.parse(sessionStorage.getItem('receipt'))
     if (receipt != null) {
-      this.findcan();
+      this.findcan()
     }
-    this.findoptions();
-    this.findsaleman();
+    this.findoptions()
+    this.findsaleman()
   },
-};
+}
 </script>
 
 <style lang="scss">
