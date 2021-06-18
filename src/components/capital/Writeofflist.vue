@@ -43,31 +43,13 @@
                 </el-date-picker>
               </div>
             </div>
-            <!-- 收款日期 -->
+            <!-- 核算方式 -->
             <div style="height: 50px">
-              <span>交货日期:</span>
+              <span>核算方式:</span>
               <el-radio-group v-model="collection" size="small" @change="qbc()">
-                <el-radio-button label="全部"></el-radio-button>
-                <el-radio-button label="今天"></el-radio-button>
-                <el-radio-button label="昨天"></el-radio-button>
-                <el-radio-button label="本周"></el-radio-button>
-                <el-radio-button label="本月"></el-radio-button>
-                <el-radio-button label="自定义"></el-radio-button>
+                <el-radio-button label="预收冲应收"></el-radio-button>
+                <el-radio-button label="预付冲应付"></el-radio-button>
               </el-radio-group>
-              <div
-                v-show="custom2"
-                style="top: -45px; left: 485px; position: relative"
-              >
-                <el-date-picker
-                  v-model="customtime2"
-                  type="daterange"
-                  range-separator="至"
-                  start-placeholder="开始日期"
-                  end-placeholder="结束日期"
-                  @change="qbc()"
-                >
-                </el-date-picker>
-              </div>
             </div>
             <!-- 结案状态 -->
             <span>审批状态:</span>
@@ -88,23 +70,33 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options1" :value="item.customerName">
+              <el-option
+                v-for="item in options1"
+                :key="item.customerNumber"
+                :label="item.customerName"
+                :value="item.customerNumber"
+              >
+              </el-option>
+            </el-select>
+            <!-- 供应商 -->
+            <span>供应商:</span>
+            <el-select
+              v-model="value2"
+              size="small"
+              clearable
+              filterable
+              @change="qbc()"
+            >
+              <el-option
+                v-for="item in options2"
+                :key="item.vendorId"
+                :label="item.vendorName"
+                :value="item.vendorId"
+              >
               </el-option>
             </el-select>
             <!-- 创建人 -->
             <span>创建人:</span>
-            <el-select
-              v-model="value2"
-              clearable
-              size="small"
-              filterable
-              @change="qbc()"
-            >
-              <el-option v-for="item in options2" :value="item.userName">
-              </el-option>
-            </el-select>
-            <!-- 销售人员 -->
-            <span>销售人员:</span>
             <el-select
               v-model="value3"
               clearable
@@ -112,7 +104,29 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options3" :value="item.userName">
+              <el-option
+                v-for="item in options3"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
+              </el-option>
+            </el-select>
+            <!-- 核销人 -->
+            <span>核销人:</span>
+            <el-select
+              v-model="value4"
+              clearable
+              size="small"
+              filterable
+              @change="qbc()"
+            >
+              <el-option
+                v-for="item in options4"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
           </div>
@@ -163,7 +177,7 @@
           width="150"
         />
         <el-table-column prop="cavType" label="核销方式" width="120" />
-        <el-table-column prop="otherParty" label="aaa" width="120" />
+        <el-table-column prop="otherParty" :label="collection=='预收冲应收'?'客户':'供应商'" width="120" />
         <el-table-column prop="cavBy" label="核销人" width="120" />
         <el-table-column
           prop="thisMoney"
@@ -197,7 +211,7 @@
           sortable
           width="200"
         />
-         <el-table-column prop="approver" label="审批人" width="120" />
+        <el-table-column prop="approver" label="审批人" width="120" />
         <el-table-column
           prop="lastApprovalTime"
           label="最后审批时间"
@@ -224,39 +238,38 @@
 
 <script>
 export default {
-  name: "Receivable",
+  name: 'Receivable',
   data() {
     return {
       //默认展开
-      activeNames: "1",
+      activeNames: '1',
       //筛选框
-      billdate: "全部", //单据日期
-      collection: "全部", //收款日期
-      status: "全部", //结案状态
-      customtime1: "", //自定义时间
-      customtime2: "",
+      billdate: '全部', //单据日期
+      collection: '预收冲应收', //核算方式
+      status: '全部', //结案状态
+      customtime1: '', //自定义时间
       options1: [],
       options2: [],
       options3: [],
-      value1: "", //客户
-      value2: "", //创建人
-      value3: "", //销售人员
+      options4: [],
+      value1: '', //客户
+      value2: '', //供应商
+      value3: '', //创建人
+      value4: '', //核销人
       //表单数据
       tableData: [],
       //条件查询数据
-      vagueorderid: "",
+      vagueorderid: '',
       condition: {
-        orderId: "", //订单id
-        orderTime: "", //单据日期
-        otimeState: "",
-        otimeEnd: "",
-        deliveryTime: "", //交货日期
-        dtimeState: "",
-        dtimeEnd: "",
-        approvalState: "", //审批状态
-        customer: "", //客户
-        founder: "", //创建人
-        salesmen: "", //销售人
+        cavId: '', //订单id
+        orderTime: '', //单据日期
+        otimeState: '',
+        otimeEnd: '',
+        cavType:'预收冲应收',//核算方式
+        approvalState: '', //审批状态
+        customer: '', //客户
+        founder: '', //创建人
+        vendor: '', //供应商
       },
       dialogTableVisible: false,
       pstatus: [],
@@ -264,121 +277,120 @@ export default {
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     paging: function () {
-      return this.tableData.length > 0 ? true : false;
+      return this.tableData.length > 0 ? true : false
     },
     custom1: function () {
-      return this.billdate == "自定义" ? true : false;
-    },
-    custom2: function () {
-      return this.collection == "自定义" ? true : false;
+      return this.billdate == '自定义' ? true : false
     },
     all: function () {
       return [
-        "单据日期: " + this.billdate,
-        "交货日期: " + this.collection,
-        "审批状态: " + this.status,
-        "客户: " + this.value1,
-        "创建人: " + this.value2,
-        "销售人员: " + this.value3,
-      ];
+        '单据日期: ' + this.billdate,
+        '核算方式:' + this.collection,
+        '审批状态: ' + this.status,
+        '客户: ' + this.value1,
+        '供应商: ' + this.value2,
+        '创建人: ' + this.value3,
+        '核销人: ' + this.value4,
+      ]
     },
   },
   methods: {
     //新增单据
     goadd() {
-      this.$router.push("/Addwriteoff");
+      this.$router.push('/Addwriteoff')
     },
     //条件分页查询
     findpage() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      var _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/capitalCavCia/conditionpage",
-        method: "post",
+        url: 'http://localhost:8088/frameproject/capitalCavCia/conditionpage',
+        method: 'post',
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
-          condition:""// JSON.stringify(_this.condition),
+          condition: JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.tableData = response.data.data.rows;
-          _this.max = response.data.data.total;
+          _this.tableData = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //改变页码数
     handleCurrentChange(val) {
-      this.findpage(val, this.pagesize);
+      this.findpage(val, this.pagesize)
     },
     //前往订单详情
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].cavId);
-      this.$router.push("/Writeoff");
+      sessionStorage.setItem('orderid', this.tableData[val].cavId)
+      this.$router.push('/Writeoff')
     },
     //条件查询
     qbc() {
-      this.condition.orderTime = this.billdate;
-      this.condition.deliveryTime = this.collection;
-      this.condition.approvalState = this.status;
-      this.condition.customer = this.value1;
-      this.condition.founder = this.value2;
-      this.condition.salesmen = this.value3;
+      this.condition.orderTime = this.billdate
+      this.condition.deliveryTime = this.collection
+      this.condition.approvalState = this.status
+      this.condition.customer = this.value1
+      this.condition.founder = this.value2
+      this.condition.salesmen = this.value3
       if (this.customtime1 != null) {
-        this.condition.otimeState = this.customtime1[0];
-        this.condition.otimeEnd = this.customtime1[1];
+        this.condition.otimeState = this.customtime1[0]
+        this.condition.otimeEnd = this.customtime1[1]
       } else {
-        this.condition.otimeState = null;
-        this.condition.otimeEnd = null;
+        this.condition.otimeState = null
+        this.condition.otimeEnd = null
       }
       if (this.customtime2 != null) {
-        this.condition.dtimeState = this.customtime2[0];
-        this.condition.dtimeEnd = this.customtime2[1];
+        this.condition.dtimeState = this.customtime2[0]
+        this.condition.dtimeEnd = this.customtime2[1]
       } else {
-        this.condition.dtimeState = null;
-        this.condition.dtimeEnd = null;
+        this.condition.dtimeState = null
+        this.condition.dtimeEnd = null
       }
       //this.findpage();
     },
     //订单模糊查询
     join() {
-      this.condition.orderId = this.vagueorderid;
-      this.findpage();
+      this.condition.orderId = this.vagueorderid
+      this.findpage()
     },
     findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.options1 = response.data.data.customers;
-          _this.options2 = response.data.data.notifiers;
-          _this.options3 = response.data.data.salemans;
+          _this.options1 = response.data.data.customers
+          _this.options2 = response.data.data.vendors
+          _this.options3 = response.data.data.notifiers
+          _this.options4 = response.data.data.salemans
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
   },
   created: function () {
-    this.findpage();
-    this.findsaleman();
+    this.findpage()
+    this.findsaleman()
   },
-};
+}
 </script>
 
 <style>

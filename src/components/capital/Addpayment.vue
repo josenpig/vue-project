@@ -121,7 +121,7 @@
           <el-table-column prop="purchaseId" label="单据编号" width="200" />
           <el-table-column prop="purchaseType" label="单据类型" />
           <el-table-column prop="purchaseTime" label="单据日期" />
-          <el-table-column prop="payableMoney" label="应付金额" />
+          <el-table-column prop="paymentMoney" label="应付金额" />
           <el-table-column prop="paidMoney" label="已付金额" />
           <el-table-column
             prop="unpaidMoney"
@@ -279,7 +279,7 @@
       </el-alert>
     </div>
     <div class="addpayment-footer">
-      本次预付金额：<el-input v-model="ciaMoney" readonly style="width: 15%" />
+      本次预付金额：<el-input v-model="piaMoney" readonly style="width: 15%" />
       <el-divider></el-divider>
       <p style="font-size: 14px">
         抄送对象
@@ -390,16 +390,16 @@ export default {
       this.accountdata.forEach((item) => {
         allmoney += item.thisMoney;
       });
-      this.formorder.payableMoney = allmoney;
+      this.formorder.paymentMoney = allmoney;
       return allmoney;
     },
     //预付款
-    ciaMoney: function () {
+    piaMoney: function () {
       if (this.formorder.paymentType == "应付付款") {
-        this.formorder.ciaMoney = this.accounttotal - this.billtotal;
+        this.formorder.piaMoney = this.accounttotal - this.billtotal;
         return this.accounttotal - this.billtotal;
       } else {
-        this.formorder.ciaMoney = this.accounttotal;
+        this.formorder.piaMoney = this.accounttotal;
         return this.accounttotal;
       }
     },
@@ -568,14 +568,14 @@ export default {
       if (tfok == true) {
         const state = JSON.parse(sessionStorage.getItem("state"));
         const _this = this;
-        this.formorder.receiptTime = dayjs(this.formorder.receiptTime).format(
+        this.formorder.paymentTime = dayjs(this.formorder.paymentTime).format(
           "YYYY-MM-DD HH:mm:ss"
         );
         this.formorder.founder = state.userInfo.userName;
-        this.formorder.ciaBalance = this.formorder.ciaMoney;
+        this.formorder.piaBalance = this.formorder.piaMoney;
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalPayable/addpayment/" +
+            "http://localhost:8088/frameproject/capitalPayment/addpayment/" +
             type,
           method: "post",
           data: {

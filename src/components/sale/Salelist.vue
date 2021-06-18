@@ -88,7 +88,12 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options1" :value="item.customerName">
+              <el-option
+                v-for="item in options1"
+                :key="item.customerNumber"
+                :label="item.customerName"
+                :value="item.customerNumber"
+              >
               </el-option>
             </el-select>
             <!-- 创建人 -->
@@ -102,6 +107,7 @@
             >
               <el-option
                 v-for="item in options2"
+                :key="item.userId"
                 :value="item.userId"
                 :label="item.userName"
               >
@@ -118,6 +124,7 @@
             >
               <el-option
                 v-for="item in options3"
+                :key="item.userId"
                 :value="item.userId"
                 :label="item.userName"
               >

@@ -11,5 +11,8 @@ import locale from 'element-plus/lib/locale/lang/zh-cn'
 import api from '../src/axios/axios.js'
 import permission from '../src/untis/permission.js'
 
+axios.defaults.withCredentials = true;
+
 createApp(App).use(ElementPlus, { locale }).use(router).use(store).use(permission)
     .use(VueAxios, axios).use(ElementPlus).mount('#app')
+    
