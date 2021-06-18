@@ -51,8 +51,9 @@
           >
             <el-option
               v-for="item in headeroptions1"
-              :key="item.customerName"
-              :value="item.customerName"
+              :key="item.customerNumber"
+              :label="item.customerName"
+              :value="item.customerNumber"
             >
             </el-option>
           </el-select>
@@ -68,8 +69,9 @@
           >
             <el-option
               v-for="item in headeroptions3"
-              :key="item.vendorName"
-              :value="item.vendorName"
+              :key="item.vendorId"
+              :label="item.vendorName"
+              :value="item.vendorId"
             >
             </el-option>
           </el-select>

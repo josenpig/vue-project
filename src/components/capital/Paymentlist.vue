@@ -111,34 +111,34 @@
         stripe
       >
         <el-table-column
-          prop="receiptId"
+          prop="paymentId"
           label="付款单据编号"
           fixed
           width="200"
         >
           <template #default="scope">
             <el-button type="text" @click="goorder(scope.$index)">{{
-              tableData[scope.$index].receiptId
+              tableData[scope.$index].paymentId
             }}</el-button>
           </template>
         </el-table-column>
         <el-table-column
-          prop="receiptTime"
+          prop="paymentTime"
           label="付款日期"
           sortable
           width="150"
         />
         <el-table-column
-          prop="customer"
+          prop="vendor"
           label="供应商名称"
           sortable
           width="150"
         />
-        <el-table-column prop="payee" label="付款人" width="120" />
-        <el-table-column prop="incomeType" label="付款类别" width="120" />
-        <el-table-column prop="receiptMoney" label="付款金额(元)" width="150" />
-        <el-table-column prop="ciaMoney" label="预收金额(元)" width="120" />
-        <el-table-column prop="ciaBalance" label="预收余额(元)" width="120" />
+        <el-table-column prop="drawee" label="付款人" width="120" />
+        <el-table-column prop="paymentType" label="付款类别" width="120" />
+        <el-table-column prop="paymentMoney" label="付款金额(元)" width="150" />
+        <el-table-column prop="piaMoney" label="预付金额(元)" width="120" />
+        <el-table-column prop="piaBalance" label="预付余额(元)" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
         <el-table-column prop="remarks" label="单据备注" width="120" />
         <el-table-column prop="approvalState" label="审批状态" width="120">
@@ -197,18 +197,17 @@ export default {
       options2: [],
       options3: [],
       options4: [],
-      value1: "全部", //供应商
-      value2: "全部", //仓库
-      value3: "全部", //创建人
-      value4: "全部", //销售人员
+      value1: "", //供应商
+      value2: "", //仓库
+      value3: "", //创建人
+      value4: "", //销售人员
       //表单数据
       tableData: [],
       //条件查询数据
       condition: {
         orderTime: "",
         deliveryTime: "",
-
-        customer: "",
+        vendor: "",
         founder: "",
         salesmen: "",
       },
@@ -245,7 +244,7 @@ export default {
       const state = JSON.parse(sessionStorage.getItem("state"));
       var _this = this;
       this.axios({
-        url: "http://localhost:8088/frameproject/capitalReceipt/conditionpage",
+        url: "http://localhost:8088/frameproject/capitalPayment/conditionpage",
         method: "post",
         processData: false,
         data: {
@@ -270,7 +269,7 @@ export default {
       this.findpage(val, this.pagesize);
     },
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].receiptId);
+      sessionStorage.setItem("orderid", this.tableData[val].paymentId);
       this.$router.push("/Receipt");
     },
     qbc() {

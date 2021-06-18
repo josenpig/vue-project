@@ -282,7 +282,7 @@ export default {
       this.$router.push("/Addreceipt");
     },
     goadd() {
-      this.$router.push("/Addreceipt");
+      this.$router.push("/Addpayment");
     },
     //条件查询
     qbc() {

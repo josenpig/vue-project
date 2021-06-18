@@ -278,13 +278,31 @@ export default {
       return this.collection == '自定义' ? true : false
     },
     all: function () {
+      var value1 = ''
+      this.options1.forEach((item) => {
+        if (item.customerNumber == this.value1) {
+          value1 = item.customerName
+        }
+      })
+      var value2 = ''
+      this.options2.forEach((item) => {
+        if (item.userId == this.value2) {
+          value2 = item.userName
+        }
+      })
+      var value3 = ''
+      this.options3.forEach((item) => {
+        if (item.userId == this.value3) {
+          value3 = item.userName
+        }
+      })
       return [
         '单据日期: ' + this.billdate,
         '收款日期: ' + this.collection,
         '结案状态: ' + this.status,
-        '客户: ' + this.value1,
-        '创建人: ' + this.value2,
-        '销售人员: ' + this.value3,
+        '客户: ' + value1,
+        '创建人: ' +value2,
+        '销售人员: ' +value3,
       ]
     },
   },

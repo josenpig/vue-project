@@ -189,7 +189,6 @@
             <el-input-number
               v-model="billdata[scope.$index].thisMoney"
               :controls="false"
-              :max="billdata[scope.$index].unpaidMoney"
               :precision="2"
             />
           </template>
