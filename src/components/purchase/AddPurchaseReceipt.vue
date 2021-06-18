@@ -285,7 +285,7 @@
         <!-- 优惠金额（元） -->
         <el-form-item label="优惠金额（元）:" class="form-input">
           <el-input
-            v-model="formorder.dismoney"
+            v-model="distotal"
             readonly="readonly"
             :precision="2"
           ></el-input>
@@ -294,7 +294,7 @@
         <el-form-item label="优惠后应收款（元）:" class="form-input">
           <el-input
             :precision="2"
-            v-model="formorder.offersPrice"
+            v-model="total"
             readonly="readonly"
           ></el-input>
         </el-form-item>
