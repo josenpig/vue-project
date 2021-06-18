@@ -60,7 +60,8 @@
             <el-option
               v-for="item in headeroptions1"
               :key="item.vendorName"
-              :value="item.vendorName"
+              :value="item.vendorId"
+              :label="item.vendorName"
             >
             </el-option>
           </el-select>
@@ -76,7 +77,8 @@
             <el-option
               v-for="item in headeroptions2"
               :key="item.userName"
-              :value="item.userName"
+              :value="item.userId"
+              :label="item.userName"
             >
             </el-option>
           </el-select>
@@ -206,9 +208,9 @@
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
-        <el-table-column prop="productNum" label="数量" width="120">
+        <el-table-column prop="productId" label="产品编号" width="200" />
+        <el-table-column prop="productUnit" label="单位" width="200" />
+        <el-table-column prop="productNum" label="数量" width="200">
           <template #default="scope">
             <el-input-number
               v-model="productdata[scope.$index].productNum"
@@ -217,7 +219,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="purchaseUnitPrice" label="采购单价" width="120">
+        <el-table-column prop="purchaseUnitPrice" label="采购单价" width="200">
           <template #default="scope">
             <el-input-number
               v-model="productdata[scope.$index].purchaseUnitPrice"
@@ -227,12 +229,12 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="purchaseMoney" label="采购金额" width="120">
+        <el-table-column prop="purchaseMoney" label="采购金额" width="200">
           <template #default="scope">
             {{ saleMoney(scope.$index)}}
           </template>
         </el-table-column>
-        <el-table-column prop="depot" label="仓库" width="150">
+        <el-table-column prop="depot" label="仓库" width="200">
           <template #default="scope">
             <el-select
               v-model="productdata[scope.$index].depotName"
@@ -610,11 +612,8 @@ export default {
       },
     })
       .then(function (response) {
-        // response.data.data.forEach((item) => {
-          // _this.headeroptions2.push({ buyerName: item.userName });
           _this.headeroptions1 = response.data.data.vendors;
           _this.headeroptions2 = response.data.data.purchasemans;
-        // });
       })
       .catch(function (error) {
         console.log(error);

@@ -107,22 +107,22 @@
         <!-- 产品详细信息 -->
         <el-table-column type="index" width="40" />
         <el-table-column prop="productName" label="产品名称" width="200" />
-        <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="remark" label="备注" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
-        <el-table-column prop="productNum" label="数量" width="120" />
+        <el-table-column prop="productId" label="产品编号" width="200" />
+        <el-table-column prop="remark" label="备注" width="200" />
+        <el-table-column prop="productUnit" label="单位" width="200" />
+        <el-table-column prop="productNum" label="数量" width="200" />
         <el-table-column
           prop="purchaseUnitPrice"
           label="采购单价(元)"
-          width="120"
+          width="200"
         />
-        <el-table-column prop="purchaseMoney" label="采购金额(元)" width="120" />
-        <el-table-column prop="depotName" label="仓库" width="120" />
+        <el-table-column prop="purchaseMoney" label="采购金额(元)" width="200" />
+        <el-table-column prop="depotName" label="仓库" width="200" />
         <el-table-column
           :show-overflow-tooltip="true"
           prop="productDescribe"
           label="产品描述"
-          width="150"
+          width="200"
         /> </el-table
       ><span>
         <el-alert
@@ -157,15 +157,15 @@
             ><div>优惠金额(元)： {{ formorder.dismoney }}元</div></el-col
           >
           <el-col :span="8"
-            ><div>应收款(元)： {{ formorder.receivables }}元</div></el-col
+            ><div>应收款(元)： {{ formorder.offersPrice }}元</div></el-col
           >
         </el-row>
         <el-row :gutter="24">
           <el-col :span="8"
-            ><div>创建人：{{ formorder.founder }}</div></el-col
+            ><div>创建人：{{ formorder.createPeople }}</div></el-col
           >
           <el-col :span="8"
-            ><div>创建时间：{{ formorder.foundTime }}</div></el-col
+            ><div>创建时间：{{ formorder.createDate }}</div></el-col
           >
         </el-row>
       </div>
@@ -216,7 +216,6 @@ export default {
       if (type == 2) {
         var obj={order:this.formorder,product:this.productdata}
         sessionStorage.setItem("receipt",JSON.stringify(obj));
-        console.log(JSON.parse(sessionStorage.getItem("receipt")))
         this.$router.push("/AddPurchaseReceipt");
       } else {
         const state = JSON.parse(sessionStorage.getItem("state"));
