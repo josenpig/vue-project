@@ -51,7 +51,8 @@
             <el-option
               v-for="item in headeroptions1"
               :key="item.vendorName"
-              :value="item.vendorName"
+              :value="item.vendorId"
+              :label="item.vendorName"
             >
             </el-option>
           </el-select>
@@ -68,7 +69,8 @@
             <el-option
               v-for="item in headeroptions2"
               :key="item.userName"
-              :value="item.userName"
+              :value="item.userId"
+              :label="item.userName"
             >
             </el-option>
           </el-select>
@@ -283,7 +285,7 @@
         <!-- 优惠金额（元） -->
         <el-form-item label="优惠金额（元）:" class="form-input">
           <el-input
-            v-model="distotal"
+            v-model="formorder.dismoney"
             readonly="readonly"
             :precision="2"
           ></el-input>
@@ -292,7 +294,7 @@
         <el-form-item label="优惠后应收款（元）:" class="form-input">
           <el-input
             :precision="2"
-            v-model="total"
+            v-model="formorder.offersPrice"
             readonly="readonly"
           ></el-input>
         </el-form-item>
@@ -562,6 +564,7 @@ export default {
            "YYYY-MM-DD HH:mm:ss"
         );
         this.formorder.createPeople = state.userInfo.userName;
+        console.log(this.formorder)
         this.axios({
           url: "http://localhost:8088/frameproject/purchaseReceipt/add/" + type,
           method: "post",
@@ -586,7 +589,6 @@ export default {
   },
   created: function () {
     const purchase = JSON.parse(sessionStorage.getItem("receipt"));
-    console.log(purchase.product)
     if (purchase != null) {
       this.issale=true
       this.productdata = purchase.product;

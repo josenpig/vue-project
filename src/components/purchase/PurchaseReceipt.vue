@@ -3,9 +3,9 @@
   <div class="deliver">
     <!-- 标题 -->
     <div class="deliver-page-tag">
-      <span style="float: left; margin-top: 10px">销售出库单</span>
+      <span style="float: left; margin-top: 10px">采购入库单</span>
       <el-steps
-        :active="formorder.state + 1"
+        :active="formorder.vettingState + 1"
         finish-status="success"
         simple
         style="width: 50%; float: left"
@@ -21,7 +21,7 @@
         >
         <el-button
           size="mini"
-          v-if="formorder.state == 0"
+          v-if="formorder.vettingState == 0"
           v-has="{ action: 'approval' }"
           @click="approval(-1)"
           >驳回</el-button
@@ -29,14 +29,14 @@
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.state == -2"
+          v-if="formorder.vettingState == -2"
           @click="approval(0)"
           >提交审批</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.state == 0"
+          v-if="formorder.vettingState == 0"
           v-has="{ action: 'approval' }"
           @click="approval(1)"
           >审批通过</el-button
@@ -135,16 +135,16 @@
         <el-row :gutter="24">
           <el-col :span="5">优惠率(%)：{{ formorder.disrate }} %</el-col>
           <el-col :span="6">优惠金额(元)： {{ formorder.dismoney }}元</el-col>
-          <el-col :span="6">应收款(元)： {{ formorder.receivables }}元</el-col>
+          <el-col :span="6">应收款(元)： {{ formorder.offers_price }}元</el-col>
         </el-row>
         
         <el-row :gutter="24">
-          <el-col :span="5">创建人：{{ formorder.founder }}</el-col>
-          <el-col :span="6">创建时间：{{ formorder.foundTime }}</el-col>
+          <el-col :span="5">创建人：{{ formorder.createPeople }}</el-col>
+          <el-col :span="6">创建时间：{{ formorder.createDate }}</el-col>
         </el-row>
         <el-row
           :gutter="24"
-          v-if="formorder.state == 1 || formorder.state == -1"
+          v-if="formorder.vettingState == 1 || formorder.vettingState == -1"
         >
           <el-col :span="5">二级审批人：{{ formorder.vettingName }}</el-col>
           <el-col :span="6"
@@ -243,6 +243,7 @@ export default {
             console.log(response)
             _this.formorder = response.data.data.receipt;
             _this.productdata = response.data.data.receiptDetails;
+
           })
           .catch(function (error) {
             console.log(error);

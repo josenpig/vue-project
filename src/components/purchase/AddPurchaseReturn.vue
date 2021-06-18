@@ -24,7 +24,7 @@
         <!-- 编号 -->
         <el-form-item label="编号:">
           <el-input
-            v-model="formorder.returnId"
+            v-model="formorder.id"
             readonly="readonly"
             placeholder="编号"
           ></el-input>
@@ -33,7 +33,7 @@
         <el-form-item label="退货日期:" class="form-input">
           <el-date-picker
             type="date"
-            v-model="formorder.returnTime"
+            v-model="formorder.exitDate"
             placeholder="选择日期"
             :clearable="false"
           >
@@ -42,15 +42,15 @@
         <!-- 采购人员 -->
         <el-form-item label="*采购人员:" class="form-input">
           <el-input
-            v-model="formorder.salesmen"
+            v-model="formorder.buyerName"
             readonly
-            placeholder="*采购员"
+            placeholder="采购员"
           />
         </el-form-item>
         <!-- 客户 -->
         <el-form-item label="*供应商:">
           <el-select
-            v-model="formorder.customer"
+            v-model="formorder.vendorName"
             size="mini"
             filterable
             placeholder="请选择供应商"
@@ -58,8 +58,9 @@
           >
             <el-option
               v-for="item in headeroptions2"
-              :key="item.customerName"
-              :value="item.customerName"
+              :key="item.vendorName"
+              :value="item.vendorId"
+              :label="item.vendorName"
             >
             </el-option>
           </el-select>
@@ -67,15 +68,16 @@
         <!-- 关联出库单编号 -->
         <el-form-item label="*关联入库单编号:">
           <el-select
-            v-model="formorder.deliveryId"
+            v-model="formorder.receiptOrder"
             size="mini"
             placeholder="请选择关联入库单编号"
             @change="setdeliveryId()"
           >
             <el-option
               v-for="item in customercanreturn"
-              :key="item.deliveryId"
-              :value="item.deliveryId"
+              :key="item.id"
+              :value="item.id"
+              :label="item.id"
             >
             </el-option>
           </el-select>
@@ -105,8 +107,6 @@
         <!-- 产品详细信息 -->
         <el-table-column prop="productName" label="产品名称" width="200" />
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="remark" label="备注" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
         <el-table-column prop="productUnit" label="单位" width="120" />
         <el-table-column prop="returnNum" label="退货数量" width="120">
           <template #default="scope">
@@ -118,13 +118,15 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="saleUnitPrice" label="采购单价" width="120" />
-        <el-table-column prop="saleMoney" label="采购金额" width="120">
+        <el-table-column prop="purchaseUnitPrice" label="采购单价" width="120" />
+        <el-table-column prop="purchaseMoney" label="退货金额" width="120">
           <template #default="scope">
             {{ saleMoney(scope.$index) }}
           </template>
         </el-table-column>
-        <el-table-column prop="depot" label="仓库" width="120" />
+        <el-table-column prop="depotName" label="仓库" width="120" />
+        <el-table-column prop="gramHeavy" label="克重" width="120" />
+        <el-table-column prop="productDescribe" label="产品描述" width="120" />
 
         <el-table-column
           prop="productDescribe"
@@ -223,20 +225,10 @@ export default {
         purchaseOrder:"",
         vendorName:"",
         buyerName:"",
-        
-
-        customer: "", //客户
-        salesmen: "", //销售人员
-        remarks: "", // 订单备注
-        //表尾买家信息
-        disrate: 0, //优惠率
-        dismoney: 0, //优惠金额
-        receivables: 0, //应收款
-        contacts: "", //客户联系人
-        contactsPhone: "", //客户联系人电话
-        contactsAddress: "", //客户地址
-        //订单信息额外
-        founder: "",
+        offersPrice:0,
+        createDate:new Date(),
+        disrate:0,
+        dismoney:0
       },
       //表体销售商品信息
       productdata: [],
@@ -251,13 +243,13 @@ export default {
       return function (id) {
         this.productdata[id].saleMoney =
           Math.round(
-            this.productdata[id].saleUnitPrice *
+            this.productdata[id].purchaseUnitPrice *
               this.productdata[id].returnNum *
               1000
           ) / 1000;
         return (
           Math.round(
-            this.productdata[id].saleUnitPrice *
+            this.productdata[id].purchaseUnitPrice *
               this.productdata[id].returnNum *
               1000
           ) / 1000
@@ -269,9 +261,9 @@ export default {
       var allmoney = 0;
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].returnNum;
+          this.productdata[i].purchaseUnitPrice * this.productdata[i].returnNum;
       }
-      this.formorder.receivables =-
+      this.formorder.offersPrice =-
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
             1000
@@ -287,7 +279,7 @@ export default {
       var allmoney = 0;
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].returnNum;
+          this.productdata[i].purchaseUnitPrice * this.productdata[i].returnNum;
       }
       this.formorder.dismoney =
         Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
@@ -306,46 +298,41 @@ export default {
       }
     },
     setcontacts() {
-      this.formorder.deliveryId = "";
+      this.formorder.receiptOrder = "";
       this.customercanreturn = [];
       this.productdata = [];
+      console.log(this.headeroptions1)
+      console.log(this.customercanreturn)
       this.headeroptions1.forEach((item) => {
-        if (this.formorder.customer == item.customer) {
+        if (this.formorder.vendorName == item.vendorName) {
           this.customercanreturn.push(item);
         }
       });
-      this.headeroptions2.forEach((item) => {
-        if (item.customerName == this.formorder.customer) {
-          this.formorder.contacts = item.contact;
-          this.formorder.contactsPhone = item.contactNumber;
-          this.formorder.contactsAddress = item.contactAddress;
-        }
-      });
     },
-    //选择销售出库单
+    //选择采购入库单
     setdeliveryId() {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
       this.axios({
         url:
-          "http://localhost:8088/frameproject/saledelivery/find/" +
-          this.formorder.deliveryId,
+          "http://localhost:8088/frameproject/purchaseReceipt/find/" +
+          this.formorder.receiptOrder,
         method: "get",
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.productdata = response.data.data.deliverydetails;
-          _this.formorder.salesmen=response.data.data.delivery.salesmen
-          _this.formorder.customer=response.data.data.delivery.customer
-          _this.formorder.contacts=response.data.data.delivery.contacts
-          _this.formorder.contactsAddress=response.data.data.delivery.contactsAddress
-          _this.formorder.contactsPhone=response.data.data.delivery.contactsPhone
-          for (var i = 0; i < _this.productdata.length; i++) {
-            _this.productdata[i].returnNum = _this.productdata[i].productNum;
+          _this.productdata = response.data.data.receiptDetails;
+          _this.formorder.vendorName=response.data.data.receipt.vendorName
+          _this.formorder.buyerName=response.data.data.receipt.buyerName
+          _this.formorder.receiptOrder=response.data.data.receipt.id
+          _this.formorder.offersPrice=response.data.data.receipt.offersPrice        
+          _this.formorder.disrate=response.data.data.receipt.disrate
+          for(var i=0;i<_this.productdata.length;i++){
+            _this.productdata[i].returnNum=0;
           }
-        })
+       })
         .catch(function (error) {
           console.log(error);
         });
@@ -361,12 +348,12 @@ export default {
       } else {
         const state = JSON.parse(sessionStorage.getItem("state"));
         const _this = this;
-        this.formorder.returnTime = dayjs(this.formorder.orderTime).format(
+        this.formorder.exitDate = dayjs(this.formorder.exitDate).format(
           "YYYY-MM-DD HH:mm:ss"
         );
         this.formorder.founder = state.userInfo.userName;
         this.axios({
-          url: "http://localhost:8088/frameproject/salereturn/add/" + type,
+          url: "http://localhost:8088/frameproject/purchaseReturn/add/" + type,
           method: "post",
           data: {
             order: JSON.stringify(_this.formorder), //_this.formorder ,
@@ -377,10 +364,8 @@ export default {
           },
         })
           .then(function (response) {
-            if (response.data.code == 200) {
               sessionStorage.setItem("orderid", response.data.data);
-              _this.$router.push("/Return");
-            }
+              _this.$router.push("/PurchaseReturn");
           })
           .catch(function (error) {
             console.log(error);
@@ -391,7 +376,7 @@ export default {
       const _this = this;
       const state = JSON.parse(sessionStorage.getItem("state"));
       this.axios({
-        url: "http://localhost:8088/frameproject/saledelivery/findcanreturn",
+        url: "http://localhost:8088/frameproject/purchaseReturn/findcanReturn",
         method: "post",
         headers: {
           JWTDemo: state.userInfo.token,
@@ -416,7 +401,7 @@ export default {
         },
       })
         .then(function (response) {
-          _this.headeroptions2 = response.data.data.customers;
+          _this.headeroptions2 = response.data.data.vendors;
           _this.footeroptions = response.data.data.notifiers;
         })
         .catch(function (error) {
