@@ -348,7 +348,6 @@ export default {
         this.condition.dtimeState = null
         this.condition.dtimeEnd = null
       }
-      console.log(this.condition);
       this.findpage()
     },
     findsaleman() {
