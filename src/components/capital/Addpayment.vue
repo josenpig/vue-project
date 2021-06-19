@@ -50,8 +50,9 @@
           >
             <el-option
               v-for="item in headeroptions1"
-              :key="item.customerName"
-              :value="item.customerName"
+              :key="item.vendorId"
+              :label="item.vendorName"
+              :value="item.vendorId"
             >
             </el-option>
           </el-select>
@@ -123,11 +124,7 @@
           <el-table-column prop="purchaseTime" label="单据日期" />
           <el-table-column prop="paymentMoney" label="应付金额" />
           <el-table-column prop="paidMoney" label="已付金额" />
-          <el-table-column
-            prop="unpaidMoney"
-            label="未付金额"
-            width="120"
-          />
+          <el-table-column prop="unpaidMoney" label="未付金额" width="120" />
         </el-table>
         <!-- 表尾分页显示 -->
         <div
@@ -148,7 +145,7 @@
     </el-dialog>
     <!-- 内容表体 -->
     <el-divider content-position="left">{{
-      formorder.paymentType == "应付付款" ? "应付单据列表:" : "采购订单列表:"
+      formorder.paymentType == '应付付款' ? '应付单据列表:' : '采购订单列表:'
     }}</el-divider>
     <div class="addpayment-main">
       <!-- 采购产品信息table -->
@@ -304,19 +301,19 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("receipt");
-    next();
+    sessionStorage.removeItem('receipt')
+    next()
   },
-  name: "addpayment",
+  name: 'addpayment',
   data() {
     return {
       //订单div
       dialogTableVisible: false,
-      findstock: "", //库存产品名称查询
+      findstock: '', //库存产品名称查询
       stockdata: [], //库存产品--信息
       joinstockdata: [], //已选库存产品
       // 表单头部下拉列表信息
@@ -325,123 +322,123 @@ export default {
       //订单信息
       formorder: {
         //表头单据信息
-        paymentId: "FKD" + Date.now(), //单据编号
+        paymentId: 'FKD' + Date.now(), //单据编号
         paymentTime: new Date(), //单据时间
-        vendor: "", //供应商
-        drawee: "", //付款人员
-        paymentType: "应付付款", //付款类别
-        paymentMoney: "", //付款金额
-        piaMoney: "", //预付金额
-        piaBalance: "", //预付余额
-        founder: "", //订单创建人
-        remarks: "", //订单备注
+        vendor: '', //供应商
+        drawee: '', //付款人员
+        paymentType: '应付付款', //付款类别
+        paymentMoney: '', //付款金额
+        piaMoney: '', //预付金额
+        piaBalance: '', //预付余额
+        founder: '', //订单创建人
+        remarks: '', //订单备注
       },
       //表体单据信息
       billdata: [
         {
-          purchaseId: "", //单据编号
-          purchaseType: "", //单据类型
-          purchaseTime: "", //单据日期
-          payableMoney: "", //应付款金额
-          paidMoney: "", //已付金额
-          unpaidMoney: "", //未付金额
-          thisMoney: 0.00, //本次付款
+          purchaseId: '', //单据编号
+          purchaseType: '', //单据类型
+          purchaseTime: '', //单据日期
+          payableMoney: '', //应付款金额
+          paidMoney: '', //已付金额
+          unpaidMoney: '', //未付金额
+          thisMoney: 0.0, //本次付款
         },
       ],
       //表体本次付款信息
       accountdata: [
         {
-          fundAccount: "", //资金账户
-          settlementTypeName: "", //账户付款类型
-          settlementType: "", //账户付款类型
-          thisMoney: 0.00, //本次付款
+          fundAccount: '', //资金账户
+          settlementTypeName: '', //账户付款类型
+          settlementType: '', //账户付款类型
+          thisMoney: 0.0, //本次付款
         },
       ],
       //抄送对象信息
       footeroptions: [],
       notice: [], //抄送对象
       options: [], //资金账户
-      paymentType: [{ value: "应付付款" }, { value: "订单付款" }],
+      paymentType: [{ value: '应付付款' }, { value: '订单付款' }],
       tfhas: false,
       //条件查询订单
       condition: {
-        vendor: "",
-        purchaseId: "",
+        vendor: '',
+        purchaseId: '',
       },
       //分页
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     //单据付款
     billtotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.billdata.forEach((item) => {
-        allmoney += item.thisMoney;
-      });
-      return allmoney;
+        allmoney += item.thisMoney
+      })
+      return allmoney
     },
     //账户付款
     accounttotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.accountdata.forEach((item) => {
-        allmoney += item.thisMoney;
-      });
-      this.formorder.paymentMoney = allmoney;
-      return allmoney;
+        allmoney += item.thisMoney
+      })
+      this.formorder.paymentMoney = allmoney
+      return allmoney
     },
     //预付款
     piaMoney: function () {
-      if (this.formorder.paymentType == "应付付款") {
-        this.formorder.piaMoney = this.accounttotal - this.billtotal;
-        return this.accounttotal - this.billtotal;
+      if (this.formorder.paymentType == '应付付款') {
+        this.formorder.piaMoney = this.accounttotal - this.billtotal
+        return this.accounttotal - this.billtotal
       } else {
-        this.formorder.piaMoney = this.accounttotal;
-        return this.accounttotal;
+        this.formorder.piaMoney = this.accounttotal
+        return this.accounttotal
       }
     },
     //已选产品
     thisrow: function () {
-      return this.joinstockdata.length;
+      return this.joinstockdata.length
     },
   },
   methods: {
     handleSelectionChange(val) {
-      this.joinstockdata = val;
+      this.joinstockdata = val
     },
     //新增一行
     addrow() {
       this.accountdata.push({
-        fundAccount: "",
-        settlementTypeName: "",
-        settlementType: "",
-        thisMoney:0.00,
-      });
+        fundAccount: '',
+        settlementTypeName: '',
+        settlementType: '',
+        thisMoney: 0.0,
+      })
     },
     //改变付款方式
     changetype() {
       this.billdata = [
         {
-          purchaseId: "", //单据编号
-          thisMoney: "0.00", //本次付款
+          purchaseId: '', //单据编号
+          thisMoney: '0.00', //本次付款
         },
-      ];
+      ]
     },
     findbill() {
-      this.condition.vendor = this.formorder.vendor;
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      var url = "";
-      this.formorder.paymentType == "应付付款"
+      this.condition.vendor = this.formorder.vendor
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      var url = ''
+      this.formorder.paymentType == '应付付款'
         ? (url =
-            "http://localhost:8088/frameproject/capitalReceivable/finddeliverypage")
+            'http://localhost:8088/frameproject/capitalReceivable/finddeliverypage')
         : (url =
-            "http://localhost:8088/frameproject/capitalReceivable/findsalepage");
+            'http://localhost:8088/frameproject/capitalReceivable/findsalepage')
       this.axios({
         url: url,
-        method: "post",
+        method: 'post',
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
@@ -453,130 +450,130 @@ export default {
       })
         .then(function (response) {
           response.data.data.rows.forEach((item) => {
-            if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == "XSCKD") {
-              item.purchaseType = "采购出库单";
-            } else if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == "XSTHD") {
-              item.purchaseType = "采购退货单";
+            if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == 'XSCKD') {
+              item.purchaseType = '采购出库单'
+            } else if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
+              item.purchaseType = '采购退货单'
             } else {
-              item.purchaseType = "采购订单";
+              item.purchaseType = '采购订单'
             }
-          });
-          _this.stockdata = response.data.data.rows;
-          _this.max = response.data.data.total;
+          })
+          _this.stockdata = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //选择订单
     dialogopen() {
-      if (this.formorder.vendor == "") {
+      if (this.formorder.vendor == '') {
         ElMessage.warning({
-          message: "请先选择一位供应商",
-          type: "warning",
-        });
+          message: '请先选择一位供应商',
+          type: 'warning',
+        })
       } else {
-        this.findbill();
-        this.dialogTableVisible = true;
+        this.findbill()
+        this.dialogTableVisible = true
       }
     },
     //添加订单
     addproduct() {
-      var productlist = [];
+      var productlist = []
       this.billdata.forEach((item) => {
-        productlist.push(item.purchaseId);
-      });
+        productlist.push(item.purchaseId)
+      })
       this.joinstockdata.forEach((item) => {
         if (productlist.indexOf(item.purchaseId) == -1) {
-          item.thisMoney = item.unpaidMoney;
-          this.billdata.push(item);
+          item.thisMoney = item.unpaidMoney
+          this.billdata.push(item)
         }
-      });
+      })
       for (var i = this.billdata.length - 1; i >= 0; i--) {
-        if (this.billdata[i].purchaseId == "" && this.billdata.length > 1) {
-          this.billdata.splice(i, 1);
+        if (this.billdata[i].purchaseId == '' && this.billdata.length > 1) {
+          this.billdata.splice(i, 1)
         }
       }
-      this.dialogTableVisible = false;
+      this.dialogTableVisible = false
     },
     //移除一行
     delrow(index, rows) {
       if (this.billdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     //移除一行
     delrow1(index, rows) {
       if (this.accountdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     settype(index) {
       this.options.forEach((item) => {
         if (item.capitalId == this.accountdata[index].fundAccount) {
-          this.accountdata[index].settlementTypeName = item.settlementType;
-          this.accountdata[index].settlementType = item.settlementTypeId;
+          this.accountdata[index].settlementTypeName = item.settlementType
+          this.accountdata[index].settlementType = item.settlementTypeId
         }
-      });
+      })
     },
     //提交审批（生成订单）
     examine(type) {
-      var tfok = true;
+      var tfok = true
       if (tfok == true) {
         this.accountdata.forEach((item) => {
           if (
-            item.fundAccount == "" ||
-            this.formorder.drawee == "" ||
-            this.formorder.vendor == "" ||
-            (this.billdata.length == 1 && this.billdata[0].purchaseId == "")
+            item.fundAccount == '' ||
+            this.formorder.drawee == '' ||
+            this.formorder.vendor == '' ||
+            (this.billdata.length == 1 && this.billdata[0].purchaseId == '')
           ) {
             this.$notify({
-              title: "警告",
-              message: "请先填写*必要信息!",
-              type: "warning",
-            });
-            tfok = false;
+              title: '警告',
+              message: '请先填写*必要信息!',
+              type: 'warning',
+            })
+            tfok = false
           }
-        });
+        })
       }
       this.billdata.forEach((item) => {
         if (item.thisMoney > item.unpaidMoney && tfok == true) {
           this.$notify({
-            title: "警告",
-            message: "本次付款金额不能大于未付金额",
-            type: "warning",
-          });
-          tfok = false;
+            title: '警告',
+            message: '本次付款金额不能大于未付金额',
+            type: 'warning',
+          })
+          tfok = false
         } else if (item.unpaidMoney == 0 && tfok == true) {
           this.$notify({
-            title: "警告",
-            message: "订单" + item.purchaseId + "的未付金额不足",
-            type: "warning",
-          });
-          tfok = false;
+            title: '警告',
+            message: '订单' + item.purchaseId + '的未付金额不足',
+            type: 'warning',
+          })
+          tfok = false
         }
-      });
+      })
       if (this.accounttotal < this.billtotal && tfok == true) {
         this.$notify({
-          title: "警告",
-          message: "账户总计付款不能小于单据总计付款",
-          type: "warning",
-        });
-        tfok = false;
+          title: '警告',
+          message: '账户总计付款不能小于单据总计付款',
+          type: 'warning',
+        })
+        tfok = false
       }
       if (tfok == true) {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const _this = this;
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const _this = this
         this.formorder.paymentTime = dayjs(this.formorder.paymentTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.founder = state.userInfo.userName;
-        this.formorder.piaBalance = this.formorder.piaMoney;
+          'YYYY-MM-DD HH:mm:ss'
+        )
+        this.formorder.founder = state.userInfo.userName
+        this.formorder.piaBalance = this.formorder.piaMoney
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalPayment/addpayment/" +
+            'http://localhost:8088/frameproject/capitalPayment/addpayment/' +
             type,
-          method: "post",
+          method: 'post',
           data: {
             payment: JSON.stringify(_this.formorder),
             bill: JSON.stringify(_this.billdata),
@@ -587,102 +584,102 @@ export default {
           },
         })
           .then(function (response) {
-            console.log(response.data.data);
+            console.log(response.data.data)
             // sessionStorage.setItem("orderid", response.data.data);
             // _this.$router.push("/Receipt");
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
     findcan() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const receipt = JSON.parse(sessionStorage.getItem("receipt"));
-      const _this = this;
-      this.tfhas = true;
-      var url = "";
-      this.formorder.paymentType = receipt.type;
-      receipt.type == "应付付款"
-        ? (this.type = "应付单据列表:")
-        : (this.type = "采购订单:");
-      receipt.type == "应付付款"
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const receipt = JSON.parse(sessionStorage.getItem('receipt'))
+      const _this = this
+      this.tfhas = true
+      var url = ''
+      this.formorder.paymentType = receipt.type
+      receipt.type == '应付付款'
+        ? (this.type = '应付单据列表:')
+        : (this.type = '采购订单:')
+      receipt.type == '应付付款'
         ? (url =
-            "http://localhost:8088/frameproject/capitalPayable/deliverythisReceipt")
+            'http://localhost:8088/frameproject/capitalPayable/receiptthisPayment')
         : (url =
-            "http://localhost:8088/frameproject/capitalPayable/purchasethisReceipt");
+            'http://localhost:8088/frameproject/capitalPayable/purchasethisPayment')
       this.axios({
         url: url,
-        method: "get",
+        method: 'get',
         params: { purchaseId: receipt.orderId },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "CGCKD") {
-            response.data.data.purchaseType = "采购出库单";
-          } else if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == "CGTHD") {
-            response.data.data.purchaseType = "采购退货单";
+          if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == 'CGRKD') {
+            response.data.data.purchaseType = '采购入库单'
+          } else if (receipt.orderId.match(/^[a-z|A-Z]+/gi) == 'CGTHD') {
+            response.data.data.purchaseType = '采购退货单'
           } else {
-            response.data.data.purchaseType = "采购订单";
+            response.data.data.purchaseType = '采购订单'
           }
-          response.data.data.thisMoney = response.data.data.unpaidMoney;
-          _this.formorder.vendor = response.data.data.vendor;
-          _this.billdata.push(response.data.data);
-          _this.billdata.splice(0, 1);
+          response.data.data.thisMoney = response.data.data.unpaidMoney
+          _this.formorder.vendor = response.data.data.vendor
+          _this.billdata.push(response.data.data)
+          _this.billdata.splice(0, 1)
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     findoptions() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/capitalPayable/findaccount",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/capitalPayable/findaccount',
+        method: 'get',
         processData: false,
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.options = response.data.data;
+          _this.options = response.data.data
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.headeroptions1 = response.data.data.customers;
-          _this.headeroptions2 = response.data.data.salemans;
-          _this.footeroptions = response.data.data.notifiers;
+          _this.headeroptions1 = response.data.data.vendors
+          _this.headeroptions2 = response.data.data.salemans
+          _this.footeroptions = response.data.data.notifiers
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
   },
   created: function () {
-    const receipt = JSON.parse(sessionStorage.getItem("receipt"));
+    const receipt = JSON.parse(sessionStorage.getItem('receipt'))
     if (receipt != null) {
-      this.findcan();
+      this.findcan()
     }
-    this.findoptions();
-    this.findsaleman();
+    this.findoptions()
+    this.findsaleman()
   },
-};
+}
 </script>
 
 <style lang="scss">
