@@ -270,7 +270,7 @@ export default {
     },
     goorder(val) {
       sessionStorage.setItem("orderid", this.tableData[val].paymentId);
-      this.$router.push("/Receipt");
+      this.$router.push("/Payment");
     },
     qbc() {
       this.condition.orderTime = this.billdate;

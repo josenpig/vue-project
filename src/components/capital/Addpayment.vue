@@ -122,7 +122,7 @@
           <el-table-column prop="purchaseId" label="单据编号" width="200" />
           <el-table-column prop="purchaseType" label="单据类型" />
           <el-table-column prop="purchaseTime" label="单据日期" />
-          <el-table-column prop="paymentMoney" label="应付金额" />
+          <el-table-column prop="payableMoney" label="应付金额" />
           <el-table-column prop="paidMoney" label="已付金额" />
           <el-table-column prop="unpaidMoney" label="未付金额" width="120" />
         </el-table>
@@ -433,9 +433,9 @@ export default {
       var url = ''
       this.formorder.paymentType == '应付付款'
         ? (url =
-            'http://localhost:8088/frameproject/capitalReceivable/finddeliverypage')
+            'http://localhost:8088/frameproject/capitalPayable/findreceiptpage')
         : (url =
-            'http://localhost:8088/frameproject/capitalReceivable/findsalepage')
+            'http://localhost:8088/frameproject/capitalPayable/findpurchasepage')
       this.axios({
         url: url,
         method: 'post',
@@ -450,9 +450,9 @@ export default {
       })
         .then(function (response) {
           response.data.data.rows.forEach((item) => {
-            if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == 'XSCKD') {
-              item.purchaseType = '采购出库单'
-            } else if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
+            if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == 'CGRKD') {
+              item.purchaseType = '采购入库单'
+            } else if (item.purchaseId.match(/^[a-z|A-Z]+/gi) == 'CGTHD') {
               item.purchaseType = '采购退货单'
             } else {
               item.purchaseType = '采购订单'
@@ -584,9 +584,8 @@ export default {
           },
         })
           .then(function (response) {
-            console.log(response.data.data)
-            // sessionStorage.setItem("orderid", response.data.data);
-            // _this.$router.push("/Receipt");
+            sessionStorage.setItem("orderid", response.data.data);
+            _this.$router.push("/Payment");
           })
           .catch(function (error) {
             console.log(error)

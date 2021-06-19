@@ -227,7 +227,7 @@ export default {
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const orderid =JSON.parse(sessionStorage.getItem('orderid'))
-      console.log(orderid.cavId);
+      console.log(orderid);
       const _this = this
       if (orderid == null) {
         this.$router.push('/Receiptlist')

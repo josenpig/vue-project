@@ -286,7 +286,7 @@ export default {
   methods: {
     goorder(val) {
       sessionStorage.setItem('orderid', this.tableData[val].deliveryId)
-      this.$router.push('/Deliver')
+      this.$router.push('/PurchaseReceipt')
     },
     goreceipt(val) {
       var receipt = {
