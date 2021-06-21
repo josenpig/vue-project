@@ -51,8 +51,9 @@
           >
             <el-option
               v-for="item in headeroptions1"
-              :key="item.customerName"
-              :value="item.customerName"
+              :key="item.customerNumber"
+              :label="item.customerName"
+              :value="item.customerNumber"
             >
             </el-option>
           </el-select>
@@ -68,8 +69,9 @@
           >
             <el-option
               v-for="item in headeroptions3"
-              :key="item.vendorName"
-              :value="item.vendorName"
+              :key="item.vendorId"
+              :label="item.vendorName"
+              :value="item.vendorId"
             >
             </el-option>
           </el-select>
@@ -133,11 +135,17 @@
           <el-table-column prop="saleId" label="单据编号" width="200" />
           <el-table-column prop="saleType" label="单据类型" />
           <el-table-column prop="saleTime" label="单据日期" />
-          <el-table-column prop="shouldMoney" :label="formorder.cavType == '预收冲应收' ?'应收金额':'应付金额'" />
-          <el-table-column prop="alreadyMoney" :label="formorder.cavType == '预收冲应收' ?'已收金额':'已付金额'" />
+          <el-table-column
+            prop="shouldMoney"
+            :label="formorder.cavType == '预收冲应收' ? '应收金额' : '应付金额'"
+          />
+          <el-table-column
+            prop="alreadyMoney"
+            :label="formorder.cavType == '预收冲应收' ? '已收金额' : '已付金额'"
+          />
           <el-table-column
             prop="notMoney"
-            :label="formorder.cavType == '预收冲应收' ?'未收金额':'未付金额'"
+            :label="formorder.cavType == '预收冲应收' ? '未收金额' : '未付金额'"
             width="120"
           />
         </el-table>
@@ -187,7 +195,10 @@
           <el-table-column prop="capitalId" label="流水号" width="200" />
           <el-table-column prop="capitalType" label="类型" />
           <el-table-column prop="capitalTime" label="流水日期" />
-          <el-table-column prop="beforeMoney" :label="formorder.cavType == '预收冲应收' ?'预收金额':'预付金额'" />
+          <el-table-column
+            prop="beforeMoney"
+            :label="formorder.cavType == '预收冲应收' ? '预收金额' : '预付金额'"
+          />
           <el-table-column prop="writtenMoney" label="已核销金额" />
           <el-table-column
             prop="unwrittenMoney"
@@ -214,7 +225,7 @@
     </el-dialog>
     <!-- 内容表体 -->
     <el-divider content-position="left">{{
-      formorder.cavType == "预收冲应收" ? "应收单据:" : "应付单据:"
+      formorder.cavType == '预收冲应收' ? '应收单据:' : '应付单据:'
     }}</el-divider>
     <div class="addwriteoff-main">
       <!-- 销售产品信息table -->
@@ -290,7 +301,7 @@
       </div>
       <!-- 本次收款 -->
       <el-divider content-position="left">{{
-        formorder.cavType == "预收冲应收" ? "预收款列表:" : "预付款列表:"
+        formorder.cavType == '预收冲应收' ? '预收款列表:' : '预付款列表:'
       }}</el-divider>
       <el-table :data="capdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
@@ -372,137 +383,136 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("receipt");
-    next();
+    sessionStorage.removeItem('receipt')
+    next()
   },
-  name: "addwriteoff",
+  name: 'addwriteoff',
   data() {
     return {
       //订单div
       dialogbill: false,
       dialogcap: false,
-      findstock: "", //查询
+      findstock: '', //查询
       allbilldata: [], //库存产品--信息
       joinallbilldata: [], //已选库存产品
-      allcapdata:[],
-      joinallcapdata:[],
+      allcapdata: [],
+      joinallcapdata: [],
       // 表单头部下拉列表信息
       headeroptions1: [],
       headeroptions2: [],
-      headeroptions3:[],
+      headeroptions3: [],
       //订单信息
       formorder: {
         //表头单据信息
-        cavId: "HXD" + Date.now(), //单据编号
+        cavId: 'HXD' + Date.now(), //单据编号
         orderTime: new Date(), //单据时间
-        otherParty: "", //客户
-        cavBy: "", //核销人
-        cavType: "预收冲应收", //核销方式
-        thisMoney: "", //本次核销余额
-        founder: "", //订单创建人
-        remarks: "", //订单备注
+        otherParty: '', //客户
+        cavBy: '', //核销人
+        cavType: '预收冲应收', //核销方式
+        thisMoney: '', //本次核销余额
+        founder: '', //订单创建人
+        remarks: '', //订单备注
       },
       //表体单据信息
       billdata: [
         {
-          saleId: "", //单据编号
-          saleType: "", //单据类型
-          saleTime: "", //单据日期
-          shouldMoney: "", //应收付款金额
-          alreadyMoney: "", //已收付金额
-          notMoney: "", //未收付金额
-          thisMoney: "0.00", //本次收付款金额
+          saleId: '', //单据编号
+          saleType: '', //单据类型
+          saleTime: '', //单据日期
+          shouldMoney: '', //应收付款金额
+          alreadyMoney: '', //已收付金额
+          notMoney: '', //未收付金额
+          thisMoney: '0.00', //本次收付款金额
         },
       ],
       //表体本次收付款信息
       capdata: [
         {
-          capitalId: "", //收付款单编号
-          capitalType: "", //收付款类型
-          capitalTime: "", //收付款日期
-          beforeMoney: "", //预收付金额
-          writtenMoney: "", //已核销金额
-          unwrittenMoney: "", //未核销金额
-          thisMoney: "0.00", //本次核销金额
+          capitalId: '', //收付款单编号
+          capitalType: '', //收付款类型
+          capitalTime: '', //收付款日期
+          beforeMoney: '', //预收付金额
+          writtenMoney: '', //已核销金额
+          unwrittenMoney: '', //未核销金额
+          thisMoney: '0.00', //本次核销金额
         },
       ],
       //抄送对象信息
       footeroptions: [],
       notice: [], //抄送对象
       options: [], //资金账户
-      type: "应收单据列表", //收款方式
-      cavType: [{ value: "预收冲应收" }, { value: "预付冲应付" }],
+      type: '应收单据列表', //收款方式
+      cavType: [{ value: '预收冲应收' }, { value: '预付冲应付' }],
       //条件查询订单
       condition: {
-        otherParty: "",
-        saleId: "",
+        otherParty: '',
+        saleId: '',
       },
       //分页
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     //单据核销金额
     billtotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.billdata.forEach((item) => {
-        allmoney += item.thisMoney;
-      });
-      return allmoney;
+        allmoney += item.thisMoney
+      })
+      return allmoney
     },
     //资金核销金额
     captotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.capdata.forEach((item) => {
-        allmoney += item.thisMoney;
-      });
-      this.formorder.thisMoney = allmoney;
-      return allmoney;
+        allmoney += item.thisMoney
+      })
+      this.formorder.thisMoney = allmoney
+      return allmoney
     },
     //已选产品
     thisrow: function () {
-      if(this.dialogbill==true){
-      return this.joinallbilldata.length;
-      }else{
-        return this.joinallcapdata.length;
+      if (this.dialogbill == true) {
+        return this.joinallbilldata.length
+      } else {
+        return this.joinallcapdata.length
       }
     },
   },
   methods: {
     handleSelectionChange(val) {
-      if(this.dialogbill==true){
-      this.joinallbilldata = val;
-      }else{
-        this.joinallcapdata=val
+      if (this.dialogbill == true) {
+        this.joinallbilldata = val
+      } else {
+        this.joinallcapdata = val
       }
     },
     //改变收款方式
     changetype(type) {
-      if(type==0){
-        this.formorder.otherParty=''
-        }
-      this.billdata = [{saleId: "", thisMoney: 0.0 }];
-      this.capdata = [{capitalId: "", thisMoney: 0.0 }];
+      if (type == 0) {
+        this.formorder.otherParty = ''
+      }
+      this.billdata = [{ saleId: '', thisMoney: 0.0 }]
+      this.capdata = [{ capitalId: '', thisMoney: 0.0 }]
     },
+    //预收付款查询
     findcap() {
-      this.condition.otherParty = this.formorder.otherParty;
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      var url = "";
-      this.formorder.cavType == "预收冲应收"
-        ? (url =
-            "http://localhost:8088/frameproject/capitalCavCia/receiptpage")
-        : (url =
-            "http://localhost:8088/frameproject/capitalCavCia/receiptpage");
+      this.condition.otherParty = this.formorder.otherParty
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      var url = ''
+      this.formorder.cavType == '预收冲应收'
+        ? (url = 'http://localhost:8088/frameproject/capitalCavCia/receiptpage')
+        : (url = 'http://localhost:8088/frameproject/capitalCavCia/paymentpage')
       this.axios({
         url: url,
-        method: "post",
+        method: 'post',
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
@@ -513,26 +523,26 @@ export default {
         },
       })
         .then(function (response) {
-          _this.allcapdata = response.data.data.rows;
-          _this.max = response.data.data.total;
+          _this.allcapdata = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
+    //应收付款查询
     findbill() {
-      this.condition.otherParty = this.formorder.otherParty;
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      var url = "";
-      this.formorder.cavType == "预收冲应收"
+      this.condition.otherParty = this.formorder.otherParty
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      var url = ''
+      this.formorder.cavType == '预收冲应收'
         ? (url =
-            "http://localhost:8088/frameproject/capitalCavCia/receivablepage")
-        : (url =
-            "http://localhost:8088/frameproject/capitalCavCia/receivablepage");
+            'http://localhost:8088/frameproject/capitalCavCia/receivablepage')
+        : (url = 'http://localhost:8088/frameproject/capitalCavCia/payablepage')
       this.axios({
         url: url,
-        method: "post",
+        method: 'post',
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
@@ -544,116 +554,121 @@ export default {
       })
         .then(function (response) {
           response.data.data.rows.forEach((item) => {
-            if (item.saleId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
-              item.saleType = "销售出库单"
-            }else{
-              item.saleType = "销售退货单"
+            if (item.saleId.match(/^[a-z|A-Z]+/gi) == 'XSCKD') {
+              item.saleType = '销售出库单'
+            } else if (item.saleId.match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
+              item.saleType = '销售退货单'
+            } else if (item.saleId.match(/^[a-z|A-Z]+/gi) == 'CGRKD') {
+              item.saleType = '采购入库单'
+            } else {
+              item.saleType = '采购退货单'
             }
-          });
-          _this.allbilldata = response.data.data.rows;
-          _this.max = response.data.data.total;
+          })
+          _this.allbilldata = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //选择应收付单
     billopen() {
       var message
-      this.formorder.cavType=='预收冲应收'?message='请先选择一位客户':message='请先选择一位供应商'
-      if (this.formorder.otherParty == "") {
+      this.formorder.cavType == '预收冲应收'
+        ? (message = '请先选择一位客户')
+        : (message = '请先选择一位供应商')
+      if (this.formorder.otherParty == '') {
         ElMessage.warning({
           message: message,
-          type: "warning",
-        });
+          type: 'warning',
+        })
       } else {
-        this.findbill();
-        this.dialogbill = true;
+        this.findbill()
+        this.dialogbill = true
       }
     },
     //选择收付单
     capopen() {
       var message
-      this.formorder.cavType=='预收冲应收'?message='请先选择一位客户':message='请先选择一位供应商'
-      if (this.formorder.otherParty == "") {
+      this.formorder.cavType == '预收冲应收'
+        ? (message = '请先选择一位客户')
+        : (message = '请先选择一位供应商')
+      if (this.formorder.otherParty == '') {
         ElMessage.warning({
           message: message,
-          type: "warning",
-        });
+          type: 'warning',
+        })
       } else {
-        this.findcap();
-        this.dialogcap = true;
+        this.findcap()
+        this.dialogcap = true
       }
     },
     //添加订单
     adddata() {
-      if(this.dialogbill==true){
-      var productlist = [];
-      this.billdata.forEach((item) => {
-        productlist.push(item.saleId);
-      });
-      this.joinallbilldata.forEach((item) => {
-        if (productlist.indexOf(item.saleId) == -1) {
-          item.thisMoney = item.notMoney;
-          this.billdata.push(item);
+      if (this.dialogbill == true) {
+        var productlist = []
+        this.billdata.forEach((item) => {
+          productlist.push(item.saleId)
+        })
+        this.joinallbilldata.forEach((item) => {
+          if (productlist.indexOf(item.saleId) == -1) {
+            item.thisMoney = item.notMoney
+            this.billdata.push(item)
+          }
+        })
+        for (var i = this.billdata.length - 1; i >= 0; i--) {
+          if (this.billdata[i].saleId == '' && this.billdata.length > 1) {
+            this.billdata.splice(i, 1)
+          }
         }
-      });
-      for (var i = this.billdata.length - 1; i >= 0; i--) {
-        if (this.billdata[i].saleId == "" && this.billdata.length > 1) {
-          this.billdata.splice(i, 1);
+        this.dialogbill = false
+      } else {
+        var productlist = []
+        this.capdata.forEach((item) => {
+          productlist.push(item.capitalId)
+        })
+        this.joinallcapdata.forEach((item) => {
+          if (productlist.indexOf(item.capitalId) == -1) {
+            item.thisMoney = item.unwrittenMoney
+            this.capdata.push(item)
+          }
+        })
+        for (var i = this.capdata.length - 1; i >= 0; i--) {
+          if (this.capdata[i].capitalId == '' && this.capdata.length > 1) {
+            this.capdata.splice(i, 1)
+          }
         }
-      }
-      this.dialogbill = false;
-      }else{
-        var productlist = [];
-      this.capdata.forEach((item) => {
-        productlist.push(item.capitalId);
-      });
-      this.joinallcapdata.forEach((item) => {
-        if (productlist.indexOf(item.capitalId) == -1) {
-          item.thisMoney = item.unwrittenMoney;
-          this.capdata.push(item);
-        }
-      });
-      for (var i = this.capdata.length - 1; i >= 0; i--) {
-        if (this.capdata[i].capitalId == "" && this.capdata.length > 1) {
-          this.capdata.splice(i, 1);
-        }
-      }
-      this.dialogcap = false;
+        this.dialogcap = false
       }
     },
     //移除一行
     delrow(index, rows) {
       if (this.billdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     //移除一行
     delrow1(index, rows) {
       if (this.capdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     //提交审批（生成订单）
     examine(type) {
-      var tfok = true;
+      var tfok = true
       if (tfok == true) {
-        
       }
       if (tfok == true) {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const _this = this;
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const _this = this
         this.formorder.saleTime = dayjs(this.formorder.saleTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.founder = state.userInfo.userName;
-        this.formorder.ciaBalance = this.formorder.ciaMoney;
+          'YYYY-MM-DD HH:mm:ss'
+        )
+        this.formorder.founder = state.userInfo.userName
+        this.formorder.ciaBalance = this.formorder.ciaMoney
         this.axios({
-          url:
-            "http://localhost:8088/frameproject/capitalCavCia/add/" +
-            type,
-          method: "post",
+          url: 'http://localhost:8088/frameproject/capitalCavCia/add/' + type,
+          method: 'post',
           data: {
             order: JSON.stringify(_this.formorder),
             bill: JSON.stringify(_this.billdata),
@@ -664,39 +679,43 @@ export default {
           },
         })
           .then(function (response) {
-            sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Writeoff");
+            var order = {
+              cavId:  response.data.data,
+              cavType: _this.formorder.cavType,
+            }
+            sessionStorage.setItem('orderid',JSON.stringify(order))
+            _this.$router.push('/Writeoff')
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
     findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.headeroptions1 = response.data.data.customers;
-          _this.headeroptions2 = response.data.data.salemans;
-          _this.headeroptions3 = response.data.data.vendors;
-          _this.footeroptions = response.data.data.notifiers;
+          _this.headeroptions1 = response.data.data.customers
+          _this.headeroptions2 = response.data.data.salemans
+          _this.headeroptions3 = response.data.data.vendors
+          _this.footeroptions = response.data.data.notifiers
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
   },
   created: function () {
-    this.findsaleman();
+    this.findsaleman()
   },
-};
+}
 </script>
 
 <style lang="scss">

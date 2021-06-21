@@ -55,7 +55,7 @@
     <!-- 内容表体 -->
     <div class="writeoff-main">
       <!-- 单据列表 -->
-      <el-divider content-position="left">单据列表</el-divider>
+      <el-divider content-position="left">{{formorder.cavType == '预收冲应收' ? '应收单据' : '应付单据'}}</el-divider>
       <el-table :data="billdata" style="width: 100%" border stripe>
         <!-- 单据列表详细信息 -->
         <el-table-column type="index" width="40" />
@@ -84,7 +84,7 @@
         单据总计核销金额：{{ billtotal }}元
       </el-alert>
       <!-- 本次收款 -->
-      <el-divider content-position="left">本次收款</el-divider>
+      <el-divider content-position="left">{{formorder.cavType == '预收冲应收' ? '预收款列表' : '预付款列表'}}</el-divider>
       <el-table :data="capdata" style="width: 100%" border stripe>
         <!-- 账户列表详细信息 -->
         <el-table-column type="index" width="40" />
@@ -138,14 +138,14 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("orderid");
-    next();
+    sessionStorage.removeItem('orderid')
+    next()
   },
-  name: "Sale",
+  name: 'Sale',
   data() {
     return {
       dialogVisible: false,
@@ -155,36 +155,36 @@ export default {
       billdata: [],
       //表体本次收款信息
       capdata: [],
-    };
+    }
   },
   computed: {
     //单据总金额
     billtotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.billdata.forEach((money) => {
-        allmoney += money.thisMoney;
-      });
-      return Math.round(allmoney * 1000) / 1000;
+        allmoney += money.thisMoney
+      })
+      return Math.round(allmoney * 1000) / 1000
     },
     captotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.capdata.forEach((money) => {
-        allmoney += money.thisMoney;
-      });
-      return Math.round(allmoney * 1000) / 1000;
+        allmoney += money.thisMoney
+      })
+      return Math.round(allmoney * 1000) / 1000
     },
   },
   methods: {
     //审批
     approval(type) {
-      var tfok = true;
+      var tfok = true
       if (tfok == true) {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const orderid = sessionStorage.getItem("orderid");
-        var _this = this;
-        this.$prompt("请输入备注", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const orderid = sessionStorage.getItem('orderid')
+        var _this = this
+        this.$prompt('请输入备注', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
         })
           .then(({ value }) => {
             var fd = {
@@ -192,10 +192,10 @@ export default {
               type: type,
               user: state.userInfo.userName,
               approvalremarks: value,
-            };
+            }
             this.axios({
-              url: "http://localhost:8088/frameproject/capitalCavCia/approval",
-              method: "get",
+              url: 'http://localhost:8088/frameproject/capitalCavCia/approval',
+              method: 'get',
               params: fd,
               headers: {
                 JWTDemo: state.userInfo.token,
@@ -204,57 +204,61 @@ export default {
               .then(function (response) {
                 if (response.data.code == 200 && response.data.data == true) {
                   _this.$notify({
-                    title: "操作成功",
-                    message: "订单信息已被修改",
-                    type: "success",
-                  });
-                  _this.showorder();
-                }else{
-                    _this.$notify({
-                    title: "操作失败",
-                    message:response.data.data,
-                    type: "warning",
-                  });
+                    title: '操作成功',
+                    message: '订单信息已被修改',
+                    type: 'success',
+                  })
+                  _this.showorder()
+                } else {
+                  _this.$notify({
+                    title: '操作失败',
+                    message: response.data.data,
+                    type: 'warning',
+                  })
                 }
               })
               .catch(function (error) {
-                console.log(error);
-              });
+                console.log(error)
+              })
           })
-          .catch(() => {});
+          .catch(() => {})
       }
     },
     showorder() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const orderid = sessionStorage.getItem("orderid");
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid =JSON.parse(sessionStorage.getItem('orderid'))
+      console.log(orderid);
+      const _this = this
       if (orderid == null) {
-        this.$router.push("/Receiptlist");
+        this.$router.push('/Receiptlist')
       } else {
         this.axios({
-          url:
-            "http://localhost:8088/frameproject/capitalCavCia/find/" + orderid,
-          method: "get",
+          url: 'http://localhost:8088/frameproject/capitalCavCia/find',
+          method: 'get',
+          params: {
+            cavId: orderid.cavId,
+            cavType: orderid.cavType,
+          },
           headers: {
             JWTDemo: state.userInfo.token,
           },
         })
           .then(function (response) {
-            _this.formorder = response.data.data.order;
-            _this.billdata = response.data.data.bills;
-            _this.capdata = response.data.data.caps;
+            _this.formorder = response.data.data.order
+            _this.billdata = response.data.data.bills
+            _this.capdata = response.data.data.caps
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
   },
 
   created: function () {
-    this.showorder();
+    this.showorder()
   },
-};
+}
 </script>
 
 <style lang="scss">

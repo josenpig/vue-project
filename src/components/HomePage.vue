@@ -117,7 +117,9 @@ export default {
       if (command == "signout") {
         this.$router.push("/Login");
         sessionStorage.clear();
-      } else {
+      } else if(command == "mydata"){
+        
+      }else {
         console.log(command);
       }
     },
