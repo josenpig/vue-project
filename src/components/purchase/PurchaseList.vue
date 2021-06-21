@@ -135,7 +135,6 @@
             <span v-else> 完全出库 </span>
           </template>
         </el-table-column>
-        <el-table-column prop="contact" label="联系人" width="200" />
         <el-table-column prop="createPeople" label="创建人" width="200" />
         <el-table-column
           prop="createDate"
@@ -294,7 +293,7 @@ export default {
           console.log(error);
         });
     },
-    //改变页码数
+    // 改变页码数
     // handleCurrentChange(val) {
     //   this.findpage(val, this.pagesize);
     // },
