@@ -14,7 +14,7 @@
 					<hr style="margin-bottom: 20px;" />
 					<el-form :model="form">
 						<el-form-item label="单位名称" :label-width="formLabelWidth">
-							<el-input v-model="form.unitName" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+							<el-input @change="pdName(form.unitName)" v-model="form.unitName" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
 						</el-form-item>
 					</el-form>
 					<template #footer>
@@ -199,6 +199,12 @@
 					.then(function(response) {
 						console.log("单位名称不重复是否通过:" + response.data)
 						_this.judge = response.data
+						if(!response.data){
+							ElMessage.warning({
+								message: '单位名称重复！',
+								type: 'success'
+							});
+						}
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -241,11 +247,6 @@
 								.catch(function(error) {
 									console.log(error);
 								});
-						} else {
-							ElMessage.warning({
-								message: '单位名称重复！',
-								type: 'success'
-							});
 						}
 					}, 200)
 				}
