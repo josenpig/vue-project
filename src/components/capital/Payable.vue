@@ -23,7 +23,7 @@
           <div>
             <!-- 单据日期 -->
             <span>单据日期:</span>
-            <el-radio-group v-model="billdate" size="small">
+            <el-radio-group v-model="billdate" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
               <el-radio-button label="昨天"></el-radio-button>
@@ -47,7 +47,7 @@
             <!-- 付款日期 -->
             <br />
             <span>付款日期:</span>
-            <el-radio-group v-model="collection" size="small">
+            <el-radio-group v-model="collection" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
               <el-radio-button label="昨天"></el-radio-button>
@@ -65,6 +65,7 @@
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                @change="qbc()"
               >
               </el-date-picker>
             </div>
@@ -72,7 +73,7 @@
             <!-- 结案状态 -->
             <br />
             <span>结案状态:</span>
-            <el-radio-group v-model="status" size="small">
+            <el-radio-group v-model="status" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="未结案"></el-radio-button>
               <el-radio-button label="结案"></el-radio-button>
@@ -321,7 +322,6 @@ export default {
         this.condition.dtimeState = null
         this.condition.dtimeEnd = null
       }
-      console.log(this.condition);
       this.findpage()
     },
     findsaleman() {

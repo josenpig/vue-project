@@ -154,10 +154,13 @@
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
           <el-pagination
-            style="float: left"
             background
             layout="prev, pager, next"
-            :total="max"
+            :total="max1"
+            :page-size="pagesize1"
+            style="float: left"
+            @current-change="handleCurrentChange1"
+            v-model:currentPage="currentPage1"
           >
           </el-pagination>
           <div style="float: right">
@@ -211,10 +214,13 @@
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
           <el-pagination
-            style="float: left"
             background
             layout="prev, pager, next"
-            :total="max"
+            :total="max2"
+            :page-size="pagesize2"
+            style="float: left"
+            @current-change="handleCurrentChange2"
+            v-model:currentPage="currentPage2"
           >
           </el-pagination>
           <div style="float: right">
@@ -426,7 +432,7 @@ export default {
           shouldMoney: '', //应收付款金额
           alreadyMoney: '', //已收付金额
           notMoney: '', //未收付金额
-          thisMoney: '0.00', //本次收付款金额
+          thisMoney: '0.00', //本次核销金额
         },
       ],
       //表体本次收付款信息
@@ -452,10 +458,14 @@ export default {
         otherParty: '',
         saleId: '',
       },
-      //分页
-      pagesize: 5,
-      max: 0,
-      currentPage: 1,
+      //应收付分页
+      pagesize1: 5,
+      max1: 0,
+      currentPage1: 1,
+       //预收付分页
+      pagesize2: 5,
+      max2: 0,
+      currentPage2: 1,
     }
   },
   computed: {
@@ -501,35 +511,6 @@ export default {
       this.billdata = [{ saleId: '', thisMoney: 0.0 }]
       this.capdata = [{ capitalId: '', thisMoney: 0.0 }]
     },
-    //预收付款查询
-    findcap() {
-      this.condition.otherParty = this.formorder.otherParty
-      const state = JSON.parse(sessionStorage.getItem('state'))
-      const _this = this
-      var url = ''
-      this.formorder.cavType == '预收冲应收'
-        ? (url = 'http://localhost:8088/frameproject/capitalCavCia/receiptpage')
-        : (url = 'http://localhost:8088/frameproject/capitalCavCia/paymentpage')
-      this.axios({
-        url: url,
-        method: 'post',
-        data: {
-          currentPage: _this.currentPage,
-          pageSize: _this.pagesize,
-          condition: JSON.stringify(_this.condition),
-        },
-        headers: {
-          JWTDemo: state.userInfo.token,
-        },
-      })
-        .then(function (response) {
-          _this.allcapdata = response.data.data.rows
-          _this.max = response.data.data.total
-        })
-        .catch(function (error) {
-          console.log(error)
-        })
-    },
     //应收付款查询
     findbill() {
       this.condition.otherParty = this.formorder.otherParty
@@ -544,8 +525,8 @@ export default {
         url: url,
         method: 'post',
         data: {
-          currentPage: _this.currentPage,
-          pageSize: _this.pagesize,
+          currentPage: _this.currentPage1,
+          pageSize: _this.pagesize1,
           condition: JSON.stringify(_this.condition),
         },
         headers: {
@@ -565,11 +546,46 @@ export default {
             }
           })
           _this.allbilldata = response.data.data.rows
-          _this.max = response.data.data.total
+          _this.max1 = response.data.data.total
         })
         .catch(function (error) {
           console.log(error)
         })
+    },
+    //预收付款查询
+    findcap() {
+      this.condition.otherParty = this.formorder.otherParty
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      var url = ''
+      this.formorder.cavType == '预收冲应收'
+        ? (url = 'http://localhost:8088/frameproject/capitalCavCia/receiptpage')
+        : (url = 'http://localhost:8088/frameproject/capitalCavCia/paymentpage')
+      this.axios({
+        url: url,
+        method: 'post',
+        data: {
+          currentPage: _this.currentPage2,
+          pageSize: _this.pagesize2,
+          condition: JSON.stringify(_this.condition),
+        },
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.allcapdata = response.data.data.rows
+          _this.max2 = response.data.data.total
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    handleCurrentChange1(val){
+      this.findbill(val, this.pagesize1)
+    },
+    handleCurrentChange2(val){
+      this.findcap(val, this.pagesize2)
     },
     //选择应收付单
     billopen() {
@@ -657,7 +673,59 @@ export default {
     examine(type) {
       var tfok = true
       if (tfok == true) {
+        this.billdata.forEach((item) => {
+          if (
+            item.saleId == '' ||
+            this.formorder.cavBy == '' ||
+            this.formorder.otherParty == ''
+          ) {
+            this.$notify({
+              title: '警告',
+              message: '请先填写*必要信息!',
+              type: 'warning',
+            })
+            tfok = false
+          }
+        })
       }
+      if (tfok == true) {
+        this.capdata.forEach((item) => {
+          if (item.capitalId == '') {
+            this.$notify({
+              title: '警告',
+              message: '请先填写*必要信息!',
+              type: 'warning',
+            })
+            tfok = false
+          }
+        })
+      }
+      this.billdata.forEach((item) => {
+        if (item.thisMoney > item.notMoney && tfok == true) {
+          this.$notify({
+            title: '警告',
+            message: '本次核销金额不能大于未收/付金额',
+            type: 'warning',
+          })
+          tfok = false
+        } else if (item.notMoney == 0 && tfok == true) {
+          this.$notify({
+            title: '警告',
+            message: '订单' + item.saleId + '的未收/付金额不足',
+            type: 'warning',
+          })
+          tfok = false
+        }
+      })
+      if (this.captotal > this.billtotal && tfok == true) {
+        this.$notify({
+          title: '警告',
+          message: '预收/付核销金额不能大于应收/付核销金额',
+          type: 'warning',
+        })
+        tfok = false
+      }
+      console.log(this.formorder)
       if (tfok == true) {
         const state = JSON.parse(sessionStorage.getItem('state'))
         const _this = this
@@ -680,10 +748,10 @@ export default {
         })
           .then(function (response) {
             var order = {
-              cavId:  response.data.data,
+              cavId: response.data.data,
               cavType: _this.formorder.cavType,
             }
-            sessionStorage.setItem('orderid',JSON.stringify(order))
+            sessionStorage.setItem('orderid', JSON.stringify(order))
             _this.$router.push('/Writeoff')
           })
           .catch(function (error) {
