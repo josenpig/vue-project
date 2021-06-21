@@ -42,11 +42,11 @@
     <!-- 表单头部 -->
     <div class="payment-header">
       <el-row :gutter="24">
-        <el-col :span="5">付款编号：{{ formorder.receiptId }}</el-col>
-        <el-col :span="5">付款日期：{{ formorder.receiptTime }}</el-col>
-        <el-col :span="4">供应商：{{ formorder.customer }}</el-col>
-        <el-col :span="4">付款人：{{ formorder.payee }}</el-col>
-        <el-col :span="4">付款类别：{{ formorder.incomeType }}</el-col>
+        <el-col :span="5">付款编号：{{ formorder.paymentId }}</el-col>
+        <el-col :span="5">付款日期：{{ formorder.paymentTime }}</el-col>
+        <el-col :span="4">供应商：{{ formorder.vendor }}</el-col>
+        <el-col :span="4">付款人：{{ formorder.drawee }}</el-col>
+        <el-col :span="4">付款类别：{{ formorder.paymentType }}</el-col>
       </el-row>
     </div>
     <!-- 内容表体 -->
@@ -56,12 +56,12 @@
       <el-table :data="billdata" style="width: 100%" border stripe>
         <!-- 单据列表详细信息 -->
         <el-table-column type="index" width="40" />
-        <el-table-column prop="saleId" label="单据编号" width="200" />
-        <el-table-column prop="saleType" label="单据类型" />
-        <el-table-column prop="saleTime" label="单据日期" />
-        <el-table-column prop="receiptMoney" label="应付款金额" />
-        <el-table-column prop="receivedMoney" label="已付金额" />
-        <el-table-column prop="uncollectedMoney" label="未付金额" />
+        <el-table-column prop="purchaseId" label="单据编号" width="200" />
+        <el-table-column prop="purchaseType" label="单据类型" />
+        <el-table-column prop="purchaseTime" label="单据日期" />
+        <el-table-column prop="payableMoney" label="应付款金额" />
+        <el-table-column prop="paidMoney" label="已付金额" />
+        <el-table-column prop="unpaidMoney" label="未付金额" />
         <el-table-column prop="thisMoney" label="本次付款" />
       </el-table>
       <el-alert
@@ -102,7 +102,7 @@
       <!-- 表单表尾 -->
       <div class="payment-footer">
         <el-row :gutter="24">
-          <el-col :span="24">本次预付金额：{{ formorder.ciaMoney }}</el-col>
+          <el-col :span="24">本次预付金额：{{ formorder.piaMoney }} 元</el-col>
         </el-row>
         <el-row :gutter="24">
           <el-col :span="5">创建人：{{ formorder.founder }}</el-col>
@@ -146,7 +146,7 @@ export default {
     billtotal: function () {
       var allmoney = 0;
       this.billdata.forEach((money) => {
-        allmoney += money.receiptMoney;
+        allmoney += money.payableMoney;
       });
       return Math.round(allmoney * 1000) / 1000;
     },
@@ -163,11 +163,11 @@ export default {
     approval(type) {
       var tfok = true;
       // this.billdata.forEach((item) => {
-      //   if (item.uncollectedMoney == 0 && tfok == true) {
+      //   if (item.unpaidMoney == 0 && tfok == true) {
       //     var massage = "";
-      //     item.saleType == "销售出库单"
-      //       ? (massage = "订单：" + item.saleId + "已结案")
-      //       : (massage = "订单：" + item.saleId + "预付款金额不足");
+      //     item.purchaseType == "销售出库单"
+      //       ? (massage = "订单：" + item.purchaseId + "已结案")
+      //       : (massage = "订单：" + item.purchaseId + "预付款金额不足");
       //     this.$notify({
       //       title: "操作失败",
       //       message: massage,
@@ -192,7 +192,7 @@ export default {
               approvalremarks: value,
             };
             this.axios({
-              url: "http://localhost:8088/frameproject/capitalReceipt/approval",
+              url: "http://localhost:8088/frameproject/capitalPayment/approval",
               method: "get",
               params: fd,
               headers: {
@@ -231,7 +231,7 @@ export default {
       } else {
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalReceipt/find/" + orderid,
+            "http://localhost:8088/frameproject/capitalPayment/find/" + orderid,
           method: "get",
           headers: {
             JWTDemo: state.userInfo.token,

@@ -189,7 +189,7 @@ export default {
       activeNames: '1',
       //筛选框
       billdate: '全部', //收款日期
-      collection: '全部', //收款日期
+      collection: '全部', //收款类别
       status: '全部', //结案状态
       customtime1: '', //自定义时间
       customtime2: '',
@@ -282,7 +282,7 @@ export default {
         data: {
           currentPage: this.currentPage,
           pageSize: this.pagesize,
-          condition: '',
+          condition: JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
@@ -305,8 +305,20 @@ export default {
       this.$router.push('/Receipt')
     },
     qbc() {
-      this.condition.orderTime = this.billdate
-      console.log(this.condition)
+      this.condition.deliveryTime = this.billdate
+      this.condition.incomeType = this.collection
+      this.condition.approvalState = this.status
+      this.condition.customer = this.value1
+      this.condition.payee = this.value2
+      this.condition.founder = this.value3
+      if (this.customtime1 != null) {
+        this.condition.otimeState = this.customtime1[0]
+        this.condition.otimeEnd = this.customtime1[1]
+      } else {
+        this.condition.otimeState = null
+        this.condition.otimeEnd = null
+      }
+      this.findpage()
     },
   },
   created: function () {

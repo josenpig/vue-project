@@ -43,59 +43,60 @@
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                @change="qbc()"
               >
               </el-date-picker>
             </div>
             <!-- 付款日期 -->
             <br />
-            <span>付款日期:</span>
+            <span>付款类型:</span>
             <el-radio-group v-model="collection" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="今天"></el-radio-button>
-              <el-radio-button label="昨天"></el-radio-button>
-              <el-radio-button label="本周"></el-radio-button>
-              <el-radio-button label="本月"></el-radio-button>
-              <el-radio-button label="自定义"></el-radio-button>
+              <el-radio-button label="应付付款"></el-radio-button>
+              <el-radio-button label="订单付款"></el-radio-button>
             </el-radio-group>
-            <div
-              v-show="custom2"
-              style="top: 228px; left: 730px; position: absolute"
-            >
-              <el-date-picker
-                v-model="customtime2"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-              >
-              </el-date-picker>
-            </div>
-
-            <!-- 结案状态 -->
+            <!-- 审批状态 -->
             <br />
-            <span>结案状态:</span>
+            <span>审批状态:</span>
             <el-radio-group v-model="status" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="未结案"></el-radio-button>
-              <el-radio-button label="结案"></el-radio-button>
+              <el-radio-button label="草稿"></el-radio-button>
+              <el-radio-button label="待审批"></el-radio-button>
+              <el-radio-button label="已驳回"></el-radio-button>
+              <el-radio-button label="审批通过"></el-radio-button>
             </el-radio-group>
             <!-- 供应商 -->
             <br /><br />
             <span>供应商:</span>
-            <el-select v-model="value1" size="small" filterable @change="qbc()">
-              <el-option v-for="item in options1" :value="item.label">
+            <el-select v-model="value1" size="small" clearable filterable @change="qbc()">
+              <el-option
+                v-for="item in options1"
+                :key="item.vendorId"
+                :label="item.vendorName"
+                :value="item.vendorId"
+              >
+              </el-option>
+            </el-select>
+            <!-- 付款人 -->
+            <span>付款人:</span>
+            <el-select v-model="value2" size="small" clearable filterable @change="qbc()">
+              <el-option
+                v-for="item in options2"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
             <!-- 创建人 -->
             <span>创建人:</span>
-            <el-select v-model="value3" size="small" filterable @change="qbc()">
-              <el-option v-for="item in options3" :value="item.label">
-              </el-option>
-            </el-select>
-            <!-- 销售人员 -->
-            <span>销售人员:</span>
-            <el-select v-model="value4" size="small" filterable @change="qbc()">
-              <el-option v-for="item in options4" :value="item.label">
+            <el-select v-model="value3" size="small" clearable filterable @change="qbc()">
+              <el-option
+                v-for="item in options3"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
           </div>
@@ -182,105 +183,131 @@
 
 <script>
 export default {
-  name: "Receivable",
+  name: 'Receivable',
   data() {
     return {
       //默认展开
-      activeNames: "1",
+      activeNames: '1',
       //筛选框
-      billdate: "全部", //单据日期
-      collection: "全部", //付款日期
-      status: "全部", //结案状态
-      customtime1: "", //自定义时间
-      customtime2: "",
+      billdate: '全部', //单据日期
+      collection: '全部', //付款类型
+      status: '全部', //结案状态
+      customtime1: '', //自定义时间
       options1: [],
       options2: [],
       options3: [],
-      options4: [],
-      value1: "", //供应商
-      value2: "", //仓库
-      value3: "", //创建人
-      value4: "", //销售人员
+      value1: '', //供应商
+      value2: '', //付款人
+      value3: '', //创建人
       //表单数据
       tableData: [],
       //条件查询数据
       condition: {
-        orderTime: "",
-        deliveryTime: "",
-        vendor: "",
-        founder: "",
-        salesmen: "",
+        deliveryId: '',
+        deliveryTime: '',
+        paymentType: '',
+        vendor: '',
+        founder: '',
+        drawee: '',
       },
       //分页
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     paging: function () {
-      return this.tableData.length > 0 ? true : false;
+      return this.tableData.length > 0 ? true : false
     },
     custom1: function () {
-      return this.billdate == "自定义" ? true : false;
-    },
-    custom2: function () {
-      return this.collection == "自定义" ? true : false;
+      return this.billdate == '自定义' ? true : false
     },
     all: function () {
       return [
-        "单据日期: " + this.billdate,
-        "付款日期: " + this.collection,
-        "结案状态: " + this.status,
-        "供应商: " + this.value1,
-        "仓库: " + this.value2,
-        "创建人: " + this.value3,
-        "销售人员: " + this.value4,
-      ];
+        '单据日期: ' + this.billdate,
+        '付款日期: ' + this.collection,
+        '结案状态: ' + this.status,
+        '供应商: ' + this.value1,
+        '付款人:' + this.value2,
+        '创建人: ' + this.value3,
+      ]
     },
   },
   methods: {
-    findpage() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      var _this = this;
+    findsaleman() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/capitalPayment/conditionpage",
-        method: "post",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.options1 = response.data.data.vendors
+          _this.options2 = response.data.data.notifiers
+          _this.options3 = response.data.data.purchasemans
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    findpage() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/capitalPayment/conditionpage',
+        method: 'post',
         processData: false,
         data: {
           currentPage: this.currentPage,
           pageSize: this.pagesize,
-          condition: "",
+          condition:JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.tableData = response.data.data.rows;
-          _this.max = response.data.data.total;
+          _this.tableData = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     //改变页码数
     handleCurrentChange(val) {
-      this.findpage(val, this.pagesize);
+      this.findpage(val, this.pagesize)
     },
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].paymentId);
-      this.$router.push("/Receipt");
+      sessionStorage.setItem('orderid', this.tableData[val].paymentId)
+      this.$router.push('/Payment')
     },
     qbc() {
-      this.condition.orderTime = this.billdate;
-      console.log(this.condition);
+      this.condition.deliveryTime = this.billdate
+      this.condition.paymentType = this.collection
+      this.condition.approvalState = this.status
+      this.condition.vendor = this.value1
+      this.condition.drawee = this.value2
+      this.condition.founder = this.value3
+      if (this.customtime1 != null) {
+        this.condition.otimeState = this.customtime1[0]
+        this.condition.otimeEnd = this.customtime1[1]
+      } else {
+        this.condition.otimeState = null
+        this.condition.otimeEnd = null
+      }
+      this.findpage();
     },
   },
   created: function () {
-    this.findpage();
+    this.findpage()
+    this.findsaleman();
   },
-};
+}
 </script>
 
 <style>

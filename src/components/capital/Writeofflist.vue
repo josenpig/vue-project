@@ -180,7 +180,7 @@
         <el-table-column
           prop="otherParty"
           :label="collection == '预收冲应收' ? '客户' : '供应商'"
-          width="120"
+          width="200"
         />
         <el-table-column prop="cavBy" label="核销人" width="120" />
         <el-table-column
@@ -269,12 +269,12 @@ export default {
         orderTime: '', //单据日期
         otimeState: '',
         otimeEnd: '',
-        cavBy: '', //核销人
         cavType: '预收冲应收', //核算方式
         approvalState: '', //审批状态
         customer: '', //客户
-        founder: '', //创建人
         vendor: '', //供应商
+        founder: '', //创建人
+        cavBy: '', //核销人
       },
       dialogTableVisible: false,
       pstatus: [],
@@ -338,21 +338,22 @@ export default {
     },
     //前往订单详情
     goorder(val) {
-      var order={
+      var order = {
         cavId: this.tableData[val].cavId,
         cavType: this.tableData[val].cavType,
       }
-      sessionStorage.setItem('orderid',JSON.stringify(order))
+      sessionStorage.setItem('orderid', JSON.stringify(order))
       this.$router.push('/Writeoff')
     },
     //条件查询
     qbc() {
       this.condition.orderTime = this.billdate
-      this.condition.deliveryTime = this.collection
+      this.condition.cavType = this.collection
       this.condition.approvalState = this.status
       this.condition.customer = this.value1
-      this.condition.founder = this.value2
-      this.condition.salesmen = this.value3
+      this.condition.vendor = this.value2
+      this.condition.founder = this.value3
+      this.condition.cavBy = this.value4
       if (this.customtime1 != null) {
         this.condition.otimeState = this.customtime1[0]
         this.condition.otimeEnd = this.customtime1[1]
@@ -360,14 +361,7 @@ export default {
         this.condition.otimeState = null
         this.condition.otimeEnd = null
       }
-      if (this.customtime2 != null) {
-        this.condition.dtimeState = this.customtime2[0]
-        this.condition.dtimeEnd = this.customtime2[1]
-      } else {
-        this.condition.dtimeState = null
-        this.condition.dtimeEnd = null
-      }
-      //this.findpage();
+      this.findpage();
     },
     //订单模糊查询
     join() {

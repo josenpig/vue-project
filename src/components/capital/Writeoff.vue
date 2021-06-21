@@ -180,7 +180,7 @@ export default {
       var tfok = true
       if (tfok == true) {
         const state = JSON.parse(sessionStorage.getItem('state'))
-        const orderid = sessionStorage.getItem('orderid')
+        const orderid = JSON.parse(sessionStorage.getItem('orderid'))
         var _this = this
         this.$prompt('请输入备注', {
           confirmButtonText: '确定',
@@ -188,10 +188,11 @@ export default {
         })
           .then(({ value }) => {
             var fd = {
-              orderid: orderid,
+              cavId: orderid.cavId,
               type: type,
               user: state.userInfo.userName,
               approvalremarks: value,
+              cavType: orderid.cavType,
             }
             this.axios({
               url: 'http://localhost:8088/frameproject/capitalCavCia/approval',
@@ -227,7 +228,7 @@ export default {
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const orderid =JSON.parse(sessionStorage.getItem('orderid'))
-      console.log(orderid.cavId);
+      console.log(orderid);
       const _this = this
       if (orderid == null) {
         this.$router.push('/Receiptlist')
