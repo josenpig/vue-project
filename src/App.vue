@@ -3,10 +3,10 @@
 </template>
 
 <script>
-import {initDynamicRoutes} from './router/index.js'
-import HomePageView from "./components/HomePage.vue";
+import { initDynamicRoutes } from './router/index.js'
+import HomePageView from './components/HomePage.vue'
 export default {
-  name: "App",
+  name: 'App',
   components: {
     HomePageView,
   },
@@ -15,9 +15,9 @@ export default {
     //然后从sessionStorage中获取，再赋值给store。然后再把session里面
     //存的删除即可，相当于中间件的作用。在页面加载时读取sessionStorage
     //里的状态信息
-     console.group("in main.js created............................begin");
+    console.group('in main.js created............................begin')
     // console.log(sessionStorage.getItem("state"));
-    if (sessionStorage.getItem("state")) {
+    if (sessionStorage.getItem('state')) {
       //替换 store 的根状态，状态合并
       //Object.assign方法用于对象的合并，将源对象（source）的所有可枚举属性
       //，复制到目标对象（target）。Object.assign(target, source1, source2);
@@ -25,25 +25,28 @@ export default {
         Object.assign(
           {},
           this.$store.state,
-          JSON.parse(sessionStorage.getItem("state"))
+          JSON.parse(sessionStorage.getItem('state'))
         )
-      );
+      )
     }
-    if (sessionStorage.getItem("djs") <= 0) {
+    if (sessionStorage.getItem('djs') <= 0) {
       //等于0时清空
-      sessionStorage.removeItem("djs");
+      sessionStorage.removeItem('djs')
     }
-    console.log("in main.js created............................end");
-    console.groupEnd();
+    console.log('in main.js created............................end')
+    console.groupEnd()
   },
   mounted: function () {
-    window.addEventListener("beforeunload", () => {
+    window.addEventListener('beforeunload', () => {
       //刷新前将目前登录的用户保存到sessionStorage中
-      sessionStorage.setItem("state", JSON.stringify(this.$store.state));
-      sessionStorage.setItem("menulists", JSON.stringify(this.$store.state.menulists));
-    });
+      sessionStorage.setItem('state', JSON.stringify(this.$store.state))
+      sessionStorage.setItem(
+        'menulists',
+        JSON.stringify(this.$store.state.menulists)
+      )
+    })
   },
-};
+}
 </script>
 <style>
 /* 滚动条 */
@@ -65,7 +68,12 @@ export default {
 ::-webkit-scrollbar-corner {
   background: #f6f6f6;
 }
-.el-table th.gutter{
-   display: table-cell!important;
- }
+.el-table th.gutter {
+  display: table-cell !important;
+}
+/* 清除input属性 */
+.el-input__suffix,
+.el-input__suffix-inner {
+  margin-right: unset !important;
+}
 </style>

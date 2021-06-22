@@ -177,12 +177,7 @@
             }}</el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="deliveryTime"
-          label="入库日期"
-          sortable
-          width="120"
-        />
+        <el-table-column prop="deliveryTime" label="入库日期" width="120" />
         <el-table-column prop="deliveryType" label="单据类型" width="120" />
         <el-table-column prop="vendor" label="供应商" width="200" />
         <el-table-column prop="buyer" label="采购人员" width="120" />
@@ -200,7 +195,6 @@
         <el-table-column
           prop="lastCollectionTime"
           label="最后付款时间"
-          sortable
           width="200"
         />
       </el-table>
@@ -274,13 +268,31 @@ export default {
       return this.collection == '自定义' ? true : false
     },
     all: function () {
+      var value1 = ''
+      this.options1.forEach((item) => {
+        if (item.vendorId == this.value1) {
+          value1 = item.vendorName
+        }
+      })
+      var value2 = ''
+      this.options2.forEach((item) => {
+        if (item.userId == this.value2) {
+          value2 = item.userName
+        }
+      })
+      var value3 = ''
+      this.options3.forEach((item) => {
+        if (item.userId == this.value3) {
+          value3 = item.userName
+        }
+      })
       return [
         '单据日期: ' + this.billdate,
         '付款日期: ' + this.collection,
         '结案状态: ' + this.status,
-        '供应商: ' + this.value1,
-        '创建人: ' + this.value2,
-        '采购人员: ' + this.value3,
+        '供应商: ' + value1,
+        '创建人: ' + value2,
+        '采购人员: ' + value3,
       ]
     },
   },
