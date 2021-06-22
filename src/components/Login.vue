@@ -17,6 +17,7 @@
                 <el-input
                   prefix-icon="el-icon-user"
                   placeholder="请输入用户名"
+                  maxlength="15"
                   v-model="loginForm.userName"
                   clearable
                 ></el-input>
@@ -27,6 +28,7 @@
                   prefix-icon="el-icon-lock"
                   placeholder="请输入密码"
                   v-model="loginForm.userPass"
+                  maxlength="15"
                   show-password
                   clearable
                 ></el-input>
