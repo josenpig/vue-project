@@ -139,78 +139,82 @@
         stripe
       >
         <el-table-column
-          prop="deliveryId"
+          prop="id"
           label="采购入库单编号"
           fixed
           width="200"
         >
           <template #default="scope">
             <el-button type="text" @click="goorder(scope.$index)">{{
-              tableData[scope.$index].deliveryId
+              tableData[scope.$index].id
             }}</el-button>
           </template>
         </el-table-column>
         <el-table-column
-          prop="deliveryTime"
+          prop="inboundDate"
           label="出库日期"
           fixed
           sortable
           width="150"
         />
-        <el-table-column prop="customer" label="供应商" width="120" />
-        <el-table-column prop="salesmen" label="采购人员" width="120" />
+        <el-table-column prop="vendorName" label="供应商" width="120" />
+        <el-table-column prop="buyerName" label="采购人员" width="120" />
         <el-table-column
-          prop="receivables"
+          prop="offersPrice"
           label="优惠后应收款(元)"
           width="150"
         />
-        <el-table-column prop="deliveryState" label="出库状态" width="120">
+        <el-table-column prop="vettingState" label="出库状态" width="120">
           <template #default="scope">
-            <span v-if="tableData[scope.$index].deliveryState == 0">
+            <span v-if="tableData[scope.$index].vettingState == 0">
               未入库
             </span>
-            <span v-else> 完全入库 </span>
+            <span v-if="tableData[scope.$index].vettingState == 1">
+              完全入库
+            </span>
+            <!-- <span v-else> 完全入库 </span> -->
           </template>
         </el-table-column>
         <el-table-column
-          prop="foundTime"
+          prop="createDate"
           label="创建时间"
           sortable
           width="200"
         />
-        <el-table-column prop="approvalState" label="审批状态" width="120">
+        <el-table-column prop="vettingState" label="审批状态" width="120">
           <template #default="scope">
-            <span v-if="tableData[scope.$index].approvalState == 0">
+            <span v-if="tableData[scope.$index].vettingState == 0">
               待二级审批
             </span>
-            <span v-else-if="tableData[scope.$index].approvalState == -2">
+            <span v-else-if="tableData[scope.$index].vettingState == -2">
               草稿
             </span>
-            <span v-else-if="tableData[scope.$index].approvalState == -1">
+            <span v-else-if="tableData[scope.$index].vettingState == -1">
               审批未通过
             </span>
             <span v-else> 审批通过 </span>
           </template>
         </el-table-column>
-        <el-table-column prop="orderState" label="订单状态" width="120">
+        <el-table-column prop="state" label="订单状态" width="120">
           <template #default="scope">
-            <span v-if="tableData[scope.$index].orderState == 0"> 执行中 </span>
+            <span v-if="tableData[scope.$index].state == 0"> 执行中 </span>
             <span v-else> 已结束 </span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="updateTime"
+          prop="updateDate"
           label="更新时间"
           sortable
           width="200"
         />
         <el-table-column
-          prop="lastApprovalTime"
+          prop="lastVettingTime"
           label="最后审批时间"
           sortable
           width="200"
         />
-        <el-table-column prop="approver" label="审批人" width="120" />
+        <el-table-column prop="vettingName" label="审批人" width="120" />
+        <el-table-column prop="createPeople" label="创建人" width="120" />
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
@@ -278,8 +282,8 @@ export default {
     all: function () {
       var value1 = ''
       this.options1.forEach((item) => {
-        if (item.customerNumber == this.value1) {
-          value1 = item.customerName
+        if (item.vendorId == this.value1) {
+          value1 = item.vendorName
         }
       })
       var value2 = ''
@@ -335,15 +339,15 @@ export default {
       this.findpage(val, this.pagesize)
     },
     goadd() {
-      this.$router.push('/AddPuchaseReceipt')
+      this.$router.push('/AddPurchaseReceipt')
     },
     //条件查询
     qbc() {
-      this.condition.deliveryTime = this.collection
-      this.condition.approvalState = this.status
-      this.condition.customer = this.value1
-      this.condition.founder = this.value2
-      this.condition.salesmen = this.value3
+      this.condition.inBoundDate = this.collection
+      this.condition.vettingState = this.status
+      this.condition.vendorName = this.value1
+      this.condition.createPeople = this.value2
+      this.condition.buyerName = this.value3
       if (this.customtime2 != null) {
         this.condition.dtimeState = this.customtime2[0]
         this.condition.dtimeEnd = this.customtime2[1]
@@ -369,16 +373,16 @@ export default {
         },
       })
         .then(function (response) {
-          _this.options1 = response.data.data.customers
+          _this.options1 = response.data.data.vendors
           _this.options2 = response.data.data.notifiers
-          _this.options3 = response.data.data.salemans
+          _this.options3 = response.data.data.purchasemans
         })
         .catch(function (error) {
           console.log(error)
         })
     },
     goorder(val) {
-      sessionStorage.setItem('orderid', this.tableData[val].orderId)
+      sessionStorage.setItem('orderid', this.tableData[val].id)
       this.$router.push('/PurchaseReceipt')
     },
   },

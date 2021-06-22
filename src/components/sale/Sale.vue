@@ -62,23 +62,41 @@
       width="30%"
       :before-close="handleClose"
     >
-      <div style="float: left">
-        <span v-if="formorder.deliveryId == null">关联销售出库单：无</span>
-        <span v-else>关联销售出库单：{{ formorder.deliveryId }}</span>
+      <div style="float: left; margin-top: 10px">关联销售出库单：</div>
+      <div style="float: left; width: 70%;">
+        <span v-if="formorder.deliveryId == null">无</span>
+        <span v-else
+          ><el-button @click="goorder(formorder.deliveryId, '销售出库单')" type="text"
+            >{{ formorder.deliveryId }}
+          </el-button>
+        </span>
       </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">关联销售退货单：无</span>
-        <span v-else>关联销售退货单：{{ formorder.returnId }}</span>
+
+      <div style="float: left; margin-top: 10px">关联销售退货单：</div>
+      <div style="float: left; width: 70%; margin-top: 10px">
+        <span v-if="formorder.returnId == null">无</span>
+        <span v-else
+          ><el-button @click="goorder(formorder.returnId, '销售退货单')" type="text"
+            >{{ formorder.returnId }}
+          </el-button>
+        </span>
       </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.receiptId }}</span>
+
+      <div style="float: left; margin-top: 10px">关联收款单：</div>
+      <div style="float: left; width: 70%;">
+        <span v-if="formorder.receipts == null">无</span>
+        <span v-else v-for="item in formorder.receipts"
+          ><el-button @click="goorder(item.receiptId, '收款单')" type="text">{{
+            item.receiptId
+          }}</el-button
+          ><br
+        /></span>
       </div>
 
       <template #footer>
         <span class="dialog-footer">
           <el-button type="primary" @click="dialogVisible = false"
-            >确 定</el-button
+            >知道了</el-button
           >
         </span>
       </template>
@@ -186,7 +204,7 @@ import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem('orderid')
+    //sessionStorage.removeItem('orderid')
     next()
   },
   name: 'Sale',
@@ -210,6 +228,16 @@ export default {
     },
   },
   methods: {
+    goorder(val, type) {
+      sessionStorage.setItem('orderid',val)
+      if(type=='销售出库单'){
+        this.$router.push('/Deliver')
+      }else if(type=='销售退货单'){
+        this.$router.push('Return')
+      }else{
+        this.$router.push('Receipt')
+      }
+    },
     //收款
     goreceipt() {
       var receipt = {
