@@ -54,19 +54,20 @@
               <el-radio-button label="应收收款"></el-radio-button>
               <el-radio-button label="订单收款"></el-radio-button>
             </el-radio-group>
-
-            <!-- 结案状态 -->
             <br />
-            <span>结案状态:</span>
+            <!-- 审批状态 -->
+            <span>审批状态:</span>
             <el-radio-group v-model="status" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="未结案"></el-radio-button>
-              <el-radio-button label="结案"></el-radio-button>
+              <el-radio-button label="草稿"></el-radio-button>
+              <el-radio-button label="待审批"></el-radio-button>
+              <el-radio-button label="已驳回"></el-radio-button>
+              <el-radio-button label="审批通过"></el-radio-button>
             </el-radio-group>
             <!-- 客户 -->
             <br /><br />
             <span>客户:</span>
-            <el-select v-model="value1" size="small" filterable @change="qbc()">
+            <el-select v-model="value1" size="small" clearable filterable @change="qbc()">
               <el-option
                 v-for="item in options1"
                 :key="item.customerNumber"
@@ -77,7 +78,7 @@
             </el-select>
             <!-- 收款人 -->
             <span>收款人:</span>
-            <el-select v-model="value2" size="small" filterable @change="qbc()">
+            <el-select v-model="value2" size="small" clearable filterable @change="qbc()">
               <el-option
                 v-for="item in options2"
                 :key="item.userId"
@@ -88,7 +89,7 @@
             </el-select>
             <!-- 创建人 -->
             <span>创建人:</span>
-            <el-select v-model="value3" size="small" filterable @change="qbc()">
+            <el-select v-model="value3" size="small" clearable filterable @change="qbc()">
               <el-option
                 v-for="item in options3"
                 :key="item.userId"
@@ -188,7 +189,7 @@ export default {
       activeNames: '1',
       //筛选框
       billdate: '全部', //收款日期
-      collection: '全部', //收款日期
+      collection: '全部', //收款类别
       status: '全部', //结案状态
       customtime1: '', //自定义时间
       customtime2: '',
@@ -281,7 +282,7 @@ export default {
         data: {
           currentPage: this.currentPage,
           pageSize: this.pagesize,
-          condition: '',
+          condition: JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
@@ -304,8 +305,20 @@ export default {
       this.$router.push('/Receipt')
     },
     qbc() {
-      this.condition.orderTime = this.billdate
-      console.log(this.condition)
+      this.condition.deliveryTime = this.billdate
+      this.condition.incomeType = this.collection
+      this.condition.approvalState = this.status
+      this.condition.customer = this.value1
+      this.condition.payee = this.value2
+      this.condition.founder = this.value3
+      if (this.customtime1 != null) {
+        this.condition.otimeState = this.customtime1[0]
+        this.condition.otimeEnd = this.customtime1[1]
+      } else {
+        this.condition.otimeState = null
+        this.condition.otimeEnd = null
+      }
+      this.findpage()
     },
   },
   created: function () {

@@ -231,7 +231,6 @@ export default {
       add: {
         userName: "",
         userPhone: "",
-        userPass: "a11111",
         userSex: "男",
         userState: true,
         founder: "",

@@ -102,7 +102,7 @@
       <!-- 表单表尾 -->
       <div class="receipt-footer">
         <el-row :gutter="24">
-          <el-col :span="24">本次预收金额：{{ formorder.ciaMoney }}</el-col>
+          <el-col :span="24">本次预收金额：{{ formorder.ciaMoney }} 元</el-col>
         </el-row>
         <el-row :gutter="24">
           <el-col :span="5">创建人：{{ formorder.founder }}</el-col>
@@ -162,20 +162,6 @@ export default {
     //审批
     approval(type) {
       var tfok = true;
-      // this.billdata.forEach((item) => {
-      //   if (item.uncollectedMoney == 0 && tfok == true) {
-      //     var massage = "";
-      //     item.saleType == "销售出库单"
-      //       ? (massage = "订单：" + item.saleId + "已结案")
-      //       : (massage = "订单：" + item.saleId + "预收款金额不足");
-      //     this.$notify({
-      //       title: "操作失败",
-      //       message: massage,
-      //       type: "warning",
-      //     });
-      //     tfok = false;
-      //   }
-      // });
       if (tfok == true) {
         const state = JSON.parse(sessionStorage.getItem("state"));
         const orderid = sessionStorage.getItem("orderid");

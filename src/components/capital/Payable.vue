@@ -23,7 +23,7 @@
           <div>
             <!-- 单据日期 -->
             <span>单据日期:</span>
-            <el-radio-group v-model="billdate" size="small">
+            <el-radio-group v-model="billdate" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
               <el-radio-button label="昨天"></el-radio-button>
@@ -47,7 +47,7 @@
             <!-- 付款日期 -->
             <br />
             <span>付款日期:</span>
-            <el-radio-group v-model="collection" size="small">
+            <el-radio-group v-model="collection" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="今天"></el-radio-button>
               <el-radio-button label="昨天"></el-radio-button>
@@ -65,6 +65,7 @@
                 range-separator="至"
                 start-placeholder="开始日期"
                 end-placeholder="结束日期"
+                @change="qbc()"
               >
               </el-date-picker>
             </div>
@@ -72,7 +73,7 @@
             <!-- 结案状态 -->
             <br />
             <span>结案状态:</span>
-            <el-radio-group v-model="status" size="small">
+            <el-radio-group v-model="status" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
               <el-radio-button label="未结案"></el-radio-button>
               <el-radio-button label="结案"></el-radio-button>
@@ -87,7 +88,12 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options1" :value="item.customerName">
+              <el-option
+                v-for="item in options1"
+                :key="item.vendorId"
+                :label="item.vendorName"
+                :value="item.vendorId"
+              >
               </el-option>
             </el-select>
             <!-- 创建人 -->
@@ -99,7 +105,12 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options2" :value="item.userName">
+              <el-option
+                v-for="item in options2"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
             <!-- 采购人员 -->
@@ -111,7 +122,12 @@
               filterable
               @change="qbc()"
             >
-              <el-option v-for="item in options3" :value="item.userName">
+              <el-option
+                v-for="item in options3"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
+              >
               </el-option>
             </el-select>
           </div>
@@ -168,7 +184,7 @@
           width="120"
         />
         <el-table-column prop="deliveryType" label="单据类型" width="120" />
-        <el-table-column prop="vendor" label="供应商" width="120" />
+        <el-table-column prop="vendor" label="供应商" width="200" />
         <el-table-column prop="buyer" label="采购人员" width="120" />
         <el-table-column prop="payables" label="应付金额" width="120" />
         <el-table-column prop="paid" label="已付金额" width="120" />
@@ -207,161 +223,162 @@
 
 <script>
 export default {
-  name: "payable",
+  name: 'payable',
   data() {
     return {
       //默认展开
-      activeNames: "1",
+      activeNames: '1',
       //筛选框
-      billdate: "全部", //单据日期
-      collection: "全部", //付款日期
-      status: "全部", //结案状态
-      customtime1: "", //自定义时间
-      customtime2: "",
+      billdate: '全部', //单据日期
+      collection: '全部', //付款日期
+      status: '全部', //结案状态
+      customtime1: '', //自定义时间
+      customtime2: '',
       options1: [],
       options2: [],
       options3: [],
-      value1: "", //供应商
-      value2: "", //创建人
-      value3: "", //销售人员
+      value1: '', //供应商
+      value2: '', //创建人
+      value3: '', //采购人员
       //表单数据
       tableData: [],
       //条件查询数据
-      vagueorderid: "",
+      vagueorderid: '',
       condition: {
-        orderId: "", //订单id
-        orderTime: "", //单据日期
-        otimeState: "",
-        otimeEnd: "",
-        deliveryTime: "", //交货日期
-        dtimeState: "",
-        dtimeEnd: "",
-        approvalState: "", //审批状态
-        customer: "", //供应商
-        founder: "", //创建人
-        salesmen: "", //销售人
+        deliveryId: '', //订单id
+        deliveryTime: '', //单据日期
+        otimeState: '',
+        otimeEnd: '',
+        lastCollectionTime: '', //收款日期
+        dtimeState: '',
+        dtimeEnd: '',
+        caseState: '', //结案状态
+        vendor: '', //供应商
+        founder: '', //创建人
+        buyer: '', //采购人
       },
       //分页
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     paging: function () {
-      return this.tableData.length > 0 ? true : false;
+      return this.tableData.length > 0 ? true : false
     },
     custom1: function () {
-      return this.billdate == "自定义" ? true : false;
+      return this.billdate == '自定义' ? true : false
     },
     custom2: function () {
-      return this.collection == "自定义" ? true : false;
+      return this.collection == '自定义' ? true : false
     },
     all: function () {
       return [
-        "单据日期: " + this.billdate,
-        "付款日期: " + this.collection,
-        "结案状态: " + this.status,
-        "供应商: " + this.value1,
-        "创建人: " + this.value2,
-        "销售人员: " + this.value3,
-      ];
+        '单据日期: ' + this.billdate,
+        '付款日期: ' + this.collection,
+        '结案状态: ' + this.status,
+        '供应商: ' + this.value1,
+        '创建人: ' + this.value2,
+        '采购人员: ' + this.value3,
+      ]
     },
   },
   methods: {
     goorder(val) {
-      sessionStorage.setItem("orderid", this.tableData[val].deliveryId);
-      this.$router.push("/Deliver");
+      sessionStorage.setItem('orderid', this.tableData[val].deliveryId)
+      this.$router.push('/PurchaseReceipt')
     },
     goreceipt(val) {
       var receipt = {
-        type: "应付付款",
+        type: '应付付款',
         orderId: this.tableData[val].deliveryId,
-      };
-      sessionStorage.setItem("receipt", JSON.stringify(receipt));
-      this.$router.push("/Addreceipt");
+      }
+      sessionStorage.setItem('receipt', JSON.stringify(receipt))
+      this.$router.push('/Addpayment')
     },
     goadd() {
-      this.$router.push("/Addreceipt");
+      this.$router.push('/Addpayment')
     },
     //条件查询
     qbc() {
-      this.condition.orderTime = this.billdate;
-      this.condition.deliveryTime = this.collection;
-      this.condition.approvalState = this.status;
-      this.condition.customer = this.value1;
-      this.condition.founder = this.value2;
-      this.condition.salesmen = this.value3;
+      this.condition.deliveryTime = this.billdate
+      this.condition.lastCollectionTime = this.collection
+      this.condition.caseState = this.status
+      this.condition.vendor = this.value1
+      this.condition.founder = this.value2
+      this.condition.buyer = this.value3
       if (this.customtime1 != null) {
-        this.condition.otimeState = this.customtime1[0];
-        this.condition.otimeEnd = this.customtime1[1];
+        this.condition.otimeState = this.customtime1[0]
+        this.condition.otimeEnd = this.customtime1[1]
       } else {
-        this.condition.otimeState = null;
-        this.condition.otimeEnd = null;
+        this.condition.otimeState = null
+        this.condition.otimeEnd = null
       }
       if (this.customtime2 != null) {
-        this.condition.dtimeState = this.customtime2[0];
-        this.condition.dtimeEnd = this.customtime2[1];
+        this.condition.dtimeState = this.customtime2[0]
+        this.condition.dtimeEnd = this.customtime2[1]
       } else {
-        this.condition.dtimeState = null;
-        this.condition.dtimeEnd = null;
+        this.condition.dtimeState = null
+        this.condition.dtimeEnd = null
       }
-      //this.findpage();
+      this.findpage()
     },
     findsaleman() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       this.axios({
-        url: "http://localhost:8088/frameproject/personnel/ofpeople",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.options1 = response.data.data.customers;
-          _this.options2 = response.data.data.notifiers;
-          _this.options3 = response.data.data.salemans;
+          _this.options1 = response.data.data.vendors
+          _this.options2 = response.data.data.notifiers
+          _this.options3 = response.data.data.purchasemans
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
     findpage() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      var _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
       this.axios({
-        url:
-          "http://localhost:8088/frameproject/capitalReceivable/conditionpage",
-        method: "post",
+        url: 'http://localhost:8088/frameproject/capitalPayable/conditionpage',
+        method: 'post',
         data: {
           currentPage: _this.currentPage,
           pageSize: _this.pagesize,
-          condition: "",
+          condition: JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
         },
       })
         .then(function (response) {
-          _this.tableData = response.data.data.rows;
+          _this.tableData = response.data.data.rows
           _this.tableData.forEach((item) => {
-            if (item.deliveryId.match(/^[a-z|A-Z]+/gi) == "XSCKD"){
-              item.deliveryType = "销售出库单"
+            if (item.deliveryId.match(/^[a-z|A-Z]+/gi) == 'CGRKD') {
+              item.deliveryType = '采购入库单'
+            } else {
+              item.deliveryType = '采购退货单'
             }
-          });
-          _this.max = response.data.data.total;
+          })
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
+          console.log(error)
+        })
     },
   },
   created: function () {
-    this.findpage();
-    this.findsaleman();
+    this.findpage()
+    this.findsaleman()
   },
-};
+}
 </script>
 
 <style>

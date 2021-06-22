@@ -62,23 +62,41 @@
       width="30%"
       :before-close="handleClose"
     >
-      <div style="float: left">
-        <span v-if="formorder.deliveryId == null">关联销售出库单：无</span>
-        <span v-else>关联销售出库单：{{ formorder.deliveryId }}</span>
+      <div style="float: left; margin-top: 10px">关联销售出库单：</div>
+      <div style="float: left; width: 70%;">
+        <span v-if="formorder.deliveryId == null">无</span>
+        <span v-else
+          ><el-button @click="goorder(formorder.deliveryId, '销售出库单')" type="text"
+            >{{ formorder.deliveryId }}
+          </el-button>
+        </span>
       </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">关联销售退货单：无</span>
-        <span v-else>关联销售退货单：{{ formorder.returnId }}</span>
+
+      <div style="float: left; margin-top: 10px">关联销售退货单：</div>
+      <div style="float: left; width: 70%; margin-top: 10px">
+        <span v-if="formorder.returnId == null">无</span>
+        <span v-else
+          ><el-button @click="goorder(formorder.returnId, '销售退货单')" type="text"
+            >{{ formorder.returnId }}
+          </el-button>
+        </span>
       </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.receiptId }}</span>
+
+      <div style="float: left; margin-top: 10px">关联收款单：</div>
+      <div style="float: left; width: 70%;">
+        <span v-if="formorder.receipts == null">无</span>
+        <span v-else v-for="item in formorder.receipts"
+          ><el-button @click="goorder(item.receiptId, '收款单')" type="text">{{
+            item.receiptId
+          }}</el-button
+          ><br
+        /></span>
       </div>
 
       <template #footer>
         <span class="dialog-footer">
           <el-button type="primary" @click="dialogVisible = false"
-            >确 定</el-button
+            >知道了</el-button
           >
         </span>
       </template>
@@ -182,14 +200,14 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("orderid");
-    next();
+    //sessionStorage.removeItem('orderid')
+    next()
   },
-  name: "Sale",
+  name: 'Sale',
   data() {
     return {
       dialogVisible: false,
@@ -197,41 +215,59 @@ export default {
       formorder: {},
       //表体销售商品信息
       productdata: [],
-    };
+    }
   },
   computed: {
     //销售总金额
     total: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.productdata.forEach((money) => {
-        allmoney += money.saleMoney;
-      });
-      return Math.round(allmoney * 1000) / 1000;
+        allmoney += money.saleMoney
+      })
+      return Math.round(allmoney * 1000) / 1000
     },
   },
   methods: {
+    goorder(val, type) {
+      sessionStorage.setItem('orderid',val)
+      if(type=='销售出库单'){
+        this.$router.push('/Deliver')
+      }else if(type=='销售退货单'){
+        this.$router.push('Return')
+      }else{
+        this.$router.push('Receipt')
+      }
+    },
     //收款
     goreceipt() {
       var receipt = {
-        type: "订单收款",
+        type: '订单收款',
         orderId: this.formorder.orderId,
-      };
-      sessionStorage.setItem("receipt", JSON.stringify(receipt));
-      this.$router.push("/Addreceipt");
+      }
+      sessionStorage.setItem('receipt', JSON.stringify(receipt))
+      this.$router.push('/Addreceipt')
     },
     //审批
     approval(type) {
       if (type == 2) {
-        var obj = { order: this.formorder, product: this.productdata };
-        sessionStorage.setItem("saledeliver", JSON.stringify(obj));
-        this.$router.push("/Adddeliver");
+        if (this.formorder.deliveryId != null) {
+          this.$notify({
+            title: '警告',
+            message: '该订单已完成出库，无法二次出库！',
+            type: 'warning',
+          })
+        } else {
+          var obj = { order: this.formorder, product: this.productdata }
+          sessionStorage.setItem('saledeliver', JSON.stringify(obj))
+          this.$router.push('/Adddeliver')
+        }
       } else {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const orderid = sessionStorage.getItem("orderid");
-        var _this = this;
-        this.$prompt("请输入备注", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const orderid = sessionStorage.getItem('orderid')
+        var _this = this
+        this.$prompt('请输入备注', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
         })
           .then(({ value }) => {
             var fd = {
@@ -239,10 +275,10 @@ export default {
               type: type,
               user: state.userInfo.userName,
               approvalremarks: value,
-            };
+            }
             this.axios({
-              url: "http://localhost:8088/frameproject/saleorder/approval",
-              method: "get",
+              url: 'http://localhost:8088/frameproject/saleorder/approval',
+              method: 'get',
               processData: false,
               params: fd,
               headers: {
@@ -252,49 +288,49 @@ export default {
               .then(function (response) {
                 if (response.data.code == 200) {
                   _this.$notify({
-                    title: "操作成功",
-                    message: "订单信息已被修改",
-                    type: "success",
-                  });
-                  _this.showorder();
+                    title: '操作成功',
+                    message: '订单信息已被修改',
+                    type: 'success',
+                  })
+                  _this.showorder()
                 }
               })
               .catch(function (error) {
-                console.log(error);
-              });
+                console.log(error)
+              })
           })
-          .catch(() => {});
+          .catch(() => {})
       }
     },
     showorder() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const orderid = sessionStorage.getItem("orderid");
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('orderid')
+      const _this = this
       if (orderid == null) {
-        this.$router.push("/Salelist");
+        this.$router.push('/Salelist')
       } else {
         this.axios({
-          url: "http://localhost:8088/frameproject/saleorder/find/" + orderid,
-          method: "get",
+          url: 'http://localhost:8088/frameproject/saleorder/find/' + orderid,
+          method: 'get',
           headers: {
             JWTDemo: state.userInfo.token,
           },
         })
           .then(function (response) {
-            _this.formorder = response.data.data.order;
-            _this.productdata = response.data.data.orderdetails;
+            _this.formorder = response.data.data.order
+            _this.productdata = response.data.data.orderdetails
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
   },
 
   created: function () {
-    this.showorder();
+    this.showorder()
   },
-};
+}
 </script>
 
 <style lang="scss">

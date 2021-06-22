@@ -57,6 +57,7 @@
               <el-option v-for="item in options2" :value="item.label">
               </el-option>
             </el-select>
+			<p/>
             <!-- 采购人 -->
             <span>采购人:</span>
             <el-select v-model="value3" size="small" filterable>
@@ -83,18 +84,6 @@
         @selection-change="handleSelectionChange"
         stripe
       >
-        <el-table-column fixed label="操作" width="200">
-          <template #default="scope">
-            <el-button
-              type="text"
-              v-if="tableData[scope.$index].orderState == 0"
-            >
-              结束执行
-            </el-button>
-            <el-button type="text" v-else> 恢复执行 </el-button>
-            <el-button type="text"> 查看出库 </el-button>
-          </template>
-        </el-table-column>
         <el-table-column
           prop="id"
           label="采购订单编号"
@@ -135,6 +124,7 @@
             <span v-else> 完全出库 </span>
           </template>
         </el-table-column>
+        <el-table-column prop="contact" label="联系人" width="200" />
         <el-table-column prop="createPeople" label="创建人" width="200" />
         <el-table-column
           prop="createDate"
@@ -293,7 +283,7 @@ export default {
           console.log(error);
         });
     },
-    // 改变页码数
+    //改变页码数
     // handleCurrentChange(val) {
     //   this.findpage(val, this.pagesize);
     // },
