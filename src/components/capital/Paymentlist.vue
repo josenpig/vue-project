@@ -68,7 +68,13 @@
             <!-- 供应商 -->
             <br /><br />
             <span>供应商:</span>
-            <el-select v-model="value1" size="small" clearable filterable @change="qbc()">
+            <el-select
+              v-model="value1"
+              size="small"
+              clearable
+              filterable
+              @change="qbc()"
+            >
               <el-option
                 v-for="item in options1"
                 :key="item.vendorId"
@@ -79,7 +85,13 @@
             </el-select>
             <!-- 付款人 -->
             <span>付款人:</span>
-            <el-select v-model="value2" size="small" clearable filterable @change="qbc()">
+            <el-select
+              v-model="value2"
+              size="small"
+              clearable
+              filterable
+              @change="qbc()"
+            >
               <el-option
                 v-for="item in options2"
                 :key="item.userId"
@@ -90,7 +102,13 @@
             </el-select>
             <!-- 创建人 -->
             <span>创建人:</span>
-            <el-select v-model="value3" size="small" clearable filterable @change="qbc()">
+            <el-select
+              v-model="value3"
+              size="small"
+              clearable
+              filterable
+              @change="qbc()"
+            >
               <el-option
                 v-for="item in options3"
                 :key="item.userId"
@@ -123,18 +141,8 @@
             }}</el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="paymentTime"
-          label="付款日期"
-          sortable
-          width="150"
-        />
-        <el-table-column
-          prop="vendor"
-          label="供应商名称"
-          sortable
-          width="150"
-        />
+        <el-table-column prop="paymentTime" label="付款日期" width="150" />
+        <el-table-column prop="vendor" label="供应商名称" width="150" />
         <el-table-column prop="drawee" label="付款人" width="120" />
         <el-table-column prop="paymentType" label="付款类别" width="120" />
         <el-table-column prop="paymentMoney" label="付款金额(元)" width="150" />
@@ -160,7 +168,6 @@
         <el-table-column
           prop="lastApprovalTime"
           label="最后审批时间"
-          sortable
           width="200"
         />
       </el-table>
@@ -224,13 +231,31 @@ export default {
       return this.billdate == '自定义' ? true : false
     },
     all: function () {
+      var value1 = ''
+      this.options1.forEach((item) => {
+        if (item.vendorId == this.value1) {
+          value1 = item.vendorName
+        }
+      })
+      var value2 = ''
+      this.options2.forEach((item) => {
+        if (item.userId == this.value2) {
+          value2 = item.userName
+        }
+      })
+      var value3 = ''
+      this.options3.forEach((item) => {
+        if (item.userId == this.value3) {
+          value3 = item.userName
+        }
+      })
       return [
         '单据日期: ' + this.billdate,
         '付款日期: ' + this.collection,
         '结案状态: ' + this.status,
-        '供应商: ' + this.value1,
-        '付款人:' + this.value2,
-        '创建人: ' + this.value3,
+        '供应商: ' + value1,
+        '付款人:' + value2,
+        '创建人: ' + value3,
       ]
     },
   },
@@ -264,7 +289,7 @@ export default {
         data: {
           currentPage: this.currentPage,
           pageSize: this.pagesize,
-          condition:JSON.stringify(_this.condition),
+          condition: JSON.stringify(_this.condition),
         },
         headers: {
           JWTDemo: state.userInfo.token,
@@ -300,12 +325,12 @@ export default {
         this.condition.otimeState = null
         this.condition.otimeEnd = null
       }
-      this.findpage();
+      this.findpage()
     },
   },
   created: function () {
     this.findpage()
-    this.findsaleman();
+    this.findsaleman()
   },
 }
 </script>

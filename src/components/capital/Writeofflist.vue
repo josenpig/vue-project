@@ -170,12 +170,7 @@
             }}</el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="orderTime"
-          label="单据日期"
-          sortable
-          width="150"
-        />
+        <el-table-column prop="orderTime" label="单据日期" width="150" />
         <el-table-column prop="cavType" label="核销方式" width="120" />
         <el-table-column
           prop="otherParty"
@@ -189,12 +184,7 @@
           width="150"
         />
         <el-table-column prop="founder" label="创建人" width="120" />
-        <el-table-column
-          prop="foundTime"
-          label="创建时间"
-          sortable
-          width="200"
-        />
+        <el-table-column prop="foundTime" label="创建时间" width="200" />
         <el-table-column prop="approvalState" label="审批状态" width="120">
           <template #default="scope">
             <span v-if="tableData[scope.$index].approvalState == 0">
@@ -209,19 +199,13 @@
             <span v-else> 审批通过 </span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="updateTime"
-          label="更新时间"
-          sortable
-          width="200"
-        />
         <el-table-column prop="approver" label="审批人" width="120" />
         <el-table-column
           prop="lastApprovalTime"
           label="最后审批时间"
-          sortable
           width="200"
         />
+        <el-table-column prop="updateTime" label="最后更新时间" width="200" />
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
@@ -292,14 +276,38 @@ export default {
       return this.billdate == '自定义' ? true : false
     },
     all: function () {
+      var value1 = ''
+      this.options1.forEach((item) => {
+        if (item.customerNumber == this.value1) {
+          value1 = item.customerName
+        }
+      })
+      var value2 = ''
+      this.options2.forEach((item) => {
+        if (item.vendorId == this.value2) {
+          value2 = item.vendorName
+        }
+      })
+      var value3 = ''
+      this.options3.forEach((item) => {
+        if (item.userId == this.value3) {
+          value3 = item.userName
+        }
+      })
+      var value4 = ''
+      this.options4.forEach((item) => {
+        if (item.userId == this.value4) {
+          value4 = item.userName
+        }
+      })
       return [
         '单据日期: ' + this.billdate,
         '核算方式:' + this.collection,
         '审批状态: ' + this.status,
-        '客户: ' + this.value1,
-        '供应商: ' + this.value2,
-        '创建人: ' + this.value3,
-        '核销人: ' + this.value4,
+        '客户: ' + value1,
+        '供应商: ' + value2,
+        '创建人: ' + value3,
+        '核销人: ' + value4,
       ]
     },
   },
@@ -361,7 +369,7 @@ export default {
         this.condition.otimeState = null
         this.condition.otimeEnd = null
       }
-      this.findpage();
+      this.findpage()
     },
     //订单模糊查询
     join() {
