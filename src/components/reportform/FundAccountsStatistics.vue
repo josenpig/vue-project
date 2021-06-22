@@ -21,14 +21,14 @@
 						<div style="height: 50px">
 							<span>单据日期:</span>
 							<el-radio-group v-model="billdate" size="small" @change="findpage">
-								<el-radio-button label="全部"></el-radio-button>
-								<el-radio-button label="上周"></el-radio-button>
-								<el-radio-button label="本月"></el-radio-button>
-								<el-radio-button label="上月"></el-radio-button>
+								<el-radio-button @click="this.customtime1=''" label="全部"></el-radio-button>
+								<el-radio-button @click="this.customtime1=this.date1" label="上周"></el-radio-button>
+								<el-radio-button @click="this.customtime1=this.date2" label="本月"></el-radio-button>
+								<el-radio-button @click="this.customtime1=this.date3" label="上月"></el-radio-button>
 								<el-radio-button label="自定义"></el-radio-button>
 							</el-radio-group>
 							<div v-show="custom1" style="top: -45px; left: 485px; position: relative">
-								<el-date-picker v-model="customtime1" type="daterange" range-separator="至" start-placeholder="开始日期"
+								<el-date-picker @change="findpage" v-model="customtime1" type="daterange" range-separator="至" start-placeholder="开始日期"
 								 end-placeholder="结束日期">
 								</el-date-picker>
 							</div>
@@ -37,7 +37,10 @@
 				</el-collapse-item>
 			</el-collapse>
 		</div>
-		{{customtime1}}
+
+		<!--横向条状图-->
+		<!---->
+
 		<!-- 表体内容 -->
 		<div class="salelist-mian">
 
@@ -59,8 +62,8 @@
 		</div>
 	</div>
 </template>
-
 <script>
+	// import charLint from './chartLint.vue';
 	export default {
 		name: 'Receivable',
 		data() {
@@ -71,25 +74,55 @@
 				billdate: '全部', //单据日期
 				customtime1: '', //自定义时间
 				date1: (() => { //上周
-					const end = new Date()
 					const start = new Date()
-					start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-					return [start, end]
+					const end = new Date()
+					const day = [7, 1, 2, 3, 4, 5, 6][end.getDay()];
+					end.setTime(end.getTime() - (day) * 24 * 60 * 60 * 1000)
+					start.setTime(end.getTime() - 24 * 60 * 60 * 1000 * 6)
+					start.setHours(0)
+					start.setMinutes(0)
+					start.setSeconds(0)
+					end.setHours(23)
+					end.setMinutes(59)
+					end.setSeconds(59)
+					const start1 = (start.getYear() + 1900) + "-" + start.getMonth() + "-" + start.getDate() + " " + start.getHours() +
+						":" + start.getMinutes() + ":" + start.getSeconds()
+					const end1 = (end.getYear() + 1900) + "-" + (end.getMonth() + 1) + "-" + end.getDate() + " " + end.getHours() +
+						":" + end.getMinutes() + ":" + end.getSeconds()
+					return [start1, end1]
 				})(),
 				date2: (() => { //这个月
 					const end = new Date()
 					const start = new Date()
-					start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-					return [start, end]
+					start.setTime(end.getTime() - 24 * 60 * 60 * 1000 * (end.getDate()))
+					start.setHours(24)
+					start.setMinutes(0)
+					start.setSeconds(0)
+					const start1 = (start.getYear() + 1900) + "-" + (start.getMonth() + 1) + "-" + start.getDate() + " " + start.getHours() +
+						":" + start.getMinutes() + ":" + start.getSeconds()
+					const end1 = (end.getYear() + 1900) + "-" + (end.getMonth() + 1) + "-" + end.getDate() + " " + end.getHours() +
+						":" + end.getMinutes() + ":" + end.getSeconds()
+					return [start1, end1]
 				})(),
 				date3: (() => { //上个月
 					const end = new Date()
 					const start = new Date()
-					start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-					return [start, end]
+					end.setTime(end.getTime() - 24 * 60 * 60 * 1000 * (end.getDate() - 1))
+					end.setHours(-24)
+					end.setMinutes(0)
+					end.setSeconds(0)
+					start.setTime(end.getTime() - 24 * 60 * 60 * 1000 * 29)
+					start.setHours(-24)
+					start.setMinutes(0)
+					start.setSeconds(0)
+					const start1 = (start.getYear() + 1900) + "-" + start.getMonth() + "-" + start.getDate() + " " + start.getHours() +
+						":" + start.getMinutes() + ":" + start.getSeconds()
+					const end1 = (end.getYear() + 1900) + "-" + (end.getMonth() + 1) + "-" + end.getDate() + " " + end.getHours() +
+						":" + end.getMinutes() + ":" + end.getSeconds()
+					return [start1, end1]
 				})(),
 				options1: [],
-				
+
 				//条件查询数据
 				vagueorderid: '',
 				condition: {
@@ -97,7 +130,7 @@
 				},
 				dialogTableVisible: false,
 				pstatus: [],
-				
+
 				//表单数据
 				tableData: [],
 				//分页
@@ -107,6 +140,7 @@
 			}
 		},
 		computed: {
+			// charLint,
 			paging: function() {
 				return this.tableData.length > 0 ? true : false
 			},
@@ -131,15 +165,17 @@
 				this.findpage(val, this.pagesize);
 			},
 			//分页查询
-			findpage(val) {
-				console.log(val)
+			findpage() {
+				console.log(this.billdate)
+				console.log(this.customtime1[0])
+				console.log(this.customtime1[1])
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
 				var fd = {
 					currentPage: this.currentPage,
 					pageSize: this.pagesize,
-					startTime:'',
-					endTime:''
+					startTime: this.customtime1[0],
+					endTime: this.customtime1[1]
 				};
 				this.axios({
 						url: "http://localhost:8088/frameproject/ReportFormController/fundAllFundAccountsStatisticsVo",
@@ -159,13 +195,13 @@
 						console.log(error);
 					});
 			},
+			
 		},
 		created: function() {
 			this.findpage()
 		},
 	}
 </script>
-
 <style>
 	.salelist {
 		width: 100%;

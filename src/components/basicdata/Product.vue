@@ -842,7 +842,7 @@
 				}
 			},
 			
-			//删除分类--待
+			//删除分类--
 			remove(data) {
 				console.log("remove:")
 				console.log(data)
