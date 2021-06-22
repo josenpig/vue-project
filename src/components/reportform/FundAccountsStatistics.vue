@@ -37,8 +37,10 @@
 				</el-collapse-item>
 			</el-collapse>
 		</div>
-		
-		
+
+		<!--横向条状图-->
+		<!---->
+
 		<!-- 表体内容 -->
 		<div class="salelist-mian">
 
@@ -60,8 +62,8 @@
 		</div>
 	</div>
 </template>
-
 <script>
+	// import charLint from './chartLint.vue';
 	export default {
 		name: 'Receivable',
 		data() {
@@ -74,43 +76,49 @@
 				date1: (() => { //上周
 					const start = new Date()
 					const end = new Date()
-					const day=[7,1,2,3,4,5,6][end.getDay()];
-					end.setTime(end.getTime() - (day)*24*60*60*1000)
-					start.setTime(end.getTime() - 24*60*60*1000*6)
+					const day = [7, 1, 2, 3, 4, 5, 6][end.getDay()];
+					end.setTime(end.getTime() - (day) * 24 * 60 * 60 * 1000)
+					start.setTime(end.getTime() - 24 * 60 * 60 * 1000 * 6)
 					start.setHours(0)
 					start.setMinutes(0)
 					start.setSeconds(0)
 					end.setHours(23)
 					end.setMinutes(59)
 					end.setSeconds(59)
-					const start1 = (start.getYear()+1900)+"-"+start.getMonth()+"-"+start.getDate()+" "+start.getHours()+":"+start.getMinutes()+":"+start.getSeconds()
-					const end1 =(end.getYear()+1900)+"-"+(end.getMonth()+1)+"-"+end.getDate()+" "+end.getHours()+":"+end.getMinutes()+":"+end.getSeconds()
+					const start1 = (start.getYear() + 1900) + "-" + start.getMonth() + "-" + start.getDate() + " " + start.getHours() +
+						":" + start.getMinutes() + ":" + start.getSeconds()
+					const end1 = (end.getYear() + 1900) + "-" + (end.getMonth() + 1) + "-" + end.getDate() + " " + end.getHours() +
+						":" + end.getMinutes() + ":" + end.getSeconds()
 					return [start1, end1]
 				})(),
 				date2: (() => { //这个月
 					const end = new Date()
 					const start = new Date()
-					start.setTime(end.getTime() - 24*60*60*1000*(end.getDate()))
+					start.setTime(end.getTime() - 24 * 60 * 60 * 1000 * (end.getDate()))
 					start.setHours(24)
 					start.setMinutes(0)
 					start.setSeconds(0)
-					const start1 = (start.getYear()+1900)+"-"+(start.getMonth()+1)+"-"+start.getDate()+" "+start.getHours()+":"+start.getMinutes()+":"+start.getSeconds()
-					const end1 =(end.getYear()+1900)+"-"+(end.getMonth()+1)+"-"+end.getDate()+" "+end.getHours()+":"+end.getMinutes()+":"+end.getSeconds()
+					const start1 = (start.getYear() + 1900) + "-" + (start.getMonth() + 1) + "-" + start.getDate() + " " + start.getHours() +
+						":" + start.getMinutes() + ":" + start.getSeconds()
+					const end1 = (end.getYear() + 1900) + "-" + (end.getMonth() + 1) + "-" + end.getDate() + " " + end.getHours() +
+						":" + end.getMinutes() + ":" + end.getSeconds()
 					return [start1, end1]
 				})(),
 				date3: (() => { //上个月
 					const end = new Date()
 					const start = new Date()
-					end.setTime(end.getTime() - 24*60*60*1000*(end.getDate() -1))
+					end.setTime(end.getTime() - 24 * 60 * 60 * 1000 * (end.getDate() - 1))
 					end.setHours(-24)
 					end.setMinutes(0)
 					end.setSeconds(0)
-					start.setTime(end.getTime() - 24*60*60*1000*29)
+					start.setTime(end.getTime() - 24 * 60 * 60 * 1000 * 29)
 					start.setHours(-24)
 					start.setMinutes(0)
 					start.setSeconds(0)
-					const start1 = (start.getYear()+1900)+"-"+start.getMonth()+"-"+start.getDate()+" "+start.getHours()+":"+start.getMinutes()+":"+start.getSeconds()
-					const end1 =(end.getYear()+1900)+"-"+(end.getMonth()+1)+"-"+end.getDate()+" "+end.getHours()+":"+end.getMinutes()+":"+end.getSeconds()
+					const start1 = (start.getYear() + 1900) + "-" + start.getMonth() + "-" + start.getDate() + " " + start.getHours() +
+						":" + start.getMinutes() + ":" + start.getSeconds()
+					const end1 = (end.getYear() + 1900) + "-" + (end.getMonth() + 1) + "-" + end.getDate() + " " + end.getHours() +
+						":" + end.getMinutes() + ":" + end.getSeconds()
 					return [start1, end1]
 				})(),
 				options1: [],
@@ -132,6 +140,7 @@
 			}
 		},
 		computed: {
+			// charLint,
 			paging: function() {
 				return this.tableData.length > 0 ? true : false
 			},
@@ -186,13 +195,13 @@
 						console.log(error);
 					});
 			},
+			
 		},
 		created: function() {
 			this.findpage()
 		},
 	}
 </script>
-
 <style>
 	.salelist {
 		width: 100%;
