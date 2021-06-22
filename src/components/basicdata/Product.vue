@@ -5,7 +5,7 @@
 		<h4 class="title">产品分类</h4>
 		<div>
 			<div>
-				<el-button @click="findByType(AllId)" class="allType">
+				<el-button @click="findpage" class="allType">
 					<i class="el-icon-caret-bottom" style="padding-right: 5px;"></i>全部
 					<a @click="openAdd(AllId)" style="float: right;">
 						<i class="el-icon-circle-plus-outline"></i>
