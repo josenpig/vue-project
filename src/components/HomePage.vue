@@ -115,12 +115,12 @@ export default {
     handleCommand(command) {
       //退出
       if (command == "signout") {
-        this.$router.push("/Login");
-        sessionStorage.clear();
+          this.$router.push("/Login");
+          sessionStorage.clear();
+          console.log(command);
       } else if(command == "mydata"){
-        
-      }else {
-        console.log(command);
+          this.$router.push('/PersonalCenter') ;
+     
       }
     },
     gotoset(){

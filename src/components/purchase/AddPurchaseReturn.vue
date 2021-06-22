@@ -106,9 +106,9 @@
         </el-table-column>
         <!-- 产品详细信息 -->
         <el-table-column prop="productName" label="产品名称" width="200" />
-        <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
-        <el-table-column prop="returnNum" label="退货数量" width="120">
+        <el-table-column prop="productId" label="产品编号" width="200" />
+        <el-table-column prop="productUnit" label="单位" width="200" />
+        <el-table-column prop="returnNum" label="退货数量" width="200">
           <template #default="scope">
             <el-input-number
               v-model="productdata[scope.$index].returnNum"
@@ -118,21 +118,21 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="purchaseUnitPrice" label="采购单价" width="120" />
-        <el-table-column prop="purchaseMoney" label="退货金额" width="120">
+        <el-table-column prop="purchaseUnitPrice" label="采购单价" width="200" />
+        <el-table-column prop="purchaseMoney" label="退货金额" width="200">
           <template #default="scope">
             {{ saleMoney(scope.$index) }}
           </template>
         </el-table-column>
-        <el-table-column prop="depotName" label="仓库" width="120" />
-        <el-table-column prop="gramHeavy" label="克重" width="120" />
-        <el-table-column prop="productDescribe" label="产品描述" width="120" />
+        <el-table-column prop="depotName" label="仓库" width="200" />
+        <el-table-column prop="gramHeavy" label="克重" width="200" />
+        <el-table-column prop="productDescribe" label="产品描述" width="200" />
 
         <el-table-column
           prop="productDescribe"
           label="产品描述"
           :show-overflow-tooltip="true"
-          width="120"
+          width="200"
         />
       </el-table>
       <!-- 备注 -->
