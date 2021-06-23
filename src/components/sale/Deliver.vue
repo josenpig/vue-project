@@ -49,25 +49,62 @@
       width="30%"
       :before-close="handleClose"
     >
-      <div style="float: left">
-        <span v-if="formorder.orderId == null">关联销售订单：无</span>
-        <span v-else>关联销售订单：{{ formorder.orderId }}</span>
-      </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">关联销售退货单：无</span>
-        <span v-else>关联销售退货单：{{ formorder.returnId }}</span>
-      </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.receiptId }}</span>
-      </div>
-
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button type="primary" @click="dialogVisible = false"
-            >确 定</el-button
+      <div class="deliver-dialog">
+        <div style="float: left">
+          <span style="float: left">关联销售订单：</span>
+          <span v-if="formorder.orderId == null">无</span>
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(formorder.orderId, '销售订单')"
+              type="text"
+              >{{ formorder.orderId }}</el-button
+            ></span
           >
-        </span>
+        </div>
+        <div style="float: left; width: 100%; margin-top: 10px">
+          <span style="float: left">关联销售退货单：</span>
+          <span v-if="formorder.returnId == null">无</span>
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(formorder.returnId, '销售退货单')"
+              type="text"
+              >{{ formorder.returnId }}</el-button
+            ></span
+          >
+        </div>
+        <div style="float: left; width: 100%; margin-top: 10px">
+          <span style="float: left">关联收款单：</span>
+          <span v-if="formorder.receipts.length == 0">无</span>
+          <span
+            v-else
+            v-for="item in formorder.receipts"
+            style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(item.receiptId, '收款单')"
+              type="text"
+              >{{ item.receiptId }}</el-button
+            ></span
+          >
+        </div>
+        <div style="float: left; width: 100%; margin-top: 10px">
+          <span style="float: left">关联核销单：</span>
+          <span v-if="formorder.cavcias.length == 0">无</span>
+          <span
+            v-else
+            v-for="item in formorder.cavcias"
+            style="float: left; width: 50%"
+            ><el-button @click="goorder(item.cavId, '核销单')" type="text">
+              {{ item.cavId }}</el-button
+            ></span
+          >
+        </div>
+      </div>
+      
+      <template #footer>
+        
+        <el-button type="primary" @click="dialogVisible = false"
+          >知道了</el-button
+        >
       </template>
     </el-dialog>
     <!-- 表单头部 -->
@@ -165,14 +202,14 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
-  beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("orderid");
-    next();
-  },
-  name: "Sale",
+  // beforeRouteLeave(to, form, next) {
+  //   sessionStorage.removeItem('orderid')
+  //   next()
+  // },
+  name: 'Sale',
   data() {
     return {
       dialogVisible: false,
@@ -180,26 +217,46 @@ export default {
       formorder: {},
       //表体销售商品信息
       productdata: [],
-    };
+    }
   },
   computed: {
     total: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.productdata.forEach((money) => {
-        allmoney += money.saleMoney;
-      });
-      return Math.round(allmoney * 1000) / 1000;
+        allmoney += money.saleMoney
+      })
+      return Math.round(allmoney * 1000) / 1000
     },
   },
   methods: {
+    goorder(val, type) {
+      sessionStorage.setItem('orderid', val)
+      if (type == '销售订单') {
+        this.$router.push('/Sale')
+      } else if (type == '销售退货单') {
+        this.$router.push('Return')
+      } else if (type == '收款单') {
+        this.$router.push('Receipt')
+      } else {
+        this.$router.push('Writeoff')
+      }
+    },
     //提交审批
     approval(type) {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const orderid = sessionStorage.getItem("orderid");
-      var _this = this;
-      this.$prompt("请输入备注", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('orderid')
+      var _this = this
+      var inputPattern
+      var inputErrorMessage
+      if(type==-1){
+        inputPattern=/\s\S+|S+\s|\S/
+        inputErrorMessage='驳回理由不能为空'
+      }
+      this.$prompt('请输入审批备注', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern:inputPattern,
+        inputErrorMessage: inputErrorMessage
       })
         .then(({ value }) => {
           var fd = {
@@ -207,10 +264,10 @@ export default {
             type: type,
             user: state.userInfo.userName,
             approvalremarks: value,
-          };
+          }
           this.axios({
-            url: "http://localhost:8088/frameproject/saledelivery/approval",
-            method: "get",
+            url: 'http://localhost:8088/frameproject/saledelivery/approval',
+            method: 'get',
             processData: false,
             params: fd,
             headers: {
@@ -220,49 +277,49 @@ export default {
             .then(function (response) {
               if (response.data.code == 200) {
                 _this.$notify({
-                  title: "操作成功",
-                  message: "订单信息已被修改",
-                  type: "success",
-                });
-                _this.showorder();
+                  title: '操作成功',
+                  message: '订单信息已被修改',
+                  type: 'success',
+                })
+                _this.showorder()
               }
             })
             .catch(function (error) {
-              console.log(error);
-            });
+              console.log(error)
+            })
         })
-        .catch(() => {});
+        .catch(() => {})
     },
     showorder() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const orderid = sessionStorage.getItem("orderid");
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('orderid')
+      const _this = this
       if (orderid == null) {
-        this.$router.push("/Deliverlist");
+        this.$router.push('/Deliverlist')
       } else {
         this.axios({
           url:
-            "http://localhost:8088/frameproject/saledelivery/find/" + orderid,
-          method: "get",
+            'http://localhost:8088/frameproject/saledelivery/find/' + orderid,
+          method: 'get',
           headers: {
             JWTDemo: state.userInfo.token,
           },
         })
           .then(function (response) {
-            _this.formorder = response.data.data.delivery;
-            _this.productdata = response.data.data.deliverydetails;
+            _this.formorder = response.data.data.delivery
+            _this.productdata = response.data.data.deliverydetails
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
   },
 
   created: function () {
-    this.showorder();
+    this.showorder()
   },
-};
+}
 </script>
 
 <style lang="scss">
@@ -271,6 +328,11 @@ export default {
   background-color: white;
 }
 /* 顶部 */
+.deliver-dialog .el-button {
+  min-height: unset !important;
+  margin-left: unset !important;
+  padding: 0px 0px 10px 0px !important ;
+}
 .deliver .el-carousel__arrow--right,
 .el-notification.right {
   top: 110px !important;
