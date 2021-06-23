@@ -93,12 +93,12 @@ export default {
     change(index) {
       console.log(index);
       this.dialogFormVisible = true;
-      this.form.menuName = this.all[index].menuName;
-      this.form.orderNum = this.all[index].orderNum;
-      this.form.icon = this.all[index].icon;
-      this.form.menuId = this.all[index].menuId;
-      this.form.parentId = this.all[index].parentId;
-      this.all[index].visible == 0
+      this.form.menuName = index.menuName;
+      this.form.orderNum = index.orderNum;
+      this.form.icon = index.icon;
+      this.form.menuId = index.menuId;
+      this.form.parentId = index.parentId;
+      index.visible == 0
         ? (this.form.visible = true)
         : (this.form.visible = false);
     },
