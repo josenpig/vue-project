@@ -102,8 +102,8 @@
 					gramHeavy: '', //克重
 					unitId: '', //单位id： 连接单位表
 					productTypeId: '', //产品分类id： 连接分类表
-					purchaseUnitPrice: , //销售单价
-					purchaseMoney: , //采购单价
+					purchaseUnitPrice:'' , //销售单价
+					purchaseMoney:'' , //采购单价
 					remarks: '', //备注
 					productDescribe: '', //产品描述
 					pictureId: 1, //图片id： 连接图片表

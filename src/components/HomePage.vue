@@ -13,7 +13,7 @@
       <!-- 用户信息 -->
       <el-row style="float: right" :gutter="40">
         <el-col :span="6" style="line-height: 48px">
-          <el-button type="text" icon="el-icon-bell" style="color: white"
+          <el-button type="text" icon="el-icon-bell" style="color: white" @click="gotoset1()"
             >提醒
           </el-button>
         </el-col>
@@ -115,16 +115,19 @@ export default {
     handleCommand(command) {
       //退出
       if (command == "signout") {
-        this.$router.push("/Login");
-        sessionStorage.clear();
+          this.$router.push("/Login");
+          sessionStorage.clear();
+          console.log(command);
       } else if(command == "mydata"){
-        
-      }else {
-        console.log(command);
+          this.$router.push('/PersonalCenter') ;
+     
       }
     },
     gotoset(){
       this.$router.push('/Menulist')
+    },
+   gotoset1(){
+      this.$router.push('/messageNotification')
     }
   },
   computed: {

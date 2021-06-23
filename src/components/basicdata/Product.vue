@@ -5,9 +5,9 @@
 		<h4 class="title">产品分类</h4>
 		<div>
 			<div>
-				<el-button @click="findByType(AllId)" class="allType">
+				<el-button @click="findpage" class="allType">
 					<i class="el-icon-caret-bottom" style="padding-right: 5px;"></i>全部
-					<a @click="append(AllId)" style="float: right;">
+					<a @click="openAdd(AllId)" style="float: right;">
 						<i class="el-icon-circle-plus-outline"></i>
 						<span style="font-size: 10px;">新增子分类</span>
 					</a>
@@ -17,13 +17,22 @@
 				<template #default="{ node, data }">
 					<span class="custom-tree-node">
 						<span>{{ node.label }}</span>
-						<span style="padding: 20px;">
-							<a @click="append(data)" style="padding: 8px;">
+						<span style="padding: 10px;">
+							<el-tooltip content="新增子分类" placement="top">
+							<a @click="openAdd(data)" style="padding: 4px;">
 								<i class="el-icon-circle-plus-outline"></i>
 							</a>
-							<a @click="remove(node, ProType)">
+							</el-tooltip>
+							<el-tooltip content="删除" placement="top">
+							<a @click="remove(data)" style="padding: 4px;">
 								<i class="el-icon-delete"></i>
 							</a>
+							</el-tooltip>
+							<el-tooltip content="修改" placement="top">
+							<a @click="openupdateProType(data)" style="padding: 4px;">
+								<i class="el-icon-edit"></i>
+							</a>
+							</el-tooltip>
 						</span>
 					</span>
 				</template>
@@ -32,6 +41,42 @@
 
 	</div>
 
+	<!--新增子分类-->
+	<div>
+		<el-dialog title="新增子分类" v-model="PTdialogFormVisible">
+			<hr style="margin-bottom: 20px;" />
+			<el-form :model="ProTypeForm">
+				<el-form-item label="分类名称" :label-width="formLabelWidth">
+					<el-input @change="pdProductTypeName(ProTypeForm.label)" v-model="ProTypeForm.label" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="PTdialogFormVisible = false">取 消</el-button>
+					<el-button type="primary" @click="append">确 定</el-button>
+				</span>
+			</template>
+		</el-dialog>
+	</div>
+	
+	<!--修改分类名称-->
+	<div>
+		<el-dialog title="修改子分类" v-model="PTupdateDialogFormVisible">
+			<hr style="margin-bottom: 20px;" />
+			<el-form :model="updateProTypeForm">
+				<el-form-item label="分类名称" :label-width="formLabelWidth">
+					<el-input @change="pdProductTypeName(updateProTypeForm.label)" v-model="updateProTypeForm.label" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="PTupdateDialogFormVisible = false">取 消</el-button>
+					<el-button type="primary" @click="updateProType">确 定</el-button>
+				</span>
+			</template>
+		</el-dialog>
+	</div>
+	
 	<!-- 主内容 -->
 	<div class="product">
 		<!-- 标题 -->
@@ -110,10 +155,10 @@
 						<el-input v-model="updateForm.remarks" autocomplete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="产品状态" :label-width="formLabelWidth">
-						<span v-if="updateForm.state==0" style="background-color: coral;color: white;padding: 15px;">禁用</span>
-						<span v-if="updateForm.state==1" style="background-color: skyblue;color: white;padding: 15px;">启用</span>
-						<el-button v-if="updateForm.state==1" @click="disableOrEnable(updateForm,1)" round style="background-color: coral;color: white;margin-left: 40px;">禁用</el-button>
-						<el-button v-if="updateForm.state==0" @click="disableOrEnable(updateForm,1)" round style="background-color: lightgreen ;color: white;margin-left: 40px">启用</el-button>
+						<span v-if="updateForm.state==0" style="background-color: coral;color: white;padding: 15px;">下架</span>
+						<span v-if="updateForm.state==1" style="background-color: skyblue;color: white;padding: 15px;">上架</span>
+						<el-button v-if="updateForm.state==1" @click="disableOrEnable(updateForm,1)" round style="background-color: coral;color: white;margin-left: 40px;">下架</el-button>
+						<el-button v-if="updateForm.state==0" @click="disableOrEnable(updateForm,1)" round style="background-color: lightgreen ;color: white;margin-left: 40px">上架</el-button>
 					</el-form-item>
 				</el-form>
 				<template #footer>
@@ -152,8 +197,8 @@
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row,0)" round style="background-color: coral;color: white;padding: 7px;">禁用</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row,0)" round style="background-color: lightgreen ;color: white;padding: 7px;">启用</el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row,0)" round style="background-color: coral;color: white;padding: 7px;">下架</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row,0)" round style="background-color: lightgreen ;color: white;padding: 7px;">上架</el-button>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
@@ -166,8 +211,8 @@
 				<el-table-column prop="opingNumber" label="初期数量" sortable width="120" />
 				<el-table-column prop="state" label="状态" sortable width="120">
 					<template #default="scope">
-						<span v-if="scope.row.state==0" style="color: orangered;">禁用</span>
-						<span v-if="scope.row.state==1" style="color: seagreen;">启用</span>
+						<span v-if="scope.row.state==0" style="color: orangered;">下架</span>
+						<span v-if="scope.row.state==1" style="color: seagreen;">上架</span>
 					</template>
 				</el-table-column>
 				<el-table-column prop="remarks" label="备注" width="120" />
@@ -195,7 +240,6 @@
 		name: "product",
 		data() {
 			return {
-				AllId: '',
 				formLabelWidth: '120px',
 				// 分类数据
 				ProType: [],
@@ -232,6 +276,22 @@
 				form: {
 					unitName: '' //单位名称
 				},
+				
+				//新增产品分类弹框
+				PTdialogFormVisible: false,
+				//修改产品信息弹框
+				PTupdateDialogFormVisible: false,
+				//新增产品分类
+				ProTypeForm:{
+					productTypeParentId:'',//父级分类id
+					label:''//分类名称
+				},
+				//修改产品分类
+				updateProTypeForm:{
+					id:'',//分类id
+					label:'',//分类名称
+				},
+				
 				//修改产品表单
 				updateForm: {
 					productId: '', //产品编号
@@ -246,8 +306,13 @@
 					remarks: '', //备注
 					productDescribe: '', //产品描述
 					state: '' //产品状态
-				}
-				
+				},
+				//全部分类
+				AllId:{
+					id: 0
+				},
+				judge: '',
+				judge2: ''
 			}
 		},
 
@@ -367,7 +432,7 @@
 					};
 					var _this = this
 					this.axios({
-							url: "http://localhost:8088/frameproject/baseProduct/delProduct",
+							url: "http://localhost:8088/frameproject/baseProductType/delProductType",
 							method: "get",
 							processData: false,
 							params: pid,
@@ -451,15 +516,15 @@
 			handleSelectionChange(val) {
 				this.selectPro = val
 			},
-			//禁用或启用
+			//下架或上架
 			disableOrEnable(val,index) {
 				var _this = this;
 				var able;
 				if (val.state == 1) {
-					able = '禁用'
+					able = '下架'
 				};
 				if (val.state == 0) {
-					able = '启用'
+					able = '上架'
 				};
 				var remind="";
 				if(index==1){
@@ -556,18 +621,6 @@
 						console.log(error);
 					});
 			},
-			
-			//新增产品子分类--待
-			append(node, data) {
-				console.log("append:")
-				console.log(node.id)
-			},
-			//删除分类--待
-			remove(node, data) {
-				console.log("remove:")
-				console.log(node.id)
-			},
-			
 			//判断单位名称是否重复
 			pdName(val) {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -635,18 +688,215 @@
 								.catch(function(error) {
 									console.log(error);
 								});
+						}
+					}, 200)
+				}
+			},
+			
+			//打开分类新增
+			openAdd(data) {
+				this.PTdialogFormVisible = true
+				this.ProTypeForm.productTypeParentId = data.id
+				console.log("add:")
+				console.log(data)
+			},
+			
+			//判断分类名称是否重复
+			pdProductTypeName(val) {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var ProductTypeName = {
+					ProductTypeName: val
+				}
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseProductType/judgeProductTypeName",
+						method: "get",
+						processData: false,
+						params: ProductTypeName,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log("产品名称不重复是否通过:" + response.data)
+						_this.judge2 = response.data
+						if(!response.data){
+							ElMessage.warning({
+								message: '产品名称重复！',
+								type: 'success'
+							});
+						}
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
+			//新增产品子分类
+			append() {
+				console.log("append:")
+				console.log(this.ProTypeForm)
+				if (this.ProTypeForm.label == null || this.ProTypeForm.label == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					this.pdProductTypeName(this.ProTypeForm.label)
+					setTimeout(() => {
+						if (this.judge2) {
+							const state = JSON.parse(sessionStorage.getItem("state"));
+							var _this = this;
+							this.dialogFormVisible = false
+							//添加仓库
+							this.axios({
+									url: "http://localhost:8088/frameproject/baseProductType/addProductType",
+									method: "post",
+									processData: false,
+									data: {
+										ProductType: JSON.stringify(_this.ProTypeForm)
+									},
+									headers: {
+										JWTDemo: state.userInfo.token,
+									},
+								})
+								.then(function(response) {
+									console.log(response.data.data)
+									ElMessage.success({
+										message: '添加成功',
+										type: 'success'
+									});
+									_this.ProTypeForm = {}
+									_this.judge2 = {}
+									_this.findAllProType()
+									_this.PTdialogFormVisible = false
+								})
+								.catch(function(error) {
+									console.log(error);
+								});
+						}
+					}, 200)
+				}
+			},
+			//打开产品分类修改
+			openupdateProType(data) {
+				this.PTupdateDialogFormVisible = true
+				this.updateProTypeForm.id = data.id
+				this.updateProTypeForm.productTypeParentId = data.productTypeParentId
+				console.log("update:")
+				console.log(data)
+			},
+			//修改产品分类信息
+			updateProType() {
+				console.log(this.updateProTypeForm)
+				if (this.updateProTypeForm.label == '' ||this.updateProTypeForm.label == null) {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.dialogFormVisible = false
+					this.pdName(this.updateProTypeForm.label)
+					setTimeout(() => {
+						if (this.judge2) {
+							this.$confirm('修改后使用过该分类的相关产品都会更新显示。确定修改？', '提示', {
+								confirmButtonText: '确定',
+								cancelButtonText: '取消',
+								type: 'warning'
+							}).then(() => {
+			
+								this.axios({
+										url: "http://localhost:8088/frameproject/baseProductType/updateProductType",
+										method: "post",
+										processData: false,
+										data: {
+											ProductType: JSON.stringify(_this.updateProTypeForm)
+										},
+										headers: {
+											JWTDemo: state.userInfo.token,
+										},
+									})
+									.then(function(response) {
+										console.log(response.data.data)
+										ElMessage.success({
+											message: '修改成功',
+											type: 'success'
+										});
+										_this.PTupdateDialogFormVisible = false;
+										_this.judge2 = {}
+										_this.findAllProType()
+									})
+									.catch(function(error) {
+										console.log(error);
+									});
+			
+							}).catch(() => {
+								this.$message({
+									type: 'info',
+									message: '已取消修改'
+								});
+							});
 						} else {
 							ElMessage.warning({
 								message: '单位名称重复！',
 								type: 'success'
 							});
 						}
-					}, 200)
+					}, 500)
 				}
 			},
+			
+			//删除分类--
+			remove(data) {
+				console.log("remove:")
+				console.log(data)
+				var _this = this;
+				this.$confirm('此操作将永久删除该分类及其下级子分类, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+				
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var id = {
+						id: data.id
+					}
+					console.log(id)
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseProductType/delProductType",
+							method: "get",
+							processData: false,
+							params: id,
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log("删除是否成功：" + response.data.data);
+							if (response.data.data) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findAllProType()
+							} else {
+								ElMessage.warning({
+									message: '该分类下有产品数据，无法删除！',
+									type: 'success'
+								});
+							}
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			},
+			
 			//打开修改框
 			openupdate(val) {
-				this.updateDialogFormVisible = true;
+				this.PTupdateDialogFormVisible = true;
 			
 				this.updateForm.productId = val.productId
 				this.updateForm.productName = val.productName
@@ -678,7 +928,7 @@
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var _this = this;
 					this.dialogFormVisible = false
-					//修改资金账户
+					
 					this.axios({
 							url: "http://localhost:8088/frameproject/baseProduct/updateProduct",
 							method: "post",

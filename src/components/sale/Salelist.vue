@@ -220,18 +220,8 @@
             }}</el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="orderTime"
-          label="单据日期"
-          sortable
-          width="150"
-        />
-        <el-table-column
-          prop="deliveryTime"
-          label="交货日期"
-          sortable
-          width="150"
-        />
+        <el-table-column prop="orderTime" label="单据日期" width="150" />
+        <el-table-column prop="deliveryTime" label="交货日期" width="150" />
         <el-table-column prop="customer" label="客户" width="120" />
         <el-table-column prop="salesmen" label="销售人员" width="120" />
         <el-table-column
@@ -250,12 +240,7 @@
         </el-table-column>
         <el-table-column prop="contacts" label="联系人" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
-        <el-table-column
-          prop="foundTime"
-          label="创建时间"
-          sortable
-          width="200"
-        />
+        <el-table-column prop="foundTime" label="创建时间" width="200" />
         <el-table-column prop="approvalState" label="审批状态" width="120">
           <template #default="scope">
             <span v-if="tableData[scope.$index].approvalState == 0">
@@ -276,16 +261,10 @@
             <span v-else> 已结束 </span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="updateTime"
-          label="更新时间"
-          sortable
-          width="200"
-        />
+        <el-table-column prop="updateTime" label="更新时间" width="200" />
         <el-table-column
           prop="lastApprovalTime"
           label="最后审批时间"
-          sortable
           width="200"
         />
         <el-table-column prop="approver" label="审批人" width="120" />
@@ -388,7 +367,7 @@ export default {
         '审批状态: ' + this.status,
         '客户: ' + value1,
         '创建人: ' + value2,
-        '销售人员: ' +value3,
+        '销售人员: ' + value3,
       ]
     },
   },

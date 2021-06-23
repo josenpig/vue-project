@@ -59,8 +59,8 @@
         />
         <el-table-column prop="operator" label="操作员" width="230" />
         <el-table-column prop="operation" label="操作内容" width="185" />
-		<el-table-column prop="method" label="操作的方法" width="230" />
-		<el-table-column prop="params" label="参数" width="230" />
+		<el-table-column prop="method" label="操作的方法" width="460" />
+		<!-- <el-table-column prop="params" label="参数" width="230" /> -->
 		<el-table-column prop="ipaddress" label="ip地址" width="230" />
 
       </el-table>
@@ -249,7 +249,7 @@ import {
 	margin-top:0px;
 	
 }
-.el-input{
+.returnlist-header .el-input{
   width: 210px;
 }
 .block{

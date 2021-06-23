@@ -23,56 +23,56 @@
           <div>
             <!-- 单据日期 -->
             <div style="height: 25px">
-            <span>单据日期:</span>
-            <el-radio-group v-model="billdate" size="small" @change="qbc()">
-              <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="今天"></el-radio-button>
-              <el-radio-button label="昨天"></el-radio-button>
-              <el-radio-button label="本周"></el-radio-button>
-              <el-radio-button label="本月"></el-radio-button>
-              <el-radio-button label="自定义"></el-radio-button>
-            </el-radio-group>
-            <div
-              v-show="custom1"
-              style="top: -45px; left: 485px; position: relative"
-            >
-              <el-date-picker
-                v-model="customtime1"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                @change="qbc()"
+              <span>单据日期:</span>
+              <el-radio-group v-model="billdate" size="small" @change="qbc()">
+                <el-radio-button label="全部"></el-radio-button>
+                <el-radio-button label="今天"></el-radio-button>
+                <el-radio-button label="昨天"></el-radio-button>
+                <el-radio-button label="本周"></el-radio-button>
+                <el-radio-button label="本月"></el-radio-button>
+                <el-radio-button label="自定义"></el-radio-button>
+              </el-radio-group>
+              <div
+                v-show="custom1"
+                style="top: -45px; left: 485px; position: relative"
               >
-              </el-date-picker>
+                <el-date-picker
+                  v-model="customtime1"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  @change="qbc()"
+                >
+                </el-date-picker>
+              </div>
             </div>
-          </div>
             <!-- 收款日期 -->
             <br />
             <div style="height: 25px">
-            <span>收款日期:</span>
-            <el-radio-group v-model="collection" size="small" @change="qbc()">
-              <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="今天"></el-radio-button>
-              <el-radio-button label="昨天"></el-radio-button>
-              <el-radio-button label="本周"></el-radio-button>
-              <el-radio-button label="本月"></el-radio-button>
-              <el-radio-button label="自定义"></el-radio-button>
-            </el-radio-group>
-            <div
-              v-show="custom2"
-              style="top: -45px; left: 485px; position: relative"
-            >
-              <el-date-picker
-                v-model="customtime2"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                @change="qbc()"
+              <span>收款日期:</span>
+              <el-radio-group v-model="collection" size="small" @change="qbc()">
+                <el-radio-button label="全部"></el-radio-button>
+                <el-radio-button label="今天"></el-radio-button>
+                <el-radio-button label="昨天"></el-radio-button>
+                <el-radio-button label="本周"></el-radio-button>
+                <el-radio-button label="本月"></el-radio-button>
+                <el-radio-button label="自定义"></el-radio-button>
+              </el-radio-group>
+              <div
+                v-show="custom2"
+                style="top: -45px; left: 485px; position: relative"
               >
-              </el-date-picker>
-            </div>
+                <el-date-picker
+                  v-model="customtime2"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  @change="qbc()"
+                >
+                </el-date-picker>
+              </div>
             </div>
             <!-- 结案状态 -->
             <br />
@@ -181,12 +181,7 @@
             }}</el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="deliveryTime"
-          label="出库日期"
-          sortable
-          width="120"
-        />
+        <el-table-column prop="deliveryTime" label="出库日期" width="120" />
         <el-table-column prop="deliveryType" label="单据类型" width="120" />
         <el-table-column prop="customer" label="客户名称" width="120" />
         <el-table-column prop="salesmen" label="销售人员" width="120" />
@@ -204,7 +199,6 @@
         <el-table-column
           prop="lastCollectionTime"
           label="最后收款时间"
-          sortable
           width="200"
         />
       </el-table>
@@ -301,8 +295,8 @@ export default {
         '收款日期: ' + this.collection,
         '结案状态: ' + this.status,
         '客户: ' + value1,
-        '创建人: ' +value2,
-        '销售人员: ' +value3,
+        '创建人: ' + value2,
+        '销售人员: ' + value3,
       ]
     },
   },

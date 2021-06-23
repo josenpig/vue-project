@@ -67,7 +67,13 @@
             <!-- 客户 -->
             <br /><br />
             <span>客户:</span>
-            <el-select v-model="value1" size="small" clearable filterable @change="qbc()">
+            <el-select
+              v-model="value1"
+              size="small"
+              clearable
+              filterable
+              @change="qbc()"
+            >
               <el-option
                 v-for="item in options1"
                 :key="item.customerNumber"
@@ -78,7 +84,13 @@
             </el-select>
             <!-- 收款人 -->
             <span>收款人:</span>
-            <el-select v-model="value2" size="small" clearable filterable @change="qbc()">
+            <el-select
+              v-model="value2"
+              size="small"
+              clearable
+              filterable
+              @change="qbc()"
+            >
               <el-option
                 v-for="item in options2"
                 :key="item.userId"
@@ -89,7 +101,13 @@
             </el-select>
             <!-- 创建人 -->
             <span>创建人:</span>
-            <el-select v-model="value3" size="small" clearable filterable @change="qbc()">
+            <el-select
+              v-model="value3"
+              size="small"
+              clearable
+              filterable
+              @change="qbc()"
+            >
               <el-option
                 v-for="item in options3"
                 :key="item.userId"
@@ -122,18 +140,8 @@
             }}</el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="receiptTime"
-          label="收款日期"
-          sortable
-          width="150"
-        />
-        <el-table-column
-          prop="customer"
-          label="客户名称"
-          sortable
-          width="150"
-        />
+        <el-table-column prop="receiptTime" label="收款日期" width="150" />
+        <el-table-column prop="customer" label="客户名称" width="150" />
         <el-table-column prop="payee" label="收款人" width="120" />
         <el-table-column prop="incomeType" label="收款类别" width="120" />
         <el-table-column prop="receiptMoney" label="收款金额(元)" width="150" />
@@ -159,7 +167,6 @@
         <el-table-column
           prop="lastApprovalTime"
           label="最后审批时间"
-          sortable
           width="200"
         />
       </el-table>
@@ -203,7 +210,7 @@ export default {
       tableData: [],
       //条件查询数据
       condition: {
-        deliveryId:'',
+        deliveryId: '',
         deliveryTime: '',
         incomeType: '',
         customer: '',
@@ -247,8 +254,8 @@ export default {
         '收款类型: ' + this.collection,
         '审批状态: ' + this.status,
         '客户: ' + value1,
-        '收款人: ' +value2,
-        '创建人: ' +value3,
+        '收款人: ' + value2,
+        '创建人: ' + value3,
       ]
     },
   },
