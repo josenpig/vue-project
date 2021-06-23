@@ -426,6 +426,7 @@ export default {
       //判断库存是否足够
       var ifnum = true;
       this.productdata.forEach((item) => {
+        
         if (
           this.formorder.outwarehouse == ""
         ) {
@@ -450,10 +451,30 @@ export default {
           ifnum = false;
           return false;
         }
+        if(this.productdata.length<1||this.productdata[0].productName==""){
+          this.$notify({
+            title: "警告",
+            message: "请选择调拨产品！！！",
+            type: "warning",
+            position: "top-left",
+          });
+          ifnum = false;
+          return false;
+        }
         if(item.productNum>item.systemNum){
           this.$notify({
             title: "警告",
             message: "调出数量不能大于该仓库库存数量！！！",
+            type: "warning",
+            position: "top-left",
+          });
+          ifnum = false;
+          return false;
+        }
+        if(this.formorder.inwarehouse==this.formorder.outwarehouse){
+          this.$notify({
+            title: "警告",
+            message: "调出仓库不能与调入仓库相同！！！",
             type: "warning",
             position: "top-left",
           });
