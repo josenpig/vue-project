@@ -48,11 +48,12 @@
         style="width: 100%; margin-bottom: 20px"
         row-key="menuId"
         :tree-props="{ children: 'childMenu' }"
+        :current-row-key="menuId"
       >
         <el-table-column prop="menuName" label="菜单名称" />
         <el-table-column prop="icon" label="菜单图标" width="100px">
           <template #default="scope">
-            <i :class="all[scope.$index].icon" />
+            <i :class="scope.row.icon" />
           </template>
         </el-table-column>
         <el-table-column prop="orderNum" label="菜单排序" width="100px" />
@@ -60,12 +61,12 @@
         <el-table-column prop="component" label="组件路径" />
         <el-table-column label="菜单显示状态">
           <template #default="scope">
-            {{ all[scope.$index].visible == 0 ? "显示" : "隐藏" }}
+            {{ scope.row.visible == 0 ? "显示" : "隐藏" }}
           </template>
         </el-table-column>
         <el-table-column prop="cz" label="操作">
           <template #default="scope">
-            <el-button icon="el-icon-edit" @click="change(scope.$index)"
+            <el-button icon="el-icon-edit" @click="change(scope.row)"
               >修改菜单</el-button
             >
           </template>
@@ -90,6 +91,7 @@ export default {
   },
   methods: {
     change(index) {
+      console.log(index);
       this.dialogFormVisible = true;
       this.form.menuName = this.all[index].menuName;
       this.form.orderNum = this.all[index].orderNum;
