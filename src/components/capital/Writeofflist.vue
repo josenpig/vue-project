@@ -373,7 +373,7 @@ export default {
     },
     //订单模糊查询
     join() {
-      this.condition.orderId = this.vagueorderid
+      this.condition.cavId = this.vagueorderid
       this.findpage()
     },
     findsaleman() {

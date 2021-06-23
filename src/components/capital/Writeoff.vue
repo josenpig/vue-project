@@ -55,7 +55,9 @@
     <!-- 内容表体 -->
     <div class="writeoff-main">
       <!-- 单据列表 -->
-      <el-divider content-position="left">{{formorder.cavType == '预收冲应收' ? '应收单据' : '应付单据'}}</el-divider>
+      <el-divider content-position="left">{{
+        formorder.cavType == '预收冲应收' ? '应收单据' : '应付单据'
+      }}</el-divider>
       <el-table :data="billdata" style="width: 100%" border stripe>
         <!-- 单据列表详细信息 -->
         <el-table-column type="index" width="40" />
@@ -84,7 +86,9 @@
         单据总计核销金额：{{ billtotal }}元
       </el-alert>
       <!-- 本次收款 -->
-      <el-divider content-position="left">{{formorder.cavType == '预收冲应收' ? '预收款列表' : '预付款列表'}}</el-divider>
+      <el-divider content-position="left">{{
+        formorder.cavType == '预收冲应收' ? '预收款列表' : '预付款列表'
+      }}</el-divider>
       <el-table :data="capdata" style="width: 100%" border stripe>
         <!-- 账户列表详细信息 -->
         <el-table-column type="index" width="40" />
@@ -182,9 +186,17 @@ export default {
         const state = JSON.parse(sessionStorage.getItem('state'))
         const orderid = JSON.parse(sessionStorage.getItem('orderid'))
         var _this = this
-        this.$prompt('请输入备注', {
+        var inputPattern
+        var inputErrorMessage
+        if (type == -1) {
+          inputPattern = /\s\S+|S+\s|\S/
+          inputErrorMessage = '驳回理由不能为空'
+        }
+        this.$prompt('请输入审批备注', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
+          inputPattern: inputPattern,
+          inputErrorMessage: inputErrorMessage,
         })
           .then(({ value }) => {
             var fd = {
@@ -227,8 +239,8 @@ export default {
     },
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))
-      const orderid =JSON.parse(sessionStorage.getItem('orderid'))
-      console.log(orderid);
+      const orderid = JSON.parse(sessionStorage.getItem('orderid'))
+      console.log(orderid)
       const _this = this
       if (orderid == null) {
         this.$router.push('/Receiptlist')
