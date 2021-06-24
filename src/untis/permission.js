@@ -1,4 +1,5 @@
 import store from "../store"
+import { ElMessage } from 'element-plus'
 export default (Vue) => {
     /**自定义按钮权限指令 */
     Vue.directive('has', {
@@ -6,14 +7,20 @@ export default (Vue) => {
             btnPermsArr = []
             importComponent(store.state.menulists)
             //获取按钮权限
-            if (btnPermsArr.indexOf(binding.value.action) == -1) {
-                //移除不匹配的按钮
-                el.parentNode.removeChild(el)
-            }
+            // if (btnPermsArr.indexOf(binding.value.action) == -1) {
+            //     //移除不匹配的按钮
+            //     el.parentNode.removeChild(el)
+            // }
+            el.addEventListener("click", () => {
+                if (btnPermsArr.indexOf(binding.value.action) == -1) {
+                    ElMessage.error('抱歉！你暂不具备该权限');
+                    event.stopPropagation()
+                }
+            })
         },
     })
 }
-var btnPermsArr = []     
+var btnPermsArr = []
 //查询用户按钮权限
 function importComponent(routerList) {
     routerList.forEach((route) => {

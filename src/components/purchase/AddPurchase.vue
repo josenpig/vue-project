@@ -570,8 +570,6 @@ export default {
         }
 
       });
-      console.log(_this.formorder)
-      console.log(_this.productdata)
       if (ifnum != false) {
         this.formorder.deliceryDate = dayjs(this.formorder.deliceryDate).format(
           "YYYY-MM-DD HH:mm:ss"

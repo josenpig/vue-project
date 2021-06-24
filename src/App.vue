@@ -76,4 +76,9 @@ export default {
 .el-input__suffix-inner {
   margin-right: unset !important;
 }
+.power{
+  padding: unset !important;
+  min-height: unset !important;
+  border: none !important;
+}
 </style>

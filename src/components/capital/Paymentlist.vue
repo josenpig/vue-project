@@ -123,6 +123,19 @@
     </div>
     <!-- 表体内容 -->
     <div class="paymentlist-mian">
+      <!-- 模糊查询 -->
+      <div style="float: right; padding: 10px 25px">
+        <el-input
+          clearable
+          v-model="vagueorderid"
+          placeholder="请输入订单编号"
+          style="width: 200px"
+          size="small"
+        />
+        <el-button icon="el-icon-search" size="small" @click="join()"
+          >查询</el-button
+        >
+      </div>
       <el-table
         :data="tableData"
         style="width: 100%"
@@ -206,6 +219,7 @@ export default {
       value1: '', //供应商
       value2: '', //付款人
       value3: '', //创建人
+      vagueorderid:"",
       //表单数据
       tableData: [],
       //条件查询数据
@@ -260,6 +274,10 @@ export default {
     },
   },
   methods: {
+    join() {
+      this.condition.deliveryId = this.vagueorderid
+      this.findpage()
+    },
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this

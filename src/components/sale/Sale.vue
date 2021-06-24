@@ -25,32 +25,34 @@
           @click="goreceipt()"
           >收款</el-button
         >
-        <el-button
-          size="mini"
-          v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
-          @click="approval(-1)"
-          >驳回</el-button
-        >
+        <el-button @click="approval(-1)" class="power">
+          <el-button
+            type="danger"
+            size="mini"
+            v-if="formorder.approvalState == 0"
+            v-has="{ action: 'approval' }"
+            >驳回</el-button
+          >
+        </el-button>
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.approvalState == -2"
           @click="approval(0)"
-          >提交审批</el-button
+          >编辑</el-button
         >
+        <el-button @click="approval(1)" class="power">
+          <el-button
+            type="primary"
+            size="mini"
+            v-if="formorder.approvalState == 0"
+            v-has="{ action: 'approval' }"
+            >审批通过</el-button
+          >
+        </el-button>
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
-          @click="approval(1)"
-          >审批通过</el-button
-        >
-        <el-button
-          type="primary"
-          size="mini"
-          v-if="formorder.approvalState == 1 && formorder.orderState == 0"
           @click="approval(2)"
           >生成出库单</el-button
         >
@@ -62,43 +64,48 @@
       width="30%"
       :before-close="handleClose"
     >
-      <div style="float: left; margin-top: 10px">关联销售出库单：</div>
-      <div style="float: left; width: 70%;">
-        <span v-if="formorder.deliveryId == null">无</span>
-        <span v-else
-          ><el-button @click="goorder(formorder.deliveryId, '销售出库单')" type="text"
-            >{{ formorder.deliveryId }}
-          </el-button>
-        </span>
-      </div>
-
-      <div style="float: left; margin-top: 10px">关联销售退货单：</div>
-      <div style="float: left; width: 70%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">无</span>
-        <span v-else
-          ><el-button @click="goorder(formorder.returnId, '销售退货单')" type="text"
-            >{{ formorder.returnId }}
-          </el-button>
-        </span>
-      </div>
-
-      <div style="float: left; margin-top: 10px">关联收款单：</div>
-      <div style="float: left; width: 70%;">
-        <span v-if="formorder.receipts == null">无</span>
-        <span v-else v-for="item in formorder.receipts"
-          ><el-button @click="goorder(item.receiptId, '收款单')" type="text">{{
-            item.receiptId
-          }}</el-button
-          ><br
-        /></span>
-      </div>
-
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button type="primary" @click="dialogVisible = false"
-            >知道了</el-button
+      <div class="sale-dialog">
+        <div style="float: left">
+          <span style="float: left">关联销售出库单：</span>
+          <span v-if="formorder.deliveryId == null">无</span>
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(formorder.deliveryId, '销售出库单')"
+              type="text"
+              >{{ formorder.deliveryId }}</el-button
+            ></span
           >
-        </span>
+        </div>
+        <div style="float: left; width: 100%; margin-top: 10px">
+          <span style="float: left">关联销售退货单：</span>
+          <span v-if="formorder.returnId == null">无</span>
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(formorder.returnId, '销售退货单')"
+              type="text"
+              >{{ formorder.returnId }}</el-button
+            ></span
+          >
+        </div>
+        <div style="float: left; width: 100%; margin-top: 10px">
+          <span style="float: left">关联收款单：</span>
+          <span v-if="formorder.receipts.length == 0">无</span>
+          <span
+            v-else
+            v-for="item in formorder.receipts"
+            style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(item.receiptId, '收款单')"
+              type="text"
+              >{{ item.receiptId }}</el-button
+            ></span
+          >
+        </div>
+      </div>
+      <template #footer>
+        <el-button type="primary" @click="dialogVisible = false"
+          >知道了</el-button
+        >
       </template>
     </el-dialog>
     <!-- 表单头部 -->
@@ -203,10 +210,10 @@
 import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
-  beforeRouteLeave(to, form, next) {
-    //sessionStorage.removeItem('orderid')
-    next()
-  },
+  // beforeRouteLeave(to, form, next) {
+  //   sessionStorage.removeItem('orderid')
+  //   next()
+  // },
   name: 'Sale',
   data() {
     return {
@@ -229,12 +236,12 @@ export default {
   },
   methods: {
     goorder(val, type) {
-      sessionStorage.setItem('orderid',val)
-      if(type=='销售出库单'){
+      sessionStorage.setItem('orderid', val)
+      if (type == '销售出库单') {
         this.$router.push('/Deliver')
-      }else if(type=='销售退货单'){
+      } else if (type == '销售退货单') {
         this.$router.push('Return')
-      }else{
+      } else {
         this.$router.push('Receipt')
       }
     },
@@ -249,57 +256,73 @@ export default {
     },
     //审批
     approval(type) {
-      if (type == 2) {
-        if (this.formorder.deliveryId != null) {
-          this.$notify({
-            title: '警告',
-            message: '该订单已完成出库，无法二次出库！',
-            type: 'warning',
-          })
-        } else {
-          var obj = { order: this.formorder, product: this.productdata }
-          sessionStorage.setItem('saledeliver', JSON.stringify(obj))
-          this.$router.push('/Adddeliver')
-        }
+      //编辑
+      if (type == 0) {
+        sessionStorage.setItem('draft', this.formorder.orderId)
+        this.$router.push('/Addsale')
       } else {
-        const state = JSON.parse(sessionStorage.getItem('state'))
-        const orderid = sessionStorage.getItem('orderid')
-        var _this = this
-        this.$prompt('请输入备注', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-        })
-          .then(({ value }) => {
-            var fd = {
-              orderid: orderid,
-              type: type,
-              user: state.userInfo.userName,
-              approvalremarks: value,
-            }
-            this.axios({
-              url: 'http://localhost:8088/frameproject/saleorder/approval',
-              method: 'get',
-              processData: false,
-              params: fd,
-              headers: {
-                JWTDemo: state.userInfo.token,
-              },
+        //生成出库
+        if (type == 2) {
+          if (this.formorder.deliveryId != null) {
+            this.$notify({
+              title: '警告',
+              message: '该订单已完成出库，无法二次出库！',
+              type: 'warning',
             })
-              .then(function (response) {
-                if (response.data.code == 200) {
-                  _this.$notify({
-                    title: '操作成功',
-                    message: '订单信息已被修改',
-                    type: 'success',
-                  })
-                  _this.showorder()
-                }
-              })
-              .catch(function (error) {
-                console.log(error)
-              })
+          } else {
+            var obj = { order: this.formorder, product: this.productdata }
+            sessionStorage.setItem('saledeliver', JSON.stringify(obj))
+            this.$router.push('/Adddeliver')
+          }
+        } else {
+          //审批
+          const state = JSON.parse(sessionStorage.getItem('state'))
+          const orderid = sessionStorage.getItem('orderid')
+          var _this = this
+          var inputPattern
+          var inputErrorMessage
+          if (type == -1) {
+            inputPattern = /\s\S+|S+\s|\S/
+            inputErrorMessage = '驳回理由不能为空'
+          }
+          this.$prompt('请输入审批备注', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputPattern: inputPattern,
+            inputErrorMessage: inputErrorMessage,
           })
-          .catch(() => {})
+            .then(({ value }) => {
+              var fd = {
+                orderid: orderid,
+                type: type,
+                user: state.userInfo.userName,
+                approvalremarks: value,
+              }
+              this.axios({
+                url: 'http://localhost:8088/frameproject/saleorder/approval',
+                method: 'get',
+                processData: false,
+                params: fd,
+                headers: {
+                  JWTDemo: state.userInfo.token,
+                },
+              })
+                .then(function (response) {
+                  if (response.data.code == 200) {
+                    _this.$notify({
+                      title: '操作成功',
+                      message: '订单信息已被修改',
+                      type: 'success',
+                    })
+                    _this.showorder()
+                  }
+                })
+                .catch(function (error) {
+                  console.log(error)
+                })
+            })
+            .catch(() => {})
+        }
       }
     },
     showorder() {
@@ -338,6 +361,7 @@ export default {
   width: 100%;
   background-color: white;
 }
+
 /* 顶部 */
 .sale .el-carousel__arrow--right,
 .el-notification.right {
@@ -381,7 +405,11 @@ export default {
 .sale-main .el-input__inner {
   border: 0;
 }
-
+.sale-dialog .el-button {
+  min-height: unset !important;
+  margin-left: unset !important;
+  padding: 0px 0px 10px 0px !important ;
+}
 .sale th {
   color: black !important;
   background-color: #e8e8e8 !important;

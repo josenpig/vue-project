@@ -13,7 +13,7 @@
       <!-- 用户信息 -->
       <el-row style="float: right" :gutter="40">
         <el-col :span="6" style="line-height: 48px">
-          <el-button type="text" icon="el-icon-bell" style="color: white"
+          <el-button type="text" icon="el-icon-bell" style="color: white" @click="gotoset1()"
             >提醒
           </el-button>
         </el-col>
@@ -125,6 +125,9 @@ export default {
     },
     gotoset(){
       this.$router.push('/Menulist')
+    },
+   gotoset1(){
+      this.$router.push('/messageNotification')
     }
   },
   computed: {

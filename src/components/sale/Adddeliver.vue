@@ -475,12 +475,14 @@ export default {
     handleSelectionChange(val) {
       this.joinstockdata = val
     },
+    //获取客户关联数据
     setcontacts() {
       this.headeroptions1.forEach((item) => {
         if (item.customerNumber == this.formorder.customer) {
           this.formorder.contacts = item.contact
           this.formorder.contactsPhone = item.contactNumber
           this.formorder.contactsAddress = item.contactAddress
+          this.formorder.disrate=item.ratio
         }
       })
     },
@@ -561,26 +563,26 @@ export default {
     },
     //提交审批
     examine(type) {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
-      var ifnum = true;
-      const sale = JSON.parse(sessionStorage.getItem("saledeliver")); //获取是否绑定销售订单
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      var ifnum = true
+      const sale = JSON.parse(sessionStorage.getItem('saledeliver')) //获取是否绑定销售订单
       //如果销售出库单不来自销售订单 则判断库存是否足够
       if (sale == null) {
         this.productdata.forEach((item) => {
           if (
-            (ifnum == true && this.formorder.salesmen == "") ||
-            item.productId == "" ||
+            (ifnum == true && this.formorder.salesmen == '') ||
+            item.productId == '' ||
             item.depot == null ||
-            this.formorder.customer == ""
+            this.formorder.customer == ''
           ) {
             this.$notify({
-              title: "警告",
-              message: "请先填写*必要信息!",
-              type: "warning",
-            });
-            ifnum = false;
-            return false;
+              title: '警告',
+              message: '请先填写*必要信息!',
+              type: 'warning',
+            })
+            ifnum = false
+            return false
           }
           item.baseOpenings.forEach((items) => {
             if (
@@ -590,22 +592,22 @@ export default {
             ) {
               ElMessage.warning({
                 message:
-                  "警告,产品:" + item.productName + "的预计可用库存不足!",
-                type: "warning",
-              });
-              ifnum = false;
+                  '警告,产品:' + item.productName + '的预计可用库存不足!',
+                type: 'warning',
+              })
+              ifnum = false
             }
-          });
-        });
+          })
+        })
       }
       if (ifnum != false) {
         this.formorder.deliveryTime = dayjs(this.formorder.deliveryTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.founder = state.userInfo.userName;
+          'YYYY-MM-DD HH:mm:ss'
+        )
+        this.formorder.founder = state.userInfo.userName
         this.axios({
-          url: "http://localhost:8088/frameproject/saledelivery/add/" + type,
-          method: "post",
+          url: 'http://localhost:8088/frameproject/saledelivery/add/' + type,
+          method: 'post',
           data: {
             delivery: JSON.stringify(_this.formorder), //_this.formorder ,
             deliverydetails: JSON.stringify(_this.productdata), //_this.productdata//
@@ -616,54 +618,107 @@ export default {
         })
           .then(function (response) {
             if (response.data.code == 200) {
-              sessionStorage.setItem("orderid", response.data.data);
-              _this.$router.push("/Deliver");
-              sessionStorage.removeItem("saledeliver");
+              sessionStorage.setItem('orderid', response.data.data)
+              _this.$router.push('/Deliver')
+              sessionStorage.removeItem('saledeliver')
             }
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
-  },
-  created: function () {
-    const state = JSON.parse(sessionStorage.getItem('state'))
-    const _this = this
-    this.axios({
-      url: 'http://localhost:8088/frameproject/personnel/ofpeople',
-      method: 'get',
-      headers: {
-        JWTDemo: state.userInfo.token,
-      },
-    })
-      .then(function (response) {
-        _this.headeroptions1 = response.data.data.customers
-        _this.headeroptions2 = response.data.data.salemans
-        _this.footeroptions = response.data.data.notifiers
-        const sale = JSON.parse(sessionStorage.getItem('saledeliver'))
-        if (sale != null) {
-          _this.issale = true
-          _this.productdata = sale.product
-          _this.formorder = sale.order
-          _this.formorder.approver = null
-          _this.formorder.receiptId=null
-          _this.formorder.deliveryId = 'XSCKD' + Date.now()
+    //查询人员
+    findmen() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.headeroptions1 = response.data.data.customers
+          _this.headeroptions2 = response.data.data.salemans
+          _this.footeroptions = response.data.data.notifiers
+          //判断是否来自订单
+          const sale = JSON.parse(sessionStorage.getItem('saledeliver'))
+          if (sale != null) {
+            _this.issale = true
+            _this.productdata = sale.product
+            _this.formorder = sale.order
+            _this.formorder.approver = null
+            _this.formorder.receiptId = null
+            _this.formorder.deliveryId = 'XSCKD' + Date.now()
+            _this.headeroptions1.forEach((item) => {
+              if (item.customerName == _this.formorder.customer) {
+                _this.formorder.customer = item.customerNumber
+              }
+            })
+            _this.headeroptions2.forEach((item) => {
+              if (item.userName == _this.formorder.salesmen) {
+                _this.formorder.salesmen = item.userId
+              }
+            })
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    //查询是否来自草稿单
+    showorder() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('draft')
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/saledelivery/find/' + orderid,
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          var productlist = []
+          response.data.data.deliverydetails.forEach((item) => {
+            productlist.push(item.productId)
+          })
+          _this.productdata.splice(0, 1)
+          response.data.data.saleProductVos.forEach((item) => {
+            if (productlist.indexOf(item.productId) != -1) {
+              _this.productdata.push(item)
+            }
+          })
+          for (var i = 0; i < response.data.data.deliverydetails.length; i++) {
+            _this.productdata[i].productNum =
+              response.data.data.deliverydetails[i].productNum
+            _this.productdata[i].depot =
+              response.data.data.deliverydetails[i].depot
+          }
+          _this.formorder = response.data.data.delivery
           _this.headeroptions1.forEach((item) => {
-            if(item.customerName == _this.formorder.customer){
-              _this.formorder.customer=item.customerNumber
+            if (item.customerName == _this.formorder.customer) {
+              _this.formorder.customer = item.customerNumber
             }
           })
           _this.headeroptions2.forEach((item) => {
-            if(item.userName == _this.formorder.salesmen){
-              _this.formorder.salesmen=item.userId
+            if (item.userName == _this.formorder.salesmen) {
+              _this.formorder.salesmen = item.userId
             }
           })
-        }
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+  },
+  created: function () {
+    this.findmen()
+    if (sessionStorage.getItem('draft') != null) {
+      this.showorder()
+    }
   },
 }
 </script>

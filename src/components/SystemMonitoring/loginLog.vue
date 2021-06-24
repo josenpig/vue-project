@@ -291,7 +291,7 @@ import store from "../../store";
 .block1{
  margin-top: 37px;
 }
-.el-collapse{
+.returnlist-header .el-collapse{
   height: 120px;
 }
 </style>
