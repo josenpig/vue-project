@@ -31,7 +31,7 @@
           size="mini"
           v-if="formorder.approvalState == -2"
           @click="approval(0)"
-          >提交审批</el-button
+          >编辑</el-button
         >
         <el-button
           type="primary"
@@ -99,9 +99,8 @@
           >
         </div>
       </div>
-      
+
       <template #footer>
-        
         <el-button type="primary" @click="dialogVisible = false"
           >知道了</el-button
         >
@@ -243,52 +242,58 @@ export default {
     },
     //提交审批
     approval(type) {
-      const state = JSON.parse(sessionStorage.getItem('state'))
-      const orderid = sessionStorage.getItem('orderid')
-      var _this = this
-      var inputPattern
-      var inputErrorMessage
-      if(type==-1){
-        inputPattern=/\s\S+|S+\s|\S/
-        inputErrorMessage='驳回理由不能为空'
-      }
-      this.$prompt('请输入审批备注', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern:inputPattern,
-        inputErrorMessage: inputErrorMessage
-      })
-        .then(({ value }) => {
-          var fd = {
-            orderid: orderid,
-            type: type,
-            user: state.userInfo.userName,
-            approvalremarks: value,
-          }
-          this.axios({
-            url: 'http://localhost:8088/frameproject/saledelivery/approval',
-            method: 'get',
-            processData: false,
-            params: fd,
-            headers: {
-              JWTDemo: state.userInfo.token,
-            },
-          })
-            .then(function (response) {
-              if (response.data.code == 200) {
-                _this.$notify({
-                  title: '操作成功',
-                  message: '订单信息已被修改',
-                  type: 'success',
-                })
-                _this.showorder()
-              }
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
+      //编辑
+      if (type == 0) {
+        sessionStorage.setItem('draft', this.formorder.deliveryId)
+        this.$router.push('/Adddeliver')
+      } else {
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const orderid = sessionStorage.getItem('orderid')
+        var _this = this
+        var inputPattern
+        var inputErrorMessage
+        if (type == -1) {
+          inputPattern = /\s\S+|S+\s|\S/
+          inputErrorMessage = '驳回理由不能为空'
+        }
+        this.$prompt('请输入审批备注', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPattern: inputPattern,
+          inputErrorMessage: inputErrorMessage,
         })
-        .catch(() => {})
+          .then(({ value }) => {
+            var fd = {
+              orderid: orderid,
+              type: type,
+              user: state.userInfo.userName,
+              approvalremarks: value,
+            }
+            this.axios({
+              url: 'http://localhost:8088/frameproject/saledelivery/approval',
+              method: 'get',
+              processData: false,
+              params: fd,
+              headers: {
+                JWTDemo: state.userInfo.token,
+              },
+            })
+              .then(function (response) {
+                if (response.data.code == 200) {
+                  _this.$notify({
+                    title: '操作成功',
+                    message: '订单信息已被修改',
+                    type: 'success',
+                  })
+                  _this.showorder()
+                }
+              })
+              .catch(function (error) {
+                console.log(error)
+              })
+          })
+          .catch(() => {})
+      }
     },
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))

@@ -84,7 +84,6 @@ export default {
     return {
       //表单数据
       tableData: [],
-      all: [],
       dialogFormVisible: false,
       form: {},
     };
@@ -101,14 +100,6 @@ export default {
       index.visible == 0
         ? (this.form.visible = true)
         : (this.form.visible = false);
-    },
-    openlist(routerList) {
-      routerList.forEach((route) => {
-        this.all.push(route);
-        if (route.childMenu && route.childMenu.length) {
-          this.openlist(route.childMenu);
-        }
-      });
     },
     changeok() {
       this.dialogFormVisible = false;
@@ -157,8 +148,6 @@ export default {
       })
         .then(function (response) {
           _this.tableData = response.data.data;
-          _this.all = [];
-          _this.openlist(_this.tableData);
         })
         .catch(function (error) {
           console.log(error);
