@@ -29,7 +29,7 @@
 							</el-radio-group>
 							<div v-show="custom1" style="top: -45px; left: 485px; position: relative">
 								<el-date-picker @change="findpage" v-model="customtime1" type="daterange" range-separator="至" start-placeholder="开始日期"
-								 end-placeholder="结束日期">
+								 end-placeholder="结束日期" format="YYYY 年 MM 月 DD 日" value-format="YYYY-MM-DD HH:mm:ss">
 								</el-date-picker>
 							</div>
 						</div>
@@ -39,6 +39,9 @@
 		</div>
 
 		<!--横向条状图-->
+		<div class="Echarts">
+			<div id="main" style="width: 540px;height:250px;padding: 10px 0px 0px 75px;"></div>
+		</div>
 		<!---->
 
 		<!-- 表体内容 -->
@@ -48,8 +51,8 @@
 				<el-table-column prop="capitalId" label="资金账户编号" fixed width="200" />
 				<el-table-column prop="fundAccount" label="资金账户名称" width="190" />
 				<el-table-column prop="settlementType" label="结算类型名称" width="150" />
-				<el-table-column prop="paymentMoney" label="支出合计(元)" width="120" />
 				<el-table-column prop="receiptMoney" label="收入合计(元)" width="120" />
+				<el-table-column prop="paymentMoney" label="支出合计(元)" width="120" />
 				<el-table-column prop="initialAmount" label="初期金额" width="120" />
 				<el-table-column prop="currentAmount" label="当前金额" width="120" />
 			</el-table>
@@ -63,7 +66,7 @@
 	</div>
 </template>
 <script>
-	// import charLint from './chartLint.vue';
+	import * as echarts from 'echarts'
 	export default {
 		name: 'Receivable',
 		data() {
@@ -137,10 +140,14 @@
 				pagesize: 5,
 				max: 0,
 				currentPage: 1,
+				
+				//本期总收入
+				rsum:0,
+				//本期总支出
+				psum:0
 			}
 		},
 		computed: {
-			// charLint,
 			paging: function() {
 				return this.tableData.length > 0 ? true : false
 			},
@@ -157,7 +164,7 @@
 				return [
 					'单据日期: ' + this.billdate
 				]
-			},
+			}
 		},
 		methods: {
 			//改变页码数
@@ -190,15 +197,98 @@
 						console.log(response.data.data.rows)
 						_this.tableData = response.data.data.rows;
 						_this.max = response.data.data.total;
+						
+						_this.sum()
 					})
 					.catch(function(error) {
 						console.log(error);
 					});
 			},
-			
+			myEcharts() {
+				var chartDom = document.getElementById('main');
+				var myChart = echarts.init(chartDom);
+				var option;
+				
+				option = {
+					tooltip: {
+						trigger: 'axis',
+						axisPointer: {
+							type: 'shadow'
+						}
+					},
+					legend: {
+						data: ['收入', '支出']
+					},
+					grid: {
+						left: '3%',
+						right: '4%',
+						bottom: '3%',
+						containLabel: true
+					},
+					xAxis: {
+						type: 'value',
+						boundaryGap: [0, 0.01]
+					},
+					yAxis: {
+						type: 'category',
+						data: ['本期收支汇总']
+					},
+					series: [{
+							name: '收入',
+							type: 'bar',
+							data: [this.rsum]
+						},
+						{
+							name: '支出',
+							type: 'bar',
+							data: [this.psum]
+						}
+					]
+				};
+				
+				// 使用刚指定的配置项和数据显示图表。
+				myChart.setOption(option);
+			},
+			//资金账户期间总收入和总支出
+			sum(){
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				console.log("time:"+this.customtime1)
+				var fd = {
+					startTime: this.customtime1[0],
+					endTime: this.customtime1[1]
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/ReportFormController/fundAllRsumAndPsum",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.rsum = response.data.data[0];
+						_this.psum = response.data.data[1];
+						
+						console.log("rsum:"+_this.rsum)
+						console.log("rsum:"+_this.psum)
+						_this.myEcharts();
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			}
+
+		},
+		mounted() {
+			this.findpage()
+			setTimeout(()=>{
+				this.sum();
+			},500)
 		},
 		created: function() {
-			this.findpage()
 		},
 	}
 </script>
@@ -206,6 +296,13 @@
 	.salelist {
 		width: 100%;
 		background-color: #e9eef3 !important;
+	}
+
+	.Echarts {
+		height: 270px;
+		padding-left: 70px;
+		background-color: white;
+		margin: 10px 0px;
 	}
 
 	/* 顶部 */

@@ -30,8 +30,8 @@
 								<el-option label="个体" value="个体"></el-option>
 							</el-select>
 						</el-form-item>
-						<el-form-item label="* 负责人 *" :label-width="formLabelWidth">
-							<el-select v-model="form.charge" placeholder="请选择负责人 (必选)">
+						<el-form-item label="* 负责人 *" :label-width="formLabelWidth" >
+							<el-select v-model="form.charge" filterable placeholder="请选择负责人 (必选)">
 								<el-option v-for="item in charge" :label="item.chargeName" :value="item.chargeName">
 								</el-option>
 							</el-select>

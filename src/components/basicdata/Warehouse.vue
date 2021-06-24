@@ -21,8 +21,8 @@
 						<el-form-item label="仓库地址" :label-width="formLabelWidth">
 							<el-input v-model="form.depotAddress" autocomplete="off"></el-input>
 						</el-form-item>
-						<el-form-item label="负责人" :label-width="formLabelWidth">
-							<el-select v-model="form.chargeName" placeholder="请选择负责人 (必选)">
+						<el-form-item label="负责人" :label-width="formLabelWidth" >
+							<el-select v-model="form.chargeName" filterable placeholder="请选择负责人 (必选)">
 								<el-option v-for="item in charge" :key="item.chargeName" :label="item.chargeName" :value="item.chargeName">
 								</el-option>
 							</el-select>

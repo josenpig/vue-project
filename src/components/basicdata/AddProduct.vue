@@ -2,7 +2,7 @@
 	<h3>新增产品</h3>
 	<div class="button">
 		<el-button size="small" @click="ToPro" class="button-no" type="primary">取消</el-button>
-		<el-button size="small" @click="Add" class="button-ok" type="primary">保存</el-button>
+		<el-button size="small" @click="AddPro" class="button-ok" type="primary">保存</el-button>
 	</div>
 	<el-tabs type="border-card">
 		<el-tab-pane label="产品管理">
@@ -24,12 +24,33 @@
 					<el-input v-model="proForm.gramHeavy" autocomplete="off"></el-input>
 				</el-form-item>
 				<el-form-item label="* 产品单位 " :label-width="formLabelWidth">
-					<el-select v-model="proForm.unitId" placeholder="请选择产品单位  (必选)">
+					<el-select v-model="proForm.unitId" filterable placeholder="请选择产品单位  (必选)">
 						<el-option v-for="item in unit" :label="item.unitName" :value="item.unitId"></el-option>
 					</el-select>
+					
+					<!-- 新增单位 -->
+					<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;margin-left: 20px;">
+						<i class="el-icon-plus"></i> 新增单位
+					</el-button>
+					
+					<el-dialog title="新增单位" v-model="dialogFormVisible">
+						<hr style="margin-bottom: 20px;" />
+						<el-form :model="form">
+							<el-form-item label="单位名称" :label-width="formLabelWidth">
+								<el-input @change="pdName(form.unitName)" v-model="form.unitName" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+							</el-form-item>
+						</el-form>
+						<template #footer>
+							<span class="dialog-footer">
+								<el-button @click="dialogFormVisible = false">取 消</el-button>
+								<el-button type="primary" @click="Add">确 定</el-button>
+							</span>
+						</template>
+					</el-dialog>
+					
 				</el-form-item>
-				<el-form-item label="* 产品分类 " :label-width="formLabelWidth">
-					<el-select v-model="proForm.productTypeId" placeholder="请选择产品分类  (必选)">
+				<el-form-item label="* 产品分类 "  :label-width="formLabelWidth">
+					<el-select v-model="proForm.productTypeId" filterable placeholder="请选择产品分类  (必选)">
 						<el-option v-for="item in proType" :label="item.label" :value="item.id"></el-option>
 					</el-select>
 				</el-form-item>
@@ -44,9 +65,6 @@
 				</el-form-item>
 				<el-form-item label="  备注 &nbsp;&nbsp; " :label-width="formLabelWidth">
 					<el-input v-model="proForm.remarks" autocomplete="off"></el-input>
-				</el-form-item>
-				<el-form-item label="  图片 &nbsp;&nbsp;" :label-width="formLabelWidth">
-					<el-button size="small" type="primary">点击上传</el-button>
 				</el-form-item>
 			</el-form>
 			
@@ -116,7 +134,15 @@
 				}],
 
 				//单位数据
-				unit: [],
+				unit:[],
+				//新增单位信息弹框
+				dialogFormVisible: false,
+				//修改产品信息弹框
+				updateDialogFormVisible: false,
+				//新增单位表单
+				form: {
+					unitName: '' //单位名称
+				},
 
 				//产品分类数据
 				proType: [],
@@ -249,7 +275,7 @@
 			},
 			
 			//添加产品-提交表单
-			Add() {
+			AddPro() {
 				console.log(this.proForm)
 				console.log(this.stockForm)
 				if (this.proForm.productId == '' ||
@@ -300,6 +326,98 @@
 								message: '产品ID重复！',
 								type: 'success'
 							});
+						}
+					}, 200)
+				}
+			},
+			
+			//查询单位列表
+			findAllUnit() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseUnit/findAllUnit/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.unit = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//判断单位名称是否重复
+			pdName(val) {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var UnitName = {
+					UnitName: val
+				}
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseUnit/judgeUnitName",
+						method: "get",
+						processData: false,
+						params: UnitName,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log("单位名称不重复是否通过:" + response.data)
+						_this.judge = response.data
+						if(!response.data){
+							ElMessage.warning({
+								message: '单位名称重复！',
+								type: 'success'
+							});
+						}
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//添加单位
+			Add() {
+				console.log(this.form)
+				if (this.form.unitName == null || this.form.unitName == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					this.pdName(this.form.unitName)
+					setTimeout(() => {
+						if (this.judge) {
+							const state = JSON.parse(sessionStorage.getItem("state"));
+							var _this = this;
+							this.dialogFormVisible = false
+							//添加仓库
+							this.axios({
+									url: "http://localhost:8088/frameproject/baseUnit/addUnit",
+									method: "post",
+									processData: false,
+									data: {
+										Unit: JSON.stringify(_this.form)
+									},
+									headers: {
+										JWTDemo: state.userInfo.token,
+									},
+								})
+								.then(function(response) {
+									console.log(response.data.data)
+									ElMessage.success({
+										message: '添加成功',
+										type: 'success'
+									});
+									_this.form = {}
+									_this.judge = {}
+									_this.findAllUnit()
+								})
+								.catch(function(error) {
+									console.log(error);
+								});
 						}
 					}, 200)
 				}

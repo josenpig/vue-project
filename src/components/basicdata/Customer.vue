@@ -26,11 +26,11 @@
 								<el-option label="经销商" value="经销商"></el-option>
 							</el-select>
 						</el-form-item>
-						<el-form-item label="* 调价比例(%) *" :label-width="formLabelWidth">
+						<el-form-item label="* 折扣比例(%) *" :label-width="formLabelWidth">
 							<el-input-number v-model="form.ratio" :precision="2" :step="0.1" :min="0" :max="100"></el-input-number>
 						</el-form-item>
-						<el-form-item label="* 负责人 *" :label-width="formLabelWidth">
-							<el-select v-model="form.chargeName" placeholder="请选择负责人  (必选)">
+						<el-form-item label="* 负责人 *" :label-width="formLabelWidth" >
+							<el-select v-model="form.chargeName" filterable placeholder="请选择负责人  (必选)">
 								<el-option v-for="item in charge" :label="item.chargeName" :value="item.chargeName"></el-option>
 							</el-select>
 						</el-form-item>
@@ -73,7 +73,7 @@
 								<el-option label="经销商" value="经销商"></el-option>
 							</el-select>
 						</el-form-item>
-						<el-form-item label="* 调价比例(%) *" :label-width="formLabelWidth">
+						<el-form-item label="* 折扣比例(%) *" :label-width="formLabelWidth">
 							<el-input-number v-model="updateForm.ratio" :precision="2" :step="0.1" :min="0" :max="100"></el-input-number>
 						</el-form-item>
 						<el-form-item label="* 负责人 *" :label-width="formLabelWidth">
@@ -157,7 +157,7 @@
 				<el-table-column fixed prop="customerNumber" label="客户编号" sortable width="120" />
 				<el-table-column  prop="customerName" label="客户名称" sortable width="120" />
 				<el-table-column prop="customerType" label="客户类型" sortable width="120" />
-				<el-table-column prop="ratio" label="调价比例(%)" sortable width="120" />
+				<el-table-column prop="ratio" label="折扣比例(%)" sortable width="120" />
 				<el-table-column prop="chargeName" label="负责人" sortable width="120" />
 				<el-table-column prop="contact" label="联系人姓名"  width="120" />
 				<el-table-column prop="contactNumber" label="联系人电话"  width="120" />
@@ -194,7 +194,7 @@
 					customerNumber: '', //客户编号
 					customerType: '', //客户类型: 类型：大客户、普通、经销商
 					chargeName: '', //负责人
-					ratio: 100, //调价比例（%）
+					ratio: 0, //调价比例（%）
 					remarks: '', //备注
 					contact: '', //联系人姓名
 					contactAddress: '', //联系人地址
@@ -206,7 +206,7 @@
 					customerNumber: '', //客户编号
 					customerType: '', //客户类型: 类型：大客户、普通、经销商
 					chargeName: '', //负责人
-					ratio: 100, //调价比例（%）
+					ratio: 0, //调价比例（%）
 					remarks: '', //备注
 					contact: '', //联系人姓名
 					contactAddress: '', //联系人地址
