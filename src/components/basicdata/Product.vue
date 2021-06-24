@@ -5,33 +5,26 @@
 		<h4 class="title">产品分类</h4>
 		<div>
 			<div>
-				<el-button @click="findpage" class="allType">
-					<i class="el-icon-caret-bottom" style="padding-right: 5px;"></i>全部
-					<a @click="openAdd(AllId)" style="float: right;">
-						<i class="el-icon-circle-plus-outline"></i>
+				<el-button @click="findpage" type="primary" class="allType">
+					<i class="el-icon-caret-bottom" style="padding:10px 0px 0px 5px;"></i>全部
+					<el-button type="text" @click="openAdd(AllId)" style="float: right;color: white;" class="el-icon-circle-plus-outline">
 						<span style="font-size: 10px;">新增子分类</span>
-					</a>
+					</el-button>
 				</el-button>
 			</div>
-			<el-tree :data="ProType" node-key="1000" @node-click="findByType" :expand-on-click-node="false" style="font-size: 15px;padding: 5px 0px;">
+			<el-tree :data="ProType" node-key="1000" @node-click="findByType" :expand-on-click-node="false" style="font-size: 15px;padding: 5px 15px;">
 				<template #default="{ node, data }">
 					<span class="custom-tree-node">
 						<span>{{ node.label }}</span>
 						<span style="padding: 10px;">
 							<el-tooltip content="新增子分类" placement="top">
-							<a @click="openAdd(data)" style="padding: 4px;">
-								<i class="el-icon-circle-plus-outline"></i>
-							</a>
+								<el-button type="text" @click="openAdd(data)" class="el-icon-circle-plus-outline"></el-button>
 							</el-tooltip>
 							<el-tooltip content="删除" placement="top">
-							<a @click="remove(data)" style="padding: 4px;">
-								<i class="el-icon-delete"></i>
-							</a>
+								<el-button type="text" @click="remove(data)" class="el-icon-delete"></el-button>
 							</el-tooltip>
 							<el-tooltip content="修改" placement="top">
-							<a @click="openupdateProType(data)" style="padding: 4px;">
-								<i class="el-icon-edit"></i>
-							</a>
+								<el-button type="text" @click="openupdateProType(data)" class="el-icon-edit"></el-button>
 							</el-tooltip>
 						</span>
 					</span>
@@ -47,7 +40,8 @@
 			<hr style="margin-bottom: 20px;" />
 			<el-form :model="ProTypeForm">
 				<el-form-item label="分类名称" :label-width="formLabelWidth">
-					<el-input @change="pdProductTypeName(ProTypeForm.label)" v-model="ProTypeForm.label" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+					<el-input @change="pdProductTypeName(ProTypeForm.label)" v-model="ProTypeForm.label" placeholder="单位名称不能重复 (必填)"
+					 autocomplete="off"></el-input>
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -58,14 +52,15 @@
 			</template>
 		</el-dialog>
 	</div>
-	
+
 	<!--修改分类名称-->
 	<div>
 		<el-dialog title="修改子分类" v-model="PTupdateDialogFormVisible">
 			<hr style="margin-bottom: 20px;" />
 			<el-form :model="updateProTypeForm">
 				<el-form-item label="分类名称" :label-width="formLabelWidth">
-					<el-input @change="pdProductTypeName(updateProTypeForm.label)" v-model="updateProTypeForm.label" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+					<el-input @change="pdProductTypeName(updateProTypeForm.label)" v-model="updateProTypeForm.label" placeholder="单位名称不能重复 (必填)"
+					 autocomplete="off"></el-input>
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -76,7 +71,7 @@
 			</template>
 		</el-dialog>
 	</div>
-	
+
 	<!-- 主内容 -->
 	<div class="product">
 		<!-- 标题 -->
@@ -112,7 +107,7 @@
 						<el-input v-model="updateForm.gramHeavy" autocomplete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="单位" :label-width="formLabelWidth">
-						<el-select v-model="updateForm.unitId" placeholder="请选择单位 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
+						<el-select v-model="updateForm.unitId" filterable placeholder="请选择单位 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
 							<el-option v-for="item in unit" :label="item.unitName" :value="item.unitId"></el-option>
 						</el-select>
 
@@ -120,7 +115,7 @@
 						<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;margin-left: 20px;">
 							<i class="el-icon-plus"></i> 新增单位
 						</el-button>
-						
+
 						<el-dialog title="新增单位" v-model="dialogFormVisible">
 							<hr style="margin-bottom: 20px;" />
 							<el-form :model="form">
@@ -138,7 +133,7 @@
 
 					</el-form-item>
 					<el-form-item label="产品分类" :label-width="formLabelWidth">
-						<el-select v-model="updateForm.productTypeId" placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
+						<el-select v-model="updateForm.productTypeId" filterable placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
 							<el-option v-for="item in ProTypeList" :label="item.label" :value="item.id"></el-option>
 						</el-select>
 					</el-form-item>
@@ -193,10 +188,18 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column type="selection" width="55" />
-				<el-table-column fixed label="操作" width="150">
+				<el-table-column fixed label="操作" width="100">
 					<template #default="scope">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-tooltip content="修改" placement="top">
+							<el-button type="text" size="small" @click="openupdate(scope.row)" icon="el-icon-edit" circle></el-button>
+						</el-tooltip>
+						<el-tooltip content="删除" placement="top">
+							<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
+						</el-tooltip>
+					</template>
+				</el-table-column>
+				<el-table-column fixed label="状态" width="80">
+					<template #default="scope">
 						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row,0)" round style="background-color: coral;color: white;padding: 7px;">下架</el-button>
 						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row,0)" round style="background-color: lightgreen ;color: white;padding: 7px;">上架</el-button>
 					</template>
@@ -215,7 +218,8 @@
 						<span v-if="scope.row.state==1" style="color: seagreen;">上架</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="remarks" label="备注" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="productDescribe" label="产品描述" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注" width="120" />
 				<el-table-column prop="purchaseMoney" label="采购单价(元)" sortable width="120" />
 				<el-table-column prop="purchaseUnitPrice" label="销售单价(元)" sortable width="120" />
 				<el-table-column prop="userName" label="创建人" sortable width="120" />
@@ -244,7 +248,7 @@
 				// 分类数据
 				ProType: [],
 				//不封装 分类数据
-				ProTypeList:[],
+				ProTypeList: [],
 				//表单数据
 				tableData: [],
 				//分页
@@ -265,9 +269,9 @@
 
 				//多选产品
 				selectPro: [],
-				
+
 				//单位数据
-				unit:[],
+				unit: [],
 				//新增单位信息弹框
 				dialogFormVisible: false,
 				//修改产品信息弹框
@@ -276,22 +280,22 @@
 				form: {
 					unitName: '' //单位名称
 				},
-				
+
 				//新增产品分类弹框
 				PTdialogFormVisible: false,
-				//修改产品信息弹框
+				//修改产品分类弹框
 				PTupdateDialogFormVisible: false,
 				//新增产品分类
-				ProTypeForm:{
-					productTypeParentId:'',//父级分类id
-					label:''//分类名称
+				ProTypeForm: {
+					productTypeParentId: '', //父级分类id
+					label: '' //分类名称
 				},
 				//修改产品分类
-				updateProTypeForm:{
-					id:'',//分类id
-					label:'',//分类名称
+				updateProTypeForm: {
+					id: '', //分类id
+					label: '', //分类名称
 				},
-				
+
 				//修改产品表单
 				updateForm: {
 					productId: '', //产品编号
@@ -308,7 +312,7 @@
 					state: '' //产品状态
 				},
 				//全部分类
-				AllId:{
+				AllId: {
 					id: 0
 				},
 				judge: '',
@@ -420,29 +424,29 @@
 					});
 			},
 			//删除产品
-			del(id, index) {
+			del(id) {
 				this.$confirm('此操作将永久删除该产品, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
 					const state = JSON.parse(sessionStorage.getItem("state"));
-					var pid = {
-						id: id
-					};
+					var ids = new Array()
+					ids.push(id)
+					console.log(ids)
 					var _this = this
 					this.axios({
-							url: "http://localhost:8088/frameproject/baseProductType/delProductType",
-							method: "get",
+							url: "http://localhost:8088/frameproject/baseProduct/delProduct/batch",
+							method: "delete",
 							processData: false,
-							params: pid,
+							data: ids,
 							headers: {
 								JWTDemo: state.userInfo.token,
 							},
 						})
 						.then(function(response) {
 							console.log("删除是否成功：" + response.data.data);
-							if (response.data.data) {
+							if (response.data.data == null) {
 								_this.$message({
 									type: 'success',
 									message: '删除成功'
@@ -450,7 +454,7 @@
 								_this.findpage()
 							} else {
 								ElMessage.warning({
-									message: '该产品已存在相关单据记录，无法删除！',
+									message: response.data.data,
 									type: 'success'
 								});
 							}
@@ -517,7 +521,7 @@
 				this.selectPro = val
 			},
 			//下架或上架
-			disableOrEnable(val,index) {
+			disableOrEnable(val, index) {
 				var _this = this;
 				var able;
 				if (val.state == 1) {
@@ -526,11 +530,11 @@
 				if (val.state == 0) {
 					able = '上架'
 				};
-				var remind="";
-				if(index==1){
-					remind='设置默认账户会导致之前修改的信息丢失，如果在此之前修改了账户信息请先提交修改！              '
+				var remind = "";
+				if (index == 1) {
+					remind = '设置默认账户会导致之前修改的信息丢失，如果在此之前修改了账户信息请先提交修改！              '
 				}
-				this.$confirm(remind+'是否 "' + able + '" 该产品！', '提示', {
+				this.$confirm(remind + '是否 "' + able + '" 该产品！', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
@@ -552,14 +556,19 @@
 							},
 						})
 						.then(function(response) {
-							console.log(response.data.data);
-							if (response.data.data) {
+							console.log("状态修改是否成功：" + response.data.data);
+							if (response.data.data == null) {
 								_this.$message({
 									type: 'success',
-									message: able + ' 成功'
+									message: able + '成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: response.data.data,
+									type: 'success'
 								});
 							}
-							_this.findpage()
 						})
 						.catch(function(error) {
 							console.log(error);
@@ -640,7 +649,7 @@
 					.then(function(response) {
 						console.log("单位名称不重复是否通过:" + response.data)
 						_this.judge = response.data
-						if(!response.data){
+						if (!response.data) {
 							ElMessage.warning({
 								message: '单位名称重复！',
 								type: 'success'
@@ -692,7 +701,7 @@
 					}, 200)
 				}
 			},
-			
+
 			//打开分类新增
 			openAdd(data) {
 				this.PTdialogFormVisible = true
@@ -700,7 +709,7 @@
 				console.log("add:")
 				console.log(data)
 			},
-			
+
 			//判断分类名称是否重复
 			pdProductTypeName(val) {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -720,7 +729,7 @@
 					.then(function(response) {
 						console.log("产品名称不重复是否通过:" + response.data)
 						_this.judge2 = response.data
-						if(!response.data){
+						if (!response.data) {
 							ElMessage.warning({
 								message: '产品名称重复！',
 								type: 'success'
@@ -731,7 +740,7 @@
 						console.log(error);
 					});
 			},
-			
+
 			//新增产品子分类
 			append() {
 				console.log("append:")
@@ -786,7 +795,7 @@
 			//修改产品分类信息
 			updateProType() {
 				console.log(this.updateProTypeForm)
-				if (this.updateProTypeForm.label == '' ||this.updateProTypeForm.label == null) {
+				if (this.updateProTypeForm.label == '' || this.updateProTypeForm.label == null) {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
 					const state = JSON.parse(sessionStorage.getItem("state"));
@@ -800,7 +809,7 @@
 								cancelButtonText: '取消',
 								type: 'warning'
 							}).then(() => {
-			
+
 								this.axios({
 										url: "http://localhost:8088/frameproject/baseProductType/updateProductType",
 										method: "post",
@@ -825,7 +834,7 @@
 									.catch(function(error) {
 										console.log(error);
 									});
-			
+
 							}).catch(() => {
 								this.$message({
 									type: 'info',
@@ -841,7 +850,7 @@
 					}, 500)
 				}
 			},
-			
+
 			//删除分类--
 			remove(data) {
 				console.log("remove:")
@@ -852,7 +861,7 @@
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-				
+
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var id = {
 						id: data.id
@@ -885,7 +894,7 @@
 						.catch(function(error) {
 							console.log(error);
 						});
-				
+
 				}).catch(() => {
 					this.$message({
 						type: 'info',
@@ -893,11 +902,11 @@
 					});
 				});
 			},
-			
-			//打开修改框
+
+			//打开产品修改框
 			openupdate(val) {
-				this.PTupdateDialogFormVisible = true;
-			
+				this.updateDialogFormVisible = true;
+
 				this.updateForm.productId = val.productId
 				this.updateForm.productName = val.productName
 				this.updateForm.ingredient = val.ingredient
@@ -928,7 +937,7 @@
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var _this = this;
 					this.dialogFormVisible = false
-					
+
 					this.axios({
 							url: "http://localhost:8088/frameproject/baseProduct/updateProduct",
 							method: "post",
@@ -982,11 +991,9 @@
 
 	.allType {
 		padding: 4px;
-		width: 222px;
+		width: 100%;
 		text-align: left;
 		font-size: 17px;
-		color: white;
-		background: lightblue;
 	}
 
 	.typelabel {
