@@ -19,8 +19,8 @@
 						<el-form-item label="* 账户名称 *" :label-width="formLabelWidth">
 							<el-input v-model="form.fundAccount" autocomplete="off" placeholder="(必填)"></el-input>
 						</el-form-item>
-						<el-form-item label="* 结算类型 *" :label-width="formLabelWidth">
-							<el-select v-model="form.settlementTypeId" placeholder="请选择结算类型 (必选)">
+						<el-form-item label="* 结算类型 *" :label-width="formLabelWidth" >
+							<el-select v-model="form.settlementTypeId" filterable placeholder="请选择结算类型 (必选)">
 								<el-option v-for="item in SettlementType" :label="item.settlementType" :value="item.id" />
 							</el-select>
 							
