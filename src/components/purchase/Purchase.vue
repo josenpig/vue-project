@@ -110,7 +110,16 @@
         <el-table-column prop="productId" label="产品编号" width="200" />
         <el-table-column prop="remark" label="备注" width="200" />
         <el-table-column prop="productUnit" label="单位" width="200" />
-        <el-table-column prop="productNum" label="数量" width="200" />
+        <el-table-column prop="productNum" label="数量" width="230">
+          <template #default="scope">
+            <el-input-number
+              v-model="productdata[scope.$index].productNum"
+              :controls="false"
+              :min="1"
+              width="120"
+            />
+          </template>
+        </el-table-column>
         <el-table-column
           prop="purchaseUnitPrice"
           label="采购单价(元)"

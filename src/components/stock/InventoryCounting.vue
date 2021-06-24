@@ -131,15 +131,14 @@
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
           <el-pagination
-            background
-            layout="prev, pager, next"
-            :total="max"
-            :page-size="pagesize"
-            style="float: left"
-            @current-change="handleCurrentChange"
-            v-model:currentPage="currentPage"
-          >
-          </el-pagination>
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 30, 100]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="max">
+    </el-pagination>
           <div style="float: right">
             <el-button type="primary" @click="addproduct()">确定</el-button>
           </div>
@@ -192,11 +191,10 @@
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpe" label="产品规格" width="120" />
-        <el-table-column prop="productType" label="产品分类" width="120" />
-        <el-table-column prop="productUnit" label="产品单位" width="120" />
-        <el-table-column prop="inventoryNum" label="盘点数量" width="120">
+        <el-table-column prop="productId" label="产品编号" width="200" />
+        <el-table-column prop="productType" label="产品分类" width="200" />
+        <el-table-column prop="productUnit" label="产品单位" width="200" />
+        <el-table-column prop="inventoryNum" label="盘点数量" width="200">
           <template #default="scope">
             <el-input-number
               v-model="productdata[scope.$index].inventoryNum"
@@ -205,9 +203,9 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="systemNum" label="系统数量" width="120" />
+        <el-table-column prop="systemNum" label="系统数量" width="200" />
 
-        <el-table-column prop="inventoryPl" label="盘盈盘亏" width="120">
+        <el-table-column prop="inventoryPl" label="盘盈盘亏" width="200">
           <template #default="scope">
             {{ calcyk(scope.$index) }}
           </template>
@@ -405,9 +403,24 @@ export default {
         this.formorder.orderTime=new Date()
       }
     },
+    //改变页码数
+    // handleCurrentChange(val) {
+    //   this.dialogopen(val, this.pagesize);
+    // },
     handleSelectionChange(val) {
       this.joinstockdata = val;
     },
+    handleCurrentChange(val) {
+        console.log(`当前页: ${val}`);
+        this.currentPage=val;
+        this.dialogopen();
+    },
+    handleSizeChange(val) {
+        console.log(`每页 ${val} 条`);
+        this.pagesize=val;
+        this.currentPage=1;
+        this.dialogopen();
+      },
     setcontacts() {
       this.headeroptions1.forEach((item) => {
         if (item.customerName == this.formorder.customer) {
@@ -468,10 +481,7 @@ export default {
 
       console.log(this.productdata)
     },
-    //改变页码数
-    handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize);
-    },
+    
     //新增一行
     addrow(productdata, event) {
       productdata.push({
