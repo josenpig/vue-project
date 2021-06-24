@@ -99,7 +99,7 @@
 					<el-form-item label="产品编号" :label-width="formLabelWidth">
 						<el-input :disabled="true" v-model="updateForm.productId" autocomplete="off"></el-input>
 					</el-form-item>
-					<el-form-item label="产品名称" :label-width="formLabelWidth">
+					<el-form-item label="产品名称"  :label-width="formLabelWidth">
 						<el-input v-model="updateForm.productName" autocomplete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="成分" :label-width="formLabelWidth">
@@ -111,8 +111,8 @@
 					<el-form-item label="克重" :label-width="formLabelWidth">
 						<el-input v-model="updateForm.gramHeavy" autocomplete="off"></el-input>
 					</el-form-item>
-					<el-form-item label="单位" :label-width="formLabelWidth">
-						<el-select v-model="updateForm.unitId" placeholder="请选择单位 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
+					<el-form-item label="单位"  :label-width="formLabelWidth">
+						<el-select v-model="updateForm.unitId" filterable placeholder="请选择单位 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
 							<el-option v-for="item in unit" :label="item.unitName" :value="item.unitId"></el-option>
 						</el-select>
 
@@ -137,8 +137,8 @@
 						</el-dialog>
 
 					</el-form-item>
-					<el-form-item label="产品分类" :label-width="formLabelWidth">
-						<el-select v-model="updateForm.productTypeId" placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
+					<el-form-item label="产品分类" :label-width="formLabelWidth" >
+						<el-select v-model="updateForm.productTypeId" filterable placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
 							<el-option v-for="item in ProTypeList" :label="item.label" :value="item.id"></el-option>
 						</el-select>
 					</el-form-item>
@@ -193,10 +193,18 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column type="selection" width="55" />
-				<el-table-column fixed label="操作" width="150">
+				<el-table-column fixed label="操作" width="100">
 					<template #default="scope">
+						<el-tooltip content="修改" placement="top">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						</el-tooltip>
+						<el-tooltip content="删除" placement="top">
 						<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
+						</el-tooltip>
+					</template>
+				</el-table-column>
+				<el-table-column fixed label="状态" width="80">
+					<template #default="scope">
 						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row,0)" round style="background-color: coral;color: white;padding: 7px;">下架</el-button>
 						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row,0)" round style="background-color: lightgreen ;color: white;padding: 7px;">上架</el-button>
 					</template>
@@ -215,7 +223,8 @@
 						<span v-if="scope.row.state==1" style="color: seagreen;">上架</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="remarks" label="备注" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="productDescribe" label="产品描述" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注" width="120" />
 				<el-table-column prop="purchaseMoney" label="采购单价(元)" sortable width="120" />
 				<el-table-column prop="purchaseUnitPrice" label="销售单价(元)" sortable width="120" />
 				<el-table-column prop="userName" label="创建人" sortable width="120" />
@@ -279,7 +288,7 @@
 				
 				//新增产品分类弹框
 				PTdialogFormVisible: false,
-				//修改产品信息弹框
+				//修改产品分类弹框
 				PTupdateDialogFormVisible: false,
 				//新增产品分类
 				ProTypeForm:{
@@ -420,29 +429,29 @@
 					});
 			},
 			//删除产品
-			del(id, index) {
+			del(id) {
 				this.$confirm('此操作将永久删除该产品, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
 					const state = JSON.parse(sessionStorage.getItem("state"));
-					var pid = {
-						id: id
-					};
+					var ids = new Array()
+					ids.push(id)
+					console.log(ids)
 					var _this = this
 					this.axios({
-							url: "http://localhost:8088/frameproject/baseProductType/delProductType",
-							method: "get",
+							url: "http://localhost:8088/frameproject/baseProduct/delProduct/batch",
+							method: "delete",
 							processData: false,
-							params: pid,
+							data: ids,
 							headers: {
 								JWTDemo: state.userInfo.token,
 							},
 						})
 						.then(function(response) {
 							console.log("删除是否成功：" + response.data.data);
-							if (response.data.data) {
+							if (response.data.data == null) {
 								_this.$message({
 									type: 'success',
 									message: '删除成功'
@@ -450,7 +459,7 @@
 								_this.findpage()
 							} else {
 								ElMessage.warning({
-									message: '该产品已存在相关单据记录，无法删除！',
+									message: response.data.data,
 									type: 'success'
 								});
 							}
@@ -552,14 +561,19 @@
 							},
 						})
 						.then(function(response) {
-							console.log(response.data.data);
-							if (response.data.data) {
+							console.log("状态修改是否成功：" + response.data.data);
+							if (response.data.data == null) {
 								_this.$message({
 									type: 'success',
-									message: able + ' 成功'
+									message: able+'成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: response.data.data,
+									type: 'success'
 								});
 							}
-							_this.findpage()
 						})
 						.catch(function(error) {
 							console.log(error);
@@ -894,9 +908,9 @@
 				});
 			},
 			
-			//打开修改框
+			//打开产品修改框
 			openupdate(val) {
-				this.PTupdateDialogFormVisible = true;
+				this.updateDialogFormVisible = true;
 			
 				this.updateForm.productId = val.productId
 				this.updateForm.productName = val.productName
@@ -976,6 +990,7 @@
 		color: #459df5;
 		background-color: #f9f9f9;
 		height: 30px;
+		width: 100%;
 		padding: 15px;
 		margin-top: 0px;
 	}

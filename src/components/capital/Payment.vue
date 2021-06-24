@@ -122,14 +122,14 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("orderid");
-    next();
+    sessionStorage.removeItem('orderid')
+    next()
   },
-  name: "Sale",
+  name: 'Sale',
   data() {
     return {
       dialogVisible: false,
@@ -139,29 +139,29 @@ export default {
       billdata: [],
       //表体本次付款信息
       accountdata: [],
-    };
+    }
   },
   computed: {
     //单据总金额
     billtotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.billdata.forEach((money) => {
-        allmoney += money.payableMoney;
-      });
-      return Math.round(allmoney * 1000) / 1000;
+        allmoney += money.payableMoney
+      })
+      return Math.round(allmoney * 1000) / 1000
     },
     accounttotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       this.accountdata.forEach((money) => {
-        allmoney += money.thisMoney;
-      });
-      return Math.round(allmoney * 1000) / 1000;
+        allmoney += money.thisMoney
+      })
+      return Math.round(allmoney * 1000) / 1000
     },
   },
   methods: {
     //审批
     approval(type) {
-      var tfok = true;
+      var tfok = true
       // this.billdata.forEach((item) => {
       //   if (item.unpaidMoney == 0 && tfok == true) {
       //     var massage = "";
@@ -177,12 +177,20 @@ export default {
       //   }
       // });
       if (tfok == true) {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const orderid = sessionStorage.getItem("orderid");
-        var _this = this;
-        this.$prompt("请输入备注", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const orderid = sessionStorage.getItem('orderid')
+        var _this = this
+        var inputPattern
+        var inputErrorMessage
+        if (type == -1) {
+          inputPattern = /\s\S+|S+\s|\S/
+          inputErrorMessage = '驳回理由不能为空'
+        }
+        this.$prompt('请输入审批备注', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPattern: inputPattern,
+          inputErrorMessage: inputErrorMessage,
         })
           .then(({ value }) => {
             var fd = {
@@ -190,10 +198,10 @@ export default {
               type: type,
               user: state.userInfo.userName,
               approvalremarks: value,
-            };
+            }
             this.axios({
-              url: "http://localhost:8088/frameproject/capitalPayment/approval",
-              method: "get",
+              url: 'http://localhost:8088/frameproject/capitalPayment/approval',
+              method: 'get',
               params: fd,
               headers: {
                 JWTDemo: state.userInfo.token,
@@ -202,57 +210,57 @@ export default {
               .then(function (response) {
                 if (response.data.code == 200 && response.data.data == true) {
                   _this.$notify({
-                    title: "操作成功",
-                    message: "订单信息已被修改",
-                    type: "success",
-                  });
-                  _this.showorder();
-                }else{
+                    title: '操作成功',
+                    message: '订单信息已被修改',
+                    type: 'success',
+                  })
+                  _this.showorder()
+                } else {
                   _this.$notify({
-                    title: "操作失败",
-                    message:response.data.data,
-                    type: "warning",
-                  });
+                    title: '操作失败',
+                    message: response.data.data,
+                    type: 'warning',
+                  })
                 }
               })
               .catch(function (error) {
-                console.log(error);
-              });
+                console.log(error)
+              })
           })
-          .catch(() => {});
+          .catch(() => {})
       }
     },
     showorder() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const orderid = sessionStorage.getItem("orderid");
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('orderid')
+      const _this = this
       if (orderid == null) {
-        this.$router.push("/Receiptlist");
+        this.$router.push('/Receiptlist')
       } else {
         this.axios({
           url:
-            "http://localhost:8088/frameproject/capitalPayment/find/" + orderid,
-          method: "get",
+            'http://localhost:8088/frameproject/capitalPayment/find/' + orderid,
+          method: 'get',
           headers: {
             JWTDemo: state.userInfo.token,
           },
         })
           .then(function (response) {
-            _this.formorder = response.data.data.payment;
-            _this.billdata = response.data.data.bills;
-            _this.accountdata = response.data.data.accounts;
+            _this.formorder = response.data.data.payment
+            _this.billdata = response.data.data.bills
+            _this.accountdata = response.data.data.accounts
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
   },
 
   created: function () {
-    this.showorder();
+    this.showorder()
   },
-};
+}
 </script>
 
 <style lang="scss">

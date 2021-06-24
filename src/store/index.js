@@ -19,6 +19,7 @@ const store = createStore({
 	mutations: {
 		updateUserInfo(state, user) {
 			state.userInfo.userName = user.user.userName
+			console.log(user.user.userName);
 			state.userInfo.userIcon = user.user.userIcon
 			state.userInfo.isValidate = true
 			state.userInfo.token = user.token

@@ -258,7 +258,7 @@
         </el-table-column>
         <el-table-column prop="ingredient" label="成分" width="120" />
         <el-table-column prop="gramHeavy" label="克量" width="120" />
-        <el-table-column prop="remark" label="产品备注" width="120"/>
+        <el-table-column prop="remark" label="产品备注" width="120" />
         <el-table-column
           prop="productDescribe"
           label="产品描述"
@@ -354,10 +354,14 @@
 </template>
 
 <script>
-import { ElMessage } from "element-plus";
-import store from "../../store";
+import { ElMessage } from 'element-plus'
+import store from '../../store'
 export default {
-  name: "Addsale",
+  beforeRouteLeave(to, form, next) {
+    sessionStorage.removeItem('draft')
+    next()
+  },
+  name: 'Addsale',
   data() {
     return {
       //库存商品div
@@ -365,10 +369,10 @@ export default {
       //库存产品--分类
       data: [],
       defaultProps: {
-        children: "children",
-        label: "label",
+        children: 'children',
+        label: 'label',
       },
-      findstock: "", //库存产品名称查询
+      findstock: '', //库存产品名称查询
       stockdata: [], //库存产品--信息
       joinstockdata: [], //已选库存产品
 
@@ -378,38 +382,38 @@ export default {
       //订单信息
       formorder: {
         //表头单据信息
-        orderId: "XSDD" + Date.now(), //单据编号
+        orderId: 'XSDD' + Date.now(), //单据编号
         orderTime: new Date(), //单据时间
         deliveryTime: new Date(), //交货时间
-        customer: "", //客户
-        salesmen: "", //销售人员
-        remarks: "", // 订单备注
+        customer: '', //客户
+        salesmen: '', //销售人员
+        remarks: '', // 订单备注
         //表尾买家信息
         disrate: 0, //优惠率
         dismoney: 0, //优惠金额
         receivables: 0, //应收款
-        contacts: "", //客户联系人
-        contactsPhone: "", //客户联系人电话
-        contactsAddress: "", //客户地址
+        contacts: '', //客户联系人
+        contactsPhone: '', //客户联系人电话
+        contactsAddress: '', //客户地址
         //订单信息额外
-        founder: "",
+        founder: '',
       },
 
       //表体销售商品信息
       productdata: [
         {
-          productId: "", //产品编号
-          productName: "", //产品名称
-          remark: "", //备注
-          productSpec: "", //规格
-          productUnit: "", //单位
-          productNum: "", //数量
-          saleUnitPrice: "", //销售单价
-          saleMoney: "", //销售金额
-          depot: "", //仓库
-          ingredient: "", //成分
-          gramHeavy: "", //克量
-          productDescribe: "", //产品描述
+          productId: '', //产品编号
+          productName: '', //产品名称
+          remark: '', //备注
+          productSpec: '', //规格
+          productUnit: '', //单位
+          productNum: '', //数量
+          saleUnitPrice: '', //销售单价
+          saleMoney: '', //销售金额
+          depot: '', //仓库
+          ingredient: '', //成分
+          gramHeavy: '', //克量
+          productDescribe: '', //产品描述
         },
       ],
       //抄送对象信息
@@ -419,12 +423,12 @@ export default {
       pagesize: 5,
       max: 0,
       currentPage: 1,
-    };
+    }
   },
   computed: {
     //已选产品
     thisrow: function () {
-      return this.joinstockdata.length;
+      return this.joinstockdata.length
     },
     //单个商品销售总价
     saleMoney() {
@@ -434,75 +438,77 @@ export default {
             this.productdata[id].saleUnitPrice *
               this.productdata[id].productNum *
               1000
-          ) / 1000;
+          ) / 1000
         return (
           Math.round(
             this.productdata[id].saleUnitPrice *
               this.productdata[id].productNum *
               1000
           ) / 1000
-        );
-      };
+        )
+      }
     },
     //销售总金额
     total: function () {
-      var allmoney = 0;
+      var allmoney = 0
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
+          this.productdata[i].saleUnitPrice * this.productdata[i].productNum
       }
       this.formorder.receivables =
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
             1000
-        ) / 1000;
+        ) / 1000
       return (
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
             1000
         ) / 1000
-      );
+      )
     },
     //销售优惠金额
     distotal: function () {
-      var allmoney = 0;
+      var allmoney = 0
       for (var i = 0; i < this.productdata.length; i++) {
         allmoney +=
-          this.productdata[i].saleUnitPrice * this.productdata[i].productNum;
+          this.productdata[i].saleUnitPrice * this.productdata[i].productNum
       }
       this.formorder.dismoney =
         Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
-        100;
+        100
       return (
         Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
         100
-      );
+      )
     },
   },
   methods: {
     handleSelectionChange(val) {
-      this.joinstockdata = val;
+      this.joinstockdata = val
     },
+    //获取客户关联数据
     setcontacts() {
       this.headeroptions1.forEach((item) => {
         if (item.customerNumber == this.formorder.customer) {
-          this.formorder.contacts = item.contact;
-          this.formorder.contactsPhone = item.contactNumber;
-          this.formorder.contactsAddress = item.contactAddress;
+          this.formorder.contacts = item.contact
+          this.formorder.contactsPhone = item.contactNumber
+          this.formorder.contactsAddress = item.contactAddress
+          this.formorder.disrate=item.ratio
         }
-      });
+      })
     },
     //选择产品
     dialogopen() {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       var fd = {
         currentPage: this.currentPage,
         pageSize: this.pagesize,
-      };
+      }
       this.axios({
-        url: "http://localhost:8088/frameproject/baseProduct/allsaleproduct",
-        method: "get",
+        url: 'http://localhost:8088/frameproject/baseProduct/allsaleproduct',
+        method: 'get',
         processData: false,
         params: fd,
         headers: {
@@ -510,83 +516,83 @@ export default {
         },
       })
         .then(function (response) {
-          _this.stockdata = response.data.data.rows;
-          _this.max = response.data.data.total;
+          _this.stockdata = response.data.data.rows
+          _this.max = response.data.data.total
         })
         .catch(function (error) {
-          console.log(error);
-        });
-      this.dialogTableVisible = true;
+          console.log(error)
+        })
+      this.dialogTableVisible = true
     },
     //添加销售产品
     addproduct() {
-      var productlist = [];
+      var productlist = []
       this.productdata.forEach((item) => {
-        productlist.push(item.productId);
-      });
+        productlist.push(item.productId)
+      })
       this.joinstockdata.forEach((item) => {
         if (productlist.indexOf(item.productId) == -1) {
-          item.productNum = 1;
-          this.productdata.push(item);
+          item.productNum = 1
+          this.productdata.push(item)
         }
-      });
+      })
       for (var i = this.productdata.length - 1; i >= 0; i--) {
         if (
-          this.productdata[i].productId == "" &&
+          this.productdata[i].productId == '' &&
           this.productdata.length > 1
         ) {
-          this.productdata.splice(i, 1);
+          this.productdata.splice(i, 1)
         }
       }
-      this.dialogTableVisible = false;
+      this.dialogTableVisible = false
     },
     //改变页码数
     handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize);
+      this.dialogopen(val, this.pagesize)
     },
     //新增一行
     addrow(productdata, event) {
       productdata.push({
-        productId: "", //产品编号
-        productName: "", //产品名称
-        remark: "", //备注
-        productSpec: "", //规格
-        productUnit: "", //单位
-        productNum: "", //数量
-        saleUnitPrice: "", //销售单价
-        saleMoney: "", //销售金额
-        depot: "", //仓库
-        ingredient: "", //成分
-        gramHeavy: "", //克量
-        productDescribe: "", //产品描述
-      });
+        productId: '', //产品编号
+        productName: '', //产品名称
+        remark: '', //备注
+        productSpec: '', //规格
+        productUnit: '', //单位
+        productNum: '', //数量
+        saleUnitPrice: '', //销售单价
+        saleMoney: '', //销售金额
+        depot: '', //仓库
+        ingredient: '', //成分
+        gramHeavy: '', //克量
+        productDescribe: '', //产品描述
+      })
     },
     //移除一行
     delrow(index, rows) {
       if (this.productdata.length > 1) {
-        rows.splice(index, 1); //删掉该行
+        rows.splice(index, 1) //删掉该行
       }
     },
     //提交审批（生成订单）
     examine(type) {
-      const state = JSON.parse(sessionStorage.getItem("state"));
-      const _this = this;
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
       //判断库存是否足够
-      var ifnum = true;
+      var ifnum = true
       this.productdata.forEach((item) => {
         if (
-          (ifnum == true && this.formorder.salesmen == "") ||
-          item.productId == "" ||
+          (ifnum == true && this.formorder.salesmen == '') ||
+          item.productId == '' ||
           item.depot == null ||
-          this.formorder.customer == ""
+          this.formorder.customer == ''
         ) {
           this.$notify({
-            title: "警告",
-            message: "请先填写*必要信息!",
-            type: "warning",
-          });
-          ifnum = false;
-          return false;
+            title: '警告',
+            message: '请先填写*必要信息!',
+            type: 'warning',
+          })
+          ifnum = false
+          return false
         }
         item.baseOpenings.forEach((items) => {
           if (
@@ -596,28 +602,28 @@ export default {
           ) {
             ElMessage.warning({
               message:
-                "仓库：" +
+                '仓库：' +
                 item.depot +
-                "  中产品：" +
+                '  中产品：' +
                 item.productName +
-                "的预计可用库存不足!",
-              type: "warning",
-            });
-            ifnum = false;
+                '的预计可用库存不足!',
+              type: 'warning',
+            })
+            ifnum = false
           }
-        });
-      });
+        })
+      })
       if (ifnum != false) {
         this.formorder.orderTime = dayjs(this.formorder.orderTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
+          'YYYY-MM-DD HH:mm:ss'
+        )
         this.formorder.deliveryTime = dayjs(this.formorder.deliveryTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.founder = state.userInfo.userName;
+          'YYYY-MM-DD HH:mm:ss'
+        )
+        this.formorder.founder = state.userInfo.userName
         this.axios({
-          url: "http://localhost:8088/frameproject/saleorder/add/" + type,
-          method: "post",
+          url: 'http://localhost:8088/frameproject/saleorder/add/' + type,
+          method: 'post',
           data: {
             order: JSON.stringify(_this.formorder), //_this.formorder ,
             orderdetails: JSON.stringify(_this.productdata), //_this.productdata//
@@ -627,37 +633,89 @@ export default {
           },
         })
           .then(function (response) {
-            if(response.data.code==200){
-            sessionStorage.setItem("orderid", response.data.data);
-            _this.$router.push("/Sale");
+            if (response.data.code == 200) {
+              sessionStorage.setItem('orderid', response.data.data)
+              _this.$router.push('/Sale')
             }
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
+    },
+    //查询是否来自草稿单
+    showorder() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('draft')
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/saleorder/find/' + orderid,
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          var productlist = []
+          response.data.data.orderdetails.forEach((item) => {
+            productlist.push(item.productId)
+          })
+          _this.productdata.splice(0, 1)
+          response.data.data.saleProductVos.forEach((item) => {
+            if (productlist.indexOf(item.productId) != -1) {
+              _this.productdata.push(item)
+            }
+          })
+          for (var i = 0; i < response.data.data.orderdetails.length; i++) {
+            _this.productdata[i].productNum =
+              response.data.data.orderdetails[i].productNum
+            _this.productdata[i].depot =
+              response.data.data.orderdetails[i].depot
+          }
+          _this.formorder = response.data.data.order
+          _this.headeroptions1.forEach((item) => {
+            if (item.customerName == _this.formorder.customer) {
+              _this.formorder.customer = item.customerNumber
+            }
+          })
+          _this.headeroptions2.forEach((item) => {
+            if (item.userName == _this.formorder.salesmen) {
+              _this.formorder.salesmen = item.userId
+            }
+          })
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    //查询人员
+    findmen() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.headeroptions1 = response.data.data.customers
+          _this.headeroptions2 = response.data.data.salemans
+          _this.footeroptions = response.data.data.notifiers
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     },
   },
   created: function () {
-    const state = JSON.parse(sessionStorage.getItem("state"));
-    const _this = this;
-    this.axios({
-      url: "http://localhost:8088/frameproject/personnel/ofpeople",
-      method: "get",
-      headers: {
-        JWTDemo: state.userInfo.token,
-      },
-    })
-      .then(function (response) {
-        _this.headeroptions1 = response.data.data.customers;
-        _this.headeroptions2 = response.data.data.salemans;
-        _this.footeroptions = response.data.data.notifiers;
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+    this.findmen()
+    if (sessionStorage.getItem('draft') != null) {
+      this.showorder()
+    }
   },
-};
+}
 </script>
 
 <style lang="scss">
