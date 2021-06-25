@@ -462,7 +462,7 @@ export default {
       pagesize1: 5,
       max1: 0,
       currentPage1: 1,
-       //预收付分页
+      //预收付分页
       pagesize2: 5,
       max2: 0,
       currentPage2: 1,
@@ -581,10 +581,10 @@ export default {
           console.log(error)
         })
     },
-    handleCurrentChange1(val){
+    handleCurrentChange1(val) {
       this.findbill(val, this.pagesize1)
     },
-    handleCurrentChange2(val){
+    handleCurrentChange2(val) {
       this.findcap(val, this.pagesize2)
     },
     //选择应收付单
@@ -697,6 +697,18 @@ export default {
               type: 'warning',
             })
             tfok = false
+          } else if (item.thisMoney > item.unwrittenMoney && tfok == true) {
+            this.$notify({
+              title: '警告',
+              message: '本次核销金额不能大于未核销金额',
+              type: 'warning',
+            })
+          }else if (item.unwrittenMoney==0 && tfok == true) {
+            this.$notify({
+              title: '警告',
+              message:'订单' +item.capitalId+ '未核销金额不足',
+              type: 'warning',
+            })
           }
         })
       }
@@ -717,15 +729,14 @@ export default {
           tfok = false
         }
       })
-      if (this.captotal > this.billtotal && tfok == true) {
+      if (this.captotal != this.billtotal && tfok == true) {
         this.$notify({
           title: '警告',
-          message: '预收/付核销金额不能大于应收/付核销金额',
+          message: '应收/付的核销总金额应等于预收/付的核销总金额',
           type: 'warning',
         })
         tfok = false
       }
-      console.log(this.formorder)
       if (tfok == true) {
         const state = JSON.parse(sessionStorage.getItem('state'))
         const _this = this

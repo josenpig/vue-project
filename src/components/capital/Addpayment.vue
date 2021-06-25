@@ -366,7 +366,7 @@ export default {
         purchaseId: '',
       },
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }
@@ -645,6 +645,13 @@ export default {
       })
         .then(function (response) {
           _this.options = response.data.data
+          _this.options.forEach((item) => {
+            if (item.state == 1) {
+              _this.accountdata[0].fundAccount = item.capitalId
+              _this.accountdata[0].settlementTypeName = item.settlementType
+              _this.accountdata[0].settlementType = item.settlementTypeId
+            }
+          })
         })
         .catch(function (error) {
           console.log(error)

@@ -251,7 +251,7 @@
             >
               <el-option
                 v-for="item in options"
-                :key="item.fundAccount"
+                :key="item.capitalId"
                 :label="item.fundAccount"
                 :value="item.capitalId"
               >
@@ -346,7 +346,7 @@ export default {
           receiptMoney: '', //应收款金额
           receivedMoney: '', //已收金额
           uncollectedMoney: '', //未收金额
-          thisMoney: 0.00, //本次收款
+          thisMoney: 0.0, //本次收款
         },
       ],
       //表体本次收款信息
@@ -355,7 +355,7 @@ export default {
           fundAccount: '', //资金账户
           settlementTypeName: '', //账户收款类型
           settlementType: '', //账户收款类型
-          thisMoney: 0.00, //本次收款
+          thisMoney: 0.0, //本次收款
         },
       ],
       //抄送对象信息
@@ -370,7 +370,7 @@ export default {
         saleId: '',
       },
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }
@@ -378,11 +378,11 @@ export default {
   computed: {
     //单据收款
     billtotal: function () {
-      var allmoney = 0
+      var allmoney = 0.0
       this.billdata.forEach((item) => {
         allmoney += item.thisMoney
       })
-      return allmoney
+      return Math.round(allmoney * 1000) / 1000
     },
     //账户收款
     accounttotal: function () {
@@ -391,7 +391,7 @@ export default {
         allmoney += item.thisMoney
       })
       this.formorder.receiptMoney = allmoney
-      return allmoney
+      return Math.round(allmoney * 1000) / 1000
     },
     //预收款
     ciaMoney: function () {
@@ -418,7 +418,7 @@ export default {
         fundAccount: '',
         settlementTypeName: '',
         settlementType: '',
-        thisMoney: 0.00,
+        thisMoney: 0.0,
       })
     },
     //改变收款方式
@@ -426,7 +426,7 @@ export default {
       this.billdata = [
         {
           saleId: '', //单据编号
-          thisMoney: 0.00, //本次收款
+          thisMoney: 0.0, //本次收款
         },
       ]
     },
@@ -649,6 +649,13 @@ export default {
       })
         .then(function (response) {
           _this.options = response.data.data
+          _this.options.forEach((item) => {
+            if (item.state == 1) {
+              _this.accountdata[0].fundAccount = item.capitalId
+              _this.accountdata[0].settlementTypeName = item.settlementType
+              _this.accountdata[0].settlementType = item.settlementTypeId
+            }
+          })
         })
         .catch(function (error) {
           console.log(error)

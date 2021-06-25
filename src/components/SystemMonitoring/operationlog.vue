@@ -7,7 +7,7 @@
       <!-- 标签页 -->
     </div>
     <!-- 表单头部 筛选 -->
-    <div class="returnlist-header">
+    <div class="returnlist-header1">
       <el-collapse accordion>
           <div class="ss">
             <!-- 操作员 -->
@@ -200,7 +200,7 @@ import {
   background-color: #e9eef3;
 }
 /* 内容表头 筛选框 */
-.returnlist-header {
+.returnlist-header1 {
   padding: 15px 15px;
   border-bottom: #e9eef3 5px solid;
   background-color: white;
@@ -208,7 +208,7 @@ import {
 .returnlist .el-radio-group {
   margin: 10px 0px;
 }
-.returnlist-header span {
+.returnlist-header1 span {
   font-size: 14px;
   color: #666666;
   margin-right: 10px;
@@ -249,7 +249,7 @@ import {
 	margin-top:0px;
 	
 }
-.returnlist-header .el-input{
+.returnlist-header1 .el-input{
   width: 210px;
 }
 .block{

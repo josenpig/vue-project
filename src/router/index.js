@@ -21,14 +21,14 @@ const routes = [
 		component: HomePageView,
 		children: [
 			//个人中心
-		{
-		path:'/PersonalCenter',
-		name:'PersonalCenter',
-		component : PersonalCenterView,
-		},
-			]
+			{
+				path: '/PersonalCenter',
+				name: 'PersonalCenter',
+				component: PersonalCenterView,
+			},
+		]
 	},
-	
+
 ]
 const router = createRouter({
 	history: createWebHistory(),
@@ -69,9 +69,9 @@ export function initDynamicRoutes() {
 function importComponent(routerList) {
 	routerList.forEach((route) => {
 		if (route.path != null) {
-			let cpath = '../components/'+route.component
-			const rouc = { path:route.path, name:route.name,component:modules[`${cpath}`]}
-			router.addRoute('HomePage',rouc)
+			let cpath = '../components/' + route.component
+			const rouc = { path: route.path, name: route.name, component: modules[`${cpath}`] }
+			router.addRoute('HomePage', rouc)
 		}
 		if (route.childMenu && route.childMenu.length) {
 			importComponent(route.childMenu)

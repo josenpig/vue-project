@@ -327,7 +327,7 @@ export default {
       dialogTableVisible: false,
       pstatus: [],
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }

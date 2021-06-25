@@ -207,11 +207,13 @@
     <div class="deliverlist-footer" v-show="paging">
       <el-pagination
         background
-        layout="prev, pager, next"
+        layout="total,sizes, prev, pager, next"
         :total="max"
+        :page-sizes="[2, 5, 8, 10]"
         :page-size="pagesize"
         style="margin-top: 50px"
         @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
         v-model:currentPage="currentPage"
       >
       </el-pagination>
@@ -253,7 +255,7 @@ export default {
       //表单数据
       tableData: [],
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }
@@ -294,9 +296,11 @@ export default {
     },
   },
   methods: {
+    //新增订单
     goadd() {
       this.$router.push('/Addsale')
     },
+    //分页查询
     findpage() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       var _this = this
@@ -320,9 +324,14 @@ export default {
           console.log(error)
         })
     },
+    //改变页码大小
+    handleSizeChange(val) {
+      this.pagesize=val
+      this.findpage()
+    },
     //改变页码数
     handleCurrentChange(val) {
-      this.findpage(val, this.pagesize)
+      this.findpage()
     },
     goadd() {
       this.$router.push('/Adddeliver')

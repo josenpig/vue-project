@@ -6,7 +6,6 @@
       <span>新增采购订单</span>
       <div class="addsale-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
           >提交审批</el-button
         >
@@ -21,6 +20,7 @@
         style="width: 75%; font-weight: bold"
         :model="formorder"
       >
+      <el-row>
         <!-- 编号 -->
         <el-form-item label="编号:">
           <el-input
@@ -39,8 +39,8 @@
           >
           </el-date-picker>
         </el-form-item>
-        <!-- 交货时间 -->
-        <el-form-item label="交货日期:" class="form-input">
+        <!-- 入库日期 -->
+        <el-form-item label="入库日期:" class="form-input">
           <el-date-picker
             v-model="formorder.deliceryDate"
             type="date"
@@ -49,7 +49,8 @@
           >
           </el-date-picker>
         </el-form-item>
-        <!-- 客户 -->
+        </el-row>
+        <!-- 供应商 -->
         <el-form-item label="*供应商:">
           <el-select
             v-model="formorder.vendorName"
@@ -79,6 +80,24 @@
               :key="item.userName"
               :value="item.userId"
               :label="item.userName"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+
+        <el-form-item label="*默认仓库:" class="form-input">
+          <el-select
+            v-model="depot"
+            size="mini"
+            filterable
+            placeholder="请选择默认仓库"
+          >
+            <el-option
+              v-for="item in depotlist"
+              :key="item.depotName"
+              :value="item.depotName"
+              :label="item.depotName"
             >
             </el-option>
           </el-select>
@@ -115,6 +134,7 @@
               placeholder="请输入产品名称"
               style="width: 250px"
               size="small"
+              
             />
             <el-button icon="el-icon-search" size="small">查询</el-button>
           </div>
@@ -124,6 +144,7 @@
           @selection-change="handleSelectionChange"
           :data="stockdata"
           style="width: 100%"
+          :row-class-name="tableRowClassName"
           max-height="350"
           border
         >
@@ -222,6 +243,7 @@
         <el-table-column prop="purchaseUnitPrice" label="采购单价" width="200">
           <template #default="scope">
             <el-input-number
+              :disabled="true"
               v-model="productdata[scope.$index].purchaseUnitPrice"
               :controls="false"
               :precision="2"
@@ -353,6 +375,9 @@ export default {
       stockdata: [], //库存产品--信息
       joinstockdata: [], //已选库存产品
 
+      depot:"",//默认仓库
+      depotlist:[],//仓库列表
+
       // 表单头部下拉列表信息
       headeroptions1: [],
       headeroptions2: [],
@@ -444,6 +469,19 @@ export default {
     },
   },
   methods: {
+     tableRowClassName({row, rowIndex}) {
+       console.log(row)
+        console.log(rowIndex)
+        if (rowIndex == 1) {
+          return 'warning-row';
+        } else if (rowIndex == 3) {
+          return 'success-row';
+        }
+        return '';
+      },
+    handleCurrentChange(val) {
+      this.dialogopen(val, this.pagesize);
+    },
     handleSelectionChange(val) {
       this.joinstockdata = val;
     },
@@ -493,6 +531,9 @@ export default {
           this.productdata.splice(i, 1);
         }
       }
+      for(var i=this.productdata.length-1;i>=0;i--){
+        this.productdata[i].depotName=this.depot;
+      }
       this.dialogTableVisible = false;
     },
     //新增一行
@@ -514,9 +555,7 @@ export default {
         rows.splice(index, 1); //删掉该行
       }
     },
-    handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize);
-    },
+    
     //提交审批（生成订单）
     examine(type) {
       const state = JSON.parse(sessionStorage.getItem("state"));
@@ -598,17 +637,16 @@ export default {
           });
       }
     },
-  },
-  created: function () {
-    const state = JSON.parse(sessionStorage.getItem("state"));
-    const _this = this;
-    this.axios({
+    infopfpeople(){
+      const state = JSON.parse(sessionStorage.getItem("state"));
+      const _this = this;
+      this.axios({
       url: "http://localhost:8088/frameproject/personnel/ofpeople",
       method: "get",
       headers: {
         JWTDemo: state.userInfo.token,
       },
-    })
+      })
       .then(function (response) {
           _this.headeroptions1 = response.data.data.vendors;
           _this.headeroptions2 = response.data.data.purchasemans;
@@ -616,6 +654,29 @@ export default {
       .catch(function (error) {
         console.log(error);
       });
+    },
+    infodepot(){
+      const state = JSON.parse(sessionStorage.getItem("state"));
+      const _this = this;
+      this.axios({
+      url: "http://localhost:8088/frameproject/stockInventory/allDepot",
+      method: "get",
+      headers: {
+        JWTDemo: state.userInfo.token,
+      },
+      })
+      .then(function (response) {
+          _this.depotlist = response.data.data.depots;
+          _this.depot = _this.depotlist[_this.depotlist.length-1].depotName;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    }
+  },
+  created: function () {
+    this.infopfpeople()
+    this.infodepot()
   },
 };
 </script>
