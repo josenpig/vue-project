@@ -420,7 +420,7 @@ export default {
       footeroptions: [],
       notice: [], //抄送对象
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }
@@ -494,7 +494,7 @@ export default {
           this.formorder.contacts = item.contact
           this.formorder.contactsPhone = item.contactNumber
           this.formorder.contactsAddress = item.contactAddress
-          this.formorder.disrate=item.ratio
+          this.formorder.disrate = item.ratio
         }
       })
     },
@@ -667,10 +667,17 @@ export default {
             }
           })
           for (var i = 0; i < response.data.data.orderdetails.length; i++) {
-            _this.productdata[i].productNum =
-              response.data.data.orderdetails[i].productNum
-            _this.productdata[i].depot =
-              response.data.data.orderdetails[i].depot
+            for (var j = 0; j < _this.productdata.length; j++) {
+              if (
+                _this.productdata[j].productId ==
+                response.data.data.orderdetails[i].productId
+              ) {
+                _this.productdata[j].productNum =
+                  response.data.data.orderdetails[i].productNum
+                _this.productdata[j].depot =
+                  response.data.data.orderdetails[i].depot
+              }
+            }
           }
           _this.formorder = response.data.data.order
           _this.headeroptions1.forEach((item) => {

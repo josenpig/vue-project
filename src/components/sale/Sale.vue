@@ -25,28 +25,28 @@
           @click="goreceipt()"
           >收款</el-button
         >
-        <el-button @click="approval(-1)" class="power">
-          <el-button
-            type="danger"
-            size="mini"
-            v-if="formorder.approvalState == 0"
-            v-has="{ action: 'approval' }"
+        <el-button
+          type="primary"
+          size="mini"
+          v-if="formorder.approver == null"
+          @click="approval(0)"
+          >编辑</el-button
+        >
+        <el-button
+          @click="approval(-1)"
+          v-if="formorder.approvalState == 0"
+          class="power"
+        >
+          <el-button type="danger" size="mini" v-has="{ action: 'approval' }"
             >驳回</el-button
           >
         </el-button>
         <el-button
-          type="primary"
-          size="mini"
-          v-if="formorder.approvalState == -2"
-          @click="approval(0)"
-          >编辑</el-button
+          @click="approval(1)"
+          v-if="formorder.approvalState == 0"
+          class="power"
         >
-        <el-button @click="approval(1)" class="power">
-          <el-button
-            type="primary"
-            size="mini"
-            v-if="formorder.approvalState == 0"
-            v-has="{ action: 'approval' }"
+          <el-button type="primary" size="mini" v-has="{ action: 'approval' }"
             >审批通过</el-button
           >
         </el-button>
@@ -54,6 +54,7 @@
           type="primary"
           size="mini"
           @click="approval(2)"
+          v-if="formorder.deliveryId == null && formorder.approvalState == 1"
           >生成出库单</el-button
         >
       </div>

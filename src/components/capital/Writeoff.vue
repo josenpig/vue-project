@@ -222,12 +222,6 @@ export default {
                     type: 'success',
                   })
                   _this.showorder()
-                } else {
-                  _this.$notify({
-                    title: '操作失败',
-                    message: response.data.data,
-                    type: 'warning',
-                  })
                 }
               })
               .catch(function (error) {

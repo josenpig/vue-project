@@ -152,7 +152,6 @@
       <el-table
         :data="tableData"
         style="width: 100%"
-        max-height="400"
         @selection-change="handleSelectionChange"
         stripe
       >
@@ -256,7 +255,7 @@ export default {
         salesmen: '', //销售人
       },
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }

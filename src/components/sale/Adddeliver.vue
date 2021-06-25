@@ -354,6 +354,7 @@ import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
+    sessionStorage.removeItem('draft')
     sessionStorage.removeItem('saledeliver')
     next()
   },
@@ -414,7 +415,7 @@ export default {
       footeroptions: [],
       notice: [], //抄送对象
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
       //判断是否为销售订单生成出库
@@ -445,9 +446,8 @@ export default {
       }
       this.formorder.receivables =
         Math.round(
-          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
-            1000
-        ) / 1000
+          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) * 100
+        ) / 100
       return (
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
@@ -482,7 +482,7 @@ export default {
           this.formorder.contacts = item.contact
           this.formorder.contactsPhone = item.contactNumber
           this.formorder.contactsAddress = item.contactAddress
-          this.formorder.disrate=item.ratio
+          this.formorder.disrate = item.ratio
         }
       })
     },
@@ -692,10 +692,17 @@ export default {
             }
           })
           for (var i = 0; i < response.data.data.deliverydetails.length; i++) {
-            _this.productdata[i].productNum =
-              response.data.data.deliverydetails[i].productNum
-            _this.productdata[i].depot =
-              response.data.data.deliverydetails[i].depot
+            for (var j = 0; j < _this.productdata.length; j++) {
+              if (
+                _this.productdata[j].productId ==
+                response.data.data.deliverydetails[i].productId
+              ) {
+                _this.productdata[j].productNum =
+                  response.data.data.deliverydetails[i].productNum
+                _this.productdata[j].depot =
+                  response.data.data.deliverydetails[i].depot
+              }
+            }
           }
           _this.formorder = response.data.data.delivery
           _this.headeroptions1.forEach((item) => {
