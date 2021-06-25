@@ -104,27 +104,31 @@
 		<div class="Warehouse-mian">
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
-				<el-table-column prop="date" fixed label="操作" width="202">
+				<el-table-column prop="date" fixed label="操作" width="100">
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						<el-button size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;">禁用</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;">启用</el-button>
 					</template>
 				</el-table-column>
-				<el-table-column prop="depotId" fixed label="仓库编号" sortable width="130" />
-				<el-table-column prop="depotName" label="仓库名称" sortable width="140" />
-				<el-table-column prop="depotAddress" label="仓库地址"  width="130" />
-				<el-table-column prop="chargeName" label="负责人" sortable width="120" />
-				<el-table-column prop="contactNumber" label="联系电话"  width="120" />
-				<el-table-column prop="remarks" label="备注"  width="120" />
-				<el-table-column prop="state" label="状态" sortable width="120">
+				<el-table-column prop="date" fixed label="修改状态" width="100">
+					<template #default="scope">
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;">禁用</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6) ;color: white;">启用</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column prop="state" label="状态" sortable width="100">
 					<template #default="scope">
 						<span v-if="scope.row.state==0" style="color: orangered;">禁用</span>
 						<span v-if="scope.row.state==1" style="color: seagreen;">启用</span>
 					</template>
 				</el-table-column>
-			</el-table>
+				<el-table-column prop="depotId" fixed label="仓库编号" sortable width="130" />
+				<el-table-column prop="depotName" label="仓库名称" sortable width="140" />
+				<el-table-column :show-overflow-tooltip="true" prop="depotAddress" label="仓库地址"  width="130" />
+				<el-table-column :show-overflow-tooltip="true" prop="chargeName" label="负责人" sortable width="100" />
+				<el-table-column prop="contactNumber" label="联系电话"  width="110" />
+				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注"  width="109" />
+				</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
 		<div class="salelist-footer">
