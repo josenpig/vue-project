@@ -150,11 +150,10 @@
 						<el-input v-model="updateForm.remarks" autocomplete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="产品状态" :label-width="formLabelWidth">
-						<span v-if="updateForm.state==0" style="background-color: coral;color: white;padding: 15px;">下架</span>
-						<span v-if="updateForm.state==1" style="background-color: skyblue;color: white;padding: 15px;">上架</span>
-						<el-button v-if="updateForm.state==1" @click="disableOrEnable(updateForm,1)" round style="background-color: coral;color: white;margin-left: 40px;">下架</el-button>
-						<el-button v-if="updateForm.state==0" @click="disableOrEnable(updateForm,1)" round style="background-color: lightgreen ;color: white;margin-left: 40px">上架</el-button>
-					</el-form-item>
+						<span style="color: #ff4949;padding: 15px;">下架</span>
+						<el-switch @change="disableOrEnable(updateForm)" v-model="updateForm.SWstate" active-color="#13ce66" inactive-color="#ff4949">
+						</el-switch>
+						<span style="color: #13ce66;padding: 15px;">上架</span></el-form-item>
 				</el-form>
 				<template #footer>
 					<span class="dialog-footer">
@@ -200,8 +199,8 @@
 				</el-table-column>
 				<el-table-column fixed label="状态" width="80">
 					<template #default="scope">
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row,0)" round style="background-color: coral;color: white;padding: 7px;">下架</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row,0)" round style="background-color: lightgreen ;color: white;padding: 7px;">上架</el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;padding: 7px;">下架</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6);color: white;padding: 7px;">上架</el-button>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
@@ -211,7 +210,7 @@
 				<el-table-column prop="gramHeavy" label="克重" width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
-				<el-table-column prop="opingNumber" label="初期数量" sortable width="120" />
+				<el-table-column prop="opingNumber" label="初期总数量" sortable width="120" />
 				<el-table-column prop="state" label="状态" sortable width="120">
 					<template #default="scope">
 						<span v-if="scope.row.state==0" style="color: orangered;">下架</span>
@@ -309,7 +308,8 @@
 					purchaseMoney: '', //采购单价
 					remarks: '', //备注
 					productDescribe: '', //产品描述
-					state: '' //产品状态
+					state: '' ,//产品状态
+					SWstate: '' ,//switch产品状态
 				},
 				//全部分类
 				AllId: {
@@ -521,7 +521,7 @@
 				this.selectPro = val
 			},
 			//下架或上架
-			disableOrEnable(val, index) {
+			disableOrEnable(val) {
 				var _this = this;
 				var able;
 				if (val.state == 1) {
@@ -530,11 +530,7 @@
 				if (val.state == 0) {
 					able = '上架'
 				};
-				var remind = "";
-				if (index == 1) {
-					remind = '设置默认账户会导致之前修改的信息丢失，如果在此之前修改了账户信息请先提交修改！              '
-				}
-				this.$confirm(remind + '是否 "' + able + '" 该产品！', '提示', {
+				this.$confirm('是否 "' + able + '" 该产品！', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
@@ -568,6 +564,7 @@
 									message: response.data.data,
 									type: 'success'
 								});
+								_this.updateForm.SWstate=val.state==0?false:true
 							}
 						})
 						.catch(function(error) {
@@ -578,6 +575,7 @@
 						type: 'info',
 						message: '已取消' + able
 					});
+					_this.updateForm.SWstate=val.state==0?false:true
 				});
 			},
 			//根据分类查询商品
@@ -921,6 +919,7 @@
 				this.updateForm.productDescribe = val.productDescribe
 				this.updateForm.pictureId = val.pictureId
 				this.updateForm.state = val.state
+				this.updateForm.SWstate = val.state==0?false:true
 			},
 			//修改产品信息---
 			update() {

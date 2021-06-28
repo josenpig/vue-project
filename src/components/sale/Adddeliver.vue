@@ -6,7 +6,12 @@
       <span>新增销售出库单</span>
       <div class="adddeliver-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
+        <el-button
+          size="mini"
+          @click="examine(-2)"
+          v-if="formorder.orderId == null"
+          >保存草稿</el-button
+        >
         <el-button type="primary" size="mini" @click="examine(0)"
           >提交审批</el-button
         >
@@ -83,11 +88,20 @@
     <el-dialog title="选择库存产品" v-model="dialogTableVisible" width="65%">
       <!-- 分类 -->
       <div style="width: 20%; height: 500px; float: left">
+        <el-button
+          class="el-icon-menu"
+          @click="dialogopen(0)"
+          type="primary"
+          style="width: 90%"
+        >
+          全部
+        </el-button>
         <el-tree
-          :data="data"
+          :data="ProType"
+          :default-expand-all="true"
           :props="defaultProps"
-          accordion
-          @node-click="handleNodeClick"
+          @node-click="findByType"
+          style="font-size: 15px"
         >
         </el-tree>
       </div>
@@ -96,7 +110,11 @@
         style="width: 80%; height: 500px; margin-left: 20%; position: relative"
       >
         <div style="width: 100%; height: 50px">
-          <el-button icon="el-icon-plus" type="primary" size="small"
+          <el-button
+            icon="el-icon-plus"
+            type="primary"
+            size="small"
+            @click="goaddproduct()"
             >新增产品</el-button
           >
           已选<span style="color: #409eff">{{ thisrow }}</span
@@ -108,8 +126,11 @@
               placeholder="请输入产品名称"
               style="width: 250px"
               size="small"
+              clearable
             />
-            <el-button icon="el-icon-search" size="small">查询</el-button>
+            <el-button icon="el-icon-search" @click="join()" size="small"
+              >查询</el-button
+            >
           </div>
         </div>
         <el-table
@@ -144,7 +165,7 @@
         >
           <el-pagination
             background
-            layout="prev, pager, next"
+            layout="total,prev, pager, next"
             :total="max"
             :page-size="pagesize"
             style="float: left"
@@ -163,7 +184,7 @@
       <!-- 销售产品信息table -->
       <el-table :data="productdata" style="width: 100%" border stripe>
         <!-- 序列操作栏 -->
-        <el-table-column type="index" width="40" fixed />
+        <el-table-column type="index" width="50" fixed />
         <el-table-column label="操作" width="100" fixed v-if="issale == false">
           <template #default="scope">
             <el-tooltip content="新增" placement="top">
@@ -354,6 +375,7 @@ import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
+    sessionStorage.removeItem('draft')
     sessionStorage.removeItem('saledeliver')
     next()
   },
@@ -363,10 +385,20 @@ export default {
       //库存商品div
       dialogTableVisible: false,
       //库存产品--分类
-      data: [],
+      ProType: [],
       defaultProps: {
         children: 'children',
         label: 'label',
+        value: 'id',
+      },
+      //产品分页查询
+      pagesize: 8,
+      max: 0,
+      currentPage: 1,
+      //查询条件
+      condition: {
+        productTypeId: '',
+        productName: '',
       },
       findstock: '', //库存产品名称查询
       stockdata: [], //库存产品--信息
@@ -413,9 +445,6 @@ export default {
       //抄送对象信息
       footeroptions: [],
       notice: [], //抄送对象
-      //分页
-      pagesize: 5,
-      max: 0,
       currentPage: 1,
       //判断是否为销售订单生成出库
       issale: false,
@@ -445,9 +474,8 @@ export default {
       }
       this.formorder.receivables =
         Math.round(
-          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
-            1000
-        ) / 1000
+          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) * 100
+        ) / 100
       return (
         Math.round(
           (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
@@ -482,23 +510,59 @@ export default {
           this.formorder.contacts = item.contact
           this.formorder.contactsPhone = item.contactNumber
           this.formorder.contactsAddress = item.contactAddress
-          this.formorder.disrate=item.ratio
+          this.formorder.disrate = item.ratio
         }
       })
     },
-    //选择产品
-    dialogopen() {
+    //查询所有产品分类
+    findAllProType() {
       const state = JSON.parse(sessionStorage.getItem('state'))
-      const _this = this
-      var fd = {
-        currentPage: this.currentPage,
-        pageSize: this.pagesize,
-      }
+      var _this = this
       this.axios({
-        url: 'http://localhost:8088/frameproject/baseProduct/allsaleproduct',
+        url: 'http://localhost:8088/frameproject/baseProductType/findProType',
         method: 'get',
         processData: false,
-        params: fd,
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.ProType = response.data.data
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    //新增产品
+    goaddproduct() {
+      this.$router.push('/AddProduct')
+    },
+    //产品模糊查询
+    join() {
+      this.condition.productName = this.findstock
+      this.dialogopen()
+    },
+    //选则类别
+    findByType(type) {
+      this.condition.productTypeId = type.id
+      this.dialogopen()
+    },
+    //选择产品
+    dialogopen(type) {
+      if (type == 0) {
+        this.condition = {}
+      }
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/baseProduct/allsaleproduct',
+        method: 'post',
+        processData: false,
+        data: {
+          currentPage: _this.currentPage,
+          pageSize: _this.pagesize,
+          condition: JSON.stringify(_this.condition),
+        },
         headers: {
           JWTDemo: state.userInfo.token,
         },
@@ -514,7 +578,7 @@ export default {
     },
     //改变页码数
     handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize)
+      this.dialogopen()
     },
     //确认添加产品
     addproduct() {
@@ -692,10 +756,17 @@ export default {
             }
           })
           for (var i = 0; i < response.data.data.deliverydetails.length; i++) {
-            _this.productdata[i].productNum =
-              response.data.data.deliverydetails[i].productNum
-            _this.productdata[i].depot =
-              response.data.data.deliverydetails[i].depot
+            for (var j = 0; j < _this.productdata.length; j++) {
+              if (
+                _this.productdata[j].productId ==
+                response.data.data.deliverydetails[i].productId
+              ) {
+                _this.productdata[j].productNum =
+                  response.data.data.deliverydetails[i].productNum
+                _this.productdata[j].depot =
+                  response.data.data.deliverydetails[i].depot
+              }
+            }
           }
           _this.formorder = response.data.data.delivery
           _this.headeroptions1.forEach((item) => {
@@ -715,6 +786,7 @@ export default {
     },
   },
   created: function () {
+    this.findAllProType()
     this.findmen()
     if (sessionStorage.getItem('draft') != null) {
       this.showorder()
@@ -729,12 +801,6 @@ export default {
   background-color: white;
 }
 /* 顶部 */
-.adddeliver .el-carousel__arrow--right,
-.el-notification.right {
-  background-color: #f2dede;
-  border-color: #ebccd1;
-  top: 110px !important;
-}
 .adddeliver-page-tag {
   height: 40px;
   padding: 0 10px;

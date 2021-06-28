@@ -152,8 +152,6 @@
       <el-table
         :data="tableData"
         style="width: 100%"
-        max-height="400"
-        @selection-change="handleSelectionChange"
         stripe
       >
         <el-table-column label="操作" width="120" fixed>
@@ -207,11 +205,13 @@
     <div class="receivable-footer" v-show="paging">
       <el-pagination
         background
-        layout="prev, pager, next"
+        layout="total,sizes, prev, pager, next"
         :total="max"
+        :page-sizes="[5,8,10,20]"
         :page-size="pagesize"
         style="margin-top: 50px"
         @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
         v-model:currentPage="currentPage"
       >
       </el-pagination>
@@ -301,6 +301,7 @@ export default {
     },
   },
   methods: {
+    //前往单据
     goorder(val) {
       sessionStorage.setItem('orderid', this.tableData[val].deliveryId)
       if (this.tableData[val].deliveryId.match(/^[a-z|A-Z]+/gi) == 'XSCKD') {
@@ -309,6 +310,7 @@ export default {
         this.$router.push('/Return')
       }
     },
+    //收款
     goreceipt(val) {
       var receipt = {
         type: '应收收款',
@@ -317,6 +319,7 @@ export default {
       sessionStorage.setItem('receipt', JSON.stringify(receipt))
       this.$router.push('/Addreceipt')
     },
+    //新增收款
     goadd() {
       this.$router.push('/Addreceipt')
     },
@@ -344,6 +347,7 @@ export default {
       }
       this.findpage()
     },
+    //查询人员
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this
@@ -363,6 +367,7 @@ export default {
           console.log(error)
         })
     },
+    //条件分页查询
     findpage() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       var _this = this
@@ -394,9 +399,14 @@ export default {
           console.log(error)
         })
     },
+    //改变页码大小
+    handleSizeChange(val) {
+      this.pagesize = val
+      this.findpage()
+    },
     //改变页码数
     handleCurrentChange(val) {
-      this.findpage(val, this.pagesize)
+      this.findpage()
     },
   },
   created: function () {

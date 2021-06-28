@@ -76,9 +76,11 @@ export default {
 .el-input__suffix-inner {
   margin-right: unset !important;
 }
-.power{
-  padding: unset !important;
-  min-height: unset !important;
-  border: none !important;
+/* 提示框样式 */
+.el-carousel__arrow--right,
+.el-notification.right {
+  top: 110px !important;
+  background-color: #f2dede;
+  border-color: #ebccd1;
 }
 </style>

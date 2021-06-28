@@ -55,6 +55,7 @@
             filterable
             placeholder="请选择客户"
             @change="setcontacts()"
+            :disabled="istf"
           >
             <el-option
               v-for="item in headeroptions2"
@@ -72,6 +73,7 @@
             size="mini"
             placeholder="请选择关联出库单编号"
             @change="setdeliveryId()"
+            :disabled="istf"
           >
             <el-option
               v-for="item in customercanreturn"
@@ -224,6 +226,10 @@
 import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
+  beforeRouteLeave(to, form, next) {
+    sessionStorage.removeItem('draft')
+    next()
+  },
   name: 'Addsale',
   data() {
     return {
@@ -250,6 +256,7 @@ export default {
         //订单信息额外
         founder: '',
       },
+      istf: false,
       //表体销售商品信息
       productdata: [],
       //抄送对象信息
@@ -350,18 +357,29 @@ export default {
         },
       })
         .then(function (response) {
-          _this.productdata = response.data.data.deliverydetails
-          _this.formorder.salesmen = response.data.data.delivery.salesmen
-          _this.headeroptions2.forEach((item) => {
-            if (item.customerName == response.data.data.delivery.customer) {
-              _this.formorder.customer = item.customerNumber
-              _this.formorder.contactsAddress = item.contactAddress
-              _this.formorder.contactsPhone = item.contactNumber
-              _this.formorder.contacts =item.contact
+          if (sessionStorage.getItem('draft') != null) {
+            for (
+              var i = 0;
+              i < response.data.data.deliverydetails.length;
+              i++
+            ) {
+              _this.productdata[i].productNum =
+                response.data.data.deliverydetails[i].productNum
             }
-          })
-          for (var i = 0; i < _this.productdata.length; i++) {
-            _this.productdata[i].returnNum = _this.productdata[i].productNum
+          } else {
+            _this.productdata = response.data.data.deliverydetails
+            _this.formorder.salesmen = response.data.data.delivery.salesmen
+            _this.headeroptions2.forEach((item) => {
+              if (item.customerName == response.data.data.delivery.customer) {
+                _this.formorder.customer = item.customerNumber
+                _this.formorder.contactsAddress = item.contactAddress
+                _this.formorder.contactsPhone = item.contactNumber
+                _this.formorder.contacts = item.contact
+              }
+            })
+            for (var i = 0; i < _this.productdata.length; i++) {
+              _this.productdata[i].returnNum = _this.productdata[i].productNum
+            }
           }
         })
         .catch(function (error) {
@@ -370,22 +388,22 @@ export default {
     },
     //提交审批
     examine(type) {
-      if (this.formorder.customer == "" || this.formorder.deliveryId == "") {
+      if (this.formorder.customer == '' || this.formorder.deliveryId == '') {
         this.$notify({
-          title: "警告",
-          message: "请先填写*必要信息!",
-          type: "warning",
-        });
+          title: '警告',
+          message: '请先填写*必要信息!',
+          type: 'warning',
+        })
       } else {
-        const state = JSON.parse(sessionStorage.getItem("state"));
-        const _this = this;
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const _this = this
         this.formorder.returnTime = dayjs(this.formorder.orderTime).format(
-          "YYYY-MM-DD HH:mm:ss"
-        );
-        this.formorder.founder = state.userInfo.userName;
+          'YYYY-MM-DD HH:mm:ss'
+        )
+        this.formorder.founder = state.userInfo.userName
         this.axios({
-          url: "http://localhost:8088/frameproject/salereturn/add/" + type,
-          method: "post",
+          url: 'http://localhost:8088/frameproject/salereturn/add/' + type,
+          method: 'post',
           data: {
             order: JSON.stringify(_this.formorder), //_this.formorder ,
             orderdetails: JSON.stringify(_this.productdata), //_this.productdata//
@@ -396,13 +414,13 @@ export default {
         })
           .then(function (response) {
             if (response.data.code == 200) {
-              sessionStorage.setItem("orderid", response.data.data);
-              _this.$router.push("/Return");
+              sessionStorage.setItem('orderid', response.data.data)
+              _this.$router.push('/Return')
             }
           })
           .catch(function (error) {
-            console.log(error);
-          });
+            console.log(error)
+          })
       }
     },
     finddeliveryId() {
@@ -436,15 +454,50 @@ export default {
         .then(function (response) {
           _this.headeroptions2 = response.data.data.customers
           _this.footeroptions = response.data.data.notifiers
+          //判断是否来自草稿
+          if (sessionStorage.getItem('draft') != null) {
+            _this.istf = true
+            _this.showorder()
+          }
         })
         .catch(function (error) {
           console.log(error)
         })
     },
+    //判断是否来自草稿
+    showorder() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('draft')
+      const _this = this
+      if (orderid == null) {
+        this.$router.push('/Returnlist')
+      } else {
+        this.axios({
+          url: 'http://localhost:8088/frameproject/salereturn/find/' + orderid,
+          method: 'get',
+          headers: {
+            JWTDemo: state.userInfo.token,
+          },
+        })
+          .then(function (response) {
+            _this.formorder = response.data.data.salereturn
+            _this.productdata = response.data.data.returndetails
+            _this.headeroptions2.forEach((item) => {
+              if (item.customerName == _this.formorder.customer) {
+                _this.formorder.customer = item.customerNumber
+              }
+            })
+            _this.setdeliveryId()
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+      }
+    },
   },
   created: function () {
-    this.finddeliveryId()
     this.findsaleman()
+    this.finddeliveryId()
   },
 }
 </script>
@@ -455,12 +508,6 @@ export default {
   background-color: white;
 }
 /* 顶部 */
-.addreturn .el-carousel__arrow--right,
-.el-notification.right {
-  top: 110px !important;
-  background-color: #f2dede;
-  border-color: #ebccd1;
-}
 .addreturn-page-tag {
   height: 40px;
   padding: 0 10px;

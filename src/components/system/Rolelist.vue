@@ -74,7 +74,7 @@
           type="primary"
           size="mini"
           @click="addnew()"
-          plain
+          v-has="{ action: 'role:add' }"
           >新增角色</el-button
         >
         <!-- 模糊查询 -->
@@ -104,14 +104,16 @@
               class="el-icon-edit"
               size="samll"
               @click="changeall(scope.$index)"
+              v-has="{ action: 'role:update' }"
               >修改</el-button
             >
             <el-button
               type="text"
               class="el-icon-delete"
               size="samll"
-              @click="delet(scope.$index)"
               v-if="tableData[scope.$index].roleId != 1"
+              @click="delet(scope.$index)"
+              v-has="{ action: 'role:delete' }"
               >删除</el-button
             >
           </template>
@@ -172,7 +174,7 @@ export default {
       condition: { roleName: '' }, //查询条件
       vagueorderid: '',
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }
@@ -272,8 +274,8 @@ export default {
           response.data.data.menus.forEach((item) => {
             //判断是否为父级菜单
             //if (item.menuType != 'M') {
-              if (parent.indexOf(item.menuId) == -1) {
-                _this.current.push(item.menuId)
+            if (parent.indexOf(item.menuId) == -1) {
+              _this.current.push(item.menuId)
               //}
             }
           })

@@ -48,13 +48,13 @@
 		<div class="SettlementType-mian">
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
-				<el-table-column prop="date" label="操作" width="150">
+				<el-table-column prop="date" label="操作" width="300">
 					<template #default="scope">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						<el-button size="small" @click="del(scope.row.id)" type="text" icon="el-icon-delete" circle></el-button>
 					</template>
 				</el-table-column>
-				<el-table-column prop="settlementType" label="结算类型名称" sortable width="170" />
+				<el-table-column prop="settlementType" label="结算类型名称" sortable width="500" />
 			</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
