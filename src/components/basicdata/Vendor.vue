@@ -13,7 +13,7 @@
 				<el-dialog title="供应商信息" v-model="dialogFormVisible">
 					<hr style="margin-bottom: 20px;" />
 					<el-form :model="form">
-						<el-form-item label="* 供应商编号 *" :label-width="formLabelWidth">
+						<el-form-item @change="pdCID" label="* 供应商编号 *" :label-width="formLabelWidth">
 							<el-input v-model="form.vendorId" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
 						<el-form-item label="* 供应商名称 *" :label-width="formLabelWidth">
@@ -50,7 +50,7 @@
 					<template #footer>
 						<span class="dialog-footer">
 							<el-button @click="dialogFormVisible = false">取 消</el-button>
-							<el-button type="primary" @click="pdCID">确 定</el-button>
+							<el-button type="primary" @click="AddVendor">确 定</el-button>
 						</span>
 					</template>
 				</el-dialog>
@@ -60,7 +60,7 @@
 					<hr style="margin-bottom: 20px;" />
 					<el-form :model="form">
 						<el-form-item label="* 供应商编号 *" :label-width="formLabelWidth">
-							<el-input :disabled="true" v-model="updateForm.vendorId" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
+							<el-input @change="pdCID" :disabled="true" v-model="updateForm.vendorId" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
 						<el-form-item label="* 供应商名称 *" :label-width="formLabelWidth">
 							<el-input :disabled="true" v-model="updateForm.vendorName" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
@@ -104,7 +104,7 @@
 			</div>
 		</div>
 		<!-- 表单头部 -->
-		<div style="font-size: 15px;padding: 15px;">
+		<div style="font-size: 15px;padding: 20px;">
 			<div>
 				<span style="font-size: 14.5px;">供应商类型：</span>
 				<el-radio @change="findpageByTypeOrCharge" v-model="selVendorType" label="全部">全部</el-radio>
@@ -148,8 +148,13 @@
 				<el-table-column type="selection" width="55" />
 				<el-table-column fixed label="操作" width="120">
 					<template #default="scope">
+						<el-tooltip content="修改" placement="top">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						</el-tooltip>
+						
+						<el-tooltip content="删除" placement="top">
 						<el-button size="small" @click="del(scope.row.vendorId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
+						</el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="vendorId" label="供应商编号" sortable width="120" />
@@ -353,32 +358,39 @@
 			},
 			//删除供应商
 			del(id, index) {
-				var _this = this;
-				this.$confirm('此操作将永久删除该客户, 是否继续?', '提示', {
+				this.$confirm('此操作将永久该供应商, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功'
-					});
+					var ids = new Array()
+					ids.push(id)
+					console.log("del:"+ids)
 					const state = JSON.parse(sessionStorage.getItem("state"));
-					var pid = {
-						id: id
-					};
+					var _this = this;
 					this.axios({
-							url: "http://localhost:8088/frameproject/baseVendor/delVendor",
-							method: "get",
+							url: "http://localhost:8088/frameproject/baseVendor/delVendor/batch",
+							method: "delete",
 							processData: false,
-							params: pid,
+							data: ids,
 							headers: {
 								JWTDemo: state.userInfo.token,
 							},
 						})
 						.then(function(response) {
 							console.log("删除是否成功：" + response.data.data);
-							_this.findpage()
+							if (response.data.data == null) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: response.data.data,
+									type: 'success'
+								});
+							}
 						})
 						.catch(function(error) {
 							console.log(error);
@@ -397,10 +409,6 @@
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功'
-					});
 					var ids = new Array()
 					this.selectCus.forEach(v => {
 						ids.push(v.vendorId)
@@ -417,8 +425,19 @@
 							},
 						})
 						.then(function(response) {
-							console.log("删除是否成功：" + response.data.data);
-							_this.findpage()
+							console.log("批量删除是否成功：" + response.data.data);
+							if (response.data.data == null) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: response.data.data,
+									type: 'success'
+								});
+							}
 						})
 						.catch(function(error) {
 							console.log(error);
@@ -434,7 +453,7 @@
 			handleSelectionChange(val) {
 				this.selectCus = val
 			},
-			//判断供应商ID是否重复并添加供应商
+			//判断供应商ID是否重复
 			pdCID() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
@@ -451,15 +470,13 @@
 						},
 					})
 					.then(function(response) {
-						console.log("id不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (response.data==false) {
+						console.log("id不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data==false) {
 							ElMessage.warning({
 								message: '供应商ID重复',
 								type: 'success'
 							});
-						}else{
-							_this.AddVendor()
 						}
 					})
 					.catch(function(error) {
@@ -475,6 +492,10 @@
 					this.form.charge == '') {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
+					this.pdCID();
+					
+					setTimeout(() => {
+						if (this.judge) {
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var _this = this;
 					this.form.user = state.userInfo.userName;
@@ -498,11 +519,14 @@
 								type: 'success'
 							});
 							_this.form = {}
+							_this.judge = {}
 							_this.findpage()
 						})
 						.catch(function(error) {
 							console.log(error);
 						});
+						}
+						}, 200)
 				}
 			},
 			//打开修改框
