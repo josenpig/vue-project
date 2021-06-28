@@ -126,14 +126,6 @@
 				})(),
 				options1: [],
 
-				//条件查询数据
-				vagueorderid: '',
-				condition: {
-					orderTime: '' //单据日期
-				},
-				dialogTableVisible: false,
-				pstatus: [],
-
 				//表单数据
 				tableData: [],
 				//分页
@@ -273,7 +265,7 @@
 						_this.psum = response.data.data[1];
 						
 						console.log("rsum:"+_this.rsum)
-						console.log("rsum:"+_this.psum)
+						console.log("psum:"+_this.psum)
 						_this.myEcharts();
 					})
 					.catch(function(error) {
