@@ -139,7 +139,6 @@
       <el-table
         :data="tableData"
         style="width: 100%"
-        @selection-change="handleSelectionChange"
         stripe
       >
         <el-table-column
@@ -189,11 +188,13 @@
     <div class="paymentlist-footer" v-show="paging">
       <el-pagination
         background
-        layout="prev, pager, next"
+        layout="total,sizes, prev, pager, next"
         :total="max"
+        :page-sizes="[5,8,10,20]"
         :page-size="pagesize"
         style="margin-top: 50px"
         @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
         v-model:currentPage="currentPage"
       >
       </el-pagination>
@@ -232,7 +233,7 @@ export default {
         drawee: '',
       },
       //分页
-      pagesize: 8,
+      pagesize: 5,
       max: 0,
       currentPage: 1,
     }
@@ -274,10 +275,12 @@ export default {
     },
   },
   methods: {
+    //单据模糊查询
     join() {
       this.condition.deliveryId = this.vagueorderid
       this.findpage()
     },
+    //查询人员
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this
@@ -297,6 +300,7 @@ export default {
           console.log(error)
         })
     },
+    //条件分页查询
     findpage() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       var _this = this
@@ -321,14 +325,21 @@ export default {
           console.log(error)
         })
     },
+    //改变页码大小
+    handleSizeChange(val) {
+      this.pagesize = val
+      this.findpage()
+    },
     //改变页码数
     handleCurrentChange(val) {
       this.findpage(val, this.pagesize)
     },
+    //前往单据
     goorder(val) {
       sessionStorage.setItem('orderid', this.tableData[val].paymentId)
       this.$router.push('/Payment')
     },
+    //分页查询条件
     qbc() {
       this.condition.deliveryTime = this.billdate
       this.condition.paymentType = this.collection

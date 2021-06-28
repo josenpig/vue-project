@@ -26,10 +26,24 @@
           >驳回</el-button
         >
         <el-button
+          type="danger"
+          size="mini"
+          v-if="formorder.approvalState < 0"
+          @click="del()"
+          >删除</el-button
+        >
+        <el-button
+          type="danger"
+          size="mini"
+          v-if="formorder.approvalState == 1"
+          @click="cancel()"
+          >废弃</el-button
+        >
+        <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == -2"
-          @click="approval(0)"
+          v-if="formorder.approvalState != 1"
+          @click="change()"
           >编辑</el-button
         >
         <el-button
@@ -74,12 +88,10 @@
         <div style="float: left; width: 100%; margin-top: 10px">
           <span style="float: left">关联收款单：</span>
           <span v-if="formorder.receipts.length == 0">无</span>
-          <span
-            v-else
-            v-for="item in formorder.receipts"
-            style="float: left; width: 50%"
+          <span v-else style="float: left; width: 50%"
             ><el-button
               @click="goorder(item.receiptId, '收款单')"
+              v-for="item in formorder.receipts"
               type="text"
               >{{ item.receiptId }}</el-button
             ></span
@@ -88,11 +100,12 @@
         <div style="float: left; width: 100%; margin-top: 10px">
           <span style="float: left">关联核销单：</span>
           <span v-if="formorder.cavcias.length == 0">无</span>
-          <span
-            v-else
-            v-for="item in formorder.cavcias"
-            style="float: left; width: 50%"
-            ><el-button @click="goorder(item.cavId, '核销单')" type="text">
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(item.cavId, '核销单')"
+              v-for="item in formorder.cavcias"
+              type="text"
+            >
               {{ item.cavId }}</el-button
             ></span
           >
@@ -203,10 +216,12 @@
 import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
-  // beforeRouteLeave(to, form, next) {
-  //   sessionStorage.removeItem('orderid')
-  //   next()
-  // },
+  beforeRouteLeave(to, form, next) {
+    if (sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
+      sessionStorage.removeItem('orderid')
+    }
+    next()
+  },
   name: 'Sale',
   data() {
     return {
@@ -240,39 +255,65 @@ export default {
         this.$router.push('Writeoff')
       }
     },
-    //审批
-    approval(type) {
-      if (type == 0) {
-        sessionStorage.setItem('draft', this.formorder.returnId)
-        this.$router.push('/Addreturn')
-      } else {
-        const state = JSON.parse(sessionStorage.getItem('state'))
-        const orderid = sessionStorage.getItem('orderid')
-        var _this = this
-        var inputPattern
-        var inputErrorMessage
-        if (type == -1) {
-          inputPattern = /\s\S+|S+\s|\S/
-          inputErrorMessage = '驳回理由不能为空'
-        }
-        this.$prompt('请输入审批备注', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          inputPattern: inputPattern,
-          inputErrorMessage: inputErrorMessage,
+    //删除
+    del() {
+      this.$confirm('此操作将永久删除该单据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(() => {
+          const state = JSON.parse(sessionStorage.getItem('state'))
+          const _this = this
+          this.axios({
+            url:
+              'http://localhost:8088/frameproject/salereturn/detele/' +
+              _this.formorder.returnId,
+            method: 'post',
+            headers: {
+              JWTDemo: state.userInfo.token,
+            },
+          })
+            .then(function (response) {
+              if (response.data.data == true) {
+                _this.$router.push('/Returnlist')
+              }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
         })
-          .then(({ value }) => {
-            var fd = {
-              orderid: orderid,
-              type: type,
-              user: state.userInfo.userName,
-              approvalremarks: value,
-            }
+        .catch(() => {})
+    },
+    //废弃
+    cancel() {
+      this.$confirm('确认废弃该单据？', '废弃', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(() => {
+          //判断单据是否可作废
+          if (this.formorder.receipts.length > 0) {
+            this.$notify({
+              title: '警告',
+              message: '该单据已产生收款记录，无法废弃。',
+              type: 'warning',
+            })
+          } else if (this.formorder.cavcias.length > 0) {
+            this.$notify({
+              title: '警告',
+              message: '该单据已产生核销记录，无法废弃。',
+              type: 'warning',
+            })
+          } else {
+            const state = JSON.parse(sessionStorage.getItem('state'))
+            const _this = this
             this.axios({
-              url: 'http://localhost:8088/frameproject/salereturn/approval',
-              method: 'get',
-              processData: false,
-              params: fd,
+              url:
+                'http://localhost:8088/frameproject/salereturn/update/' +
+                _this.formorder.returnId,
+              method: 'post',
               headers: {
                 JWTDemo: state.userInfo.token,
               },
@@ -290,9 +331,63 @@ export default {
               .catch(function (error) {
                 console.log(error)
               })
-          })
-          .catch(() => {})
+          }
+        })
+        .catch(() => {})
+    },
+    //编辑
+    change() {
+      sessionStorage.setItem('draft', this.formorder.returnId)
+      this.$router.push('/Addreturn')
+    },
+    //审批
+    approval(type) {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('orderid')
+      var _this = this
+      var inputPattern
+      var inputErrorMessage
+      if (type == -1) {
+        inputPattern = /\s\S+|S+\s|\S/
+        inputErrorMessage = '驳回理由不能为空'
       }
+      this.$prompt('请输入审批备注', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: inputPattern,
+        inputErrorMessage: inputErrorMessage,
+      })
+        .then(({ value }) => {
+          var fd = {
+            orderid: orderid,
+            type: type,
+            user: state.userInfo.userName,
+            approvalremarks: value,
+          }
+          this.axios({
+            url: 'http://localhost:8088/frameproject/salereturn/approval',
+            method: 'get',
+            processData: false,
+            params: fd,
+            headers: {
+              JWTDemo: state.userInfo.token,
+            },
+          })
+            .then(function (response) {
+              if (response.data.code == 200) {
+                _this.$notify({
+                  title: '操作成功',
+                  message: '订单信息已被修改',
+                  type: 'success',
+                })
+                _this.showorder()
+              }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        })
+        .catch(() => {})
     },
     //显示订单
     showorder() {
@@ -310,6 +405,7 @@ export default {
           },
         })
           .then(function (response) {
+            console.log(response.data.data)
             _this.formorder = response.data.data.salereturn
             _this.productdata = response.data.data.returndetails
           })

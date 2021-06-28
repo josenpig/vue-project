@@ -256,7 +256,7 @@ export default {
         //订单信息额外
         founder: '',
       },
-      istf:false,
+      istf: false,
       //表体销售商品信息
       productdata: [],
       //抄送对象信息
@@ -377,9 +377,9 @@ export default {
                 _this.formorder.contacts = item.contact
               }
             })
-          }
-          for (var i = 0; i < _this.productdata.length; i++) {
-            _this.productdata[i].returnNum = _this.productdata[i].productNum
+            for (var i = 0; i < _this.productdata.length; i++) {
+              _this.productdata[i].returnNum = _this.productdata[i].productNum
+            }
           }
         })
         .catch(function (error) {
@@ -456,7 +456,7 @@ export default {
           _this.footeroptions = response.data.data.notifiers
           //判断是否来自草稿
           if (sessionStorage.getItem('draft') != null) {
-            _this.istf=true
+            _this.istf = true
             _this.showorder()
           }
         })
@@ -508,12 +508,6 @@ export default {
   background-color: white;
 }
 /* 顶部 */
-.addreturn .el-carousel__arrow--right,
-.el-notification.right {
-  top: 110px !important;
-  background-color: #f2dede;
-  border-color: #ebccd1;
-}
 .addreturn-page-tag {
   height: 40px;
   padding: 0 10px;

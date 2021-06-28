@@ -6,7 +6,6 @@
       <span>新增付款</span>
       <div class="addpayment-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
           >提交审批</el-button
         >
