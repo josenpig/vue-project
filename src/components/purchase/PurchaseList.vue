@@ -259,6 +259,9 @@ export default {
     },
   },
   methods: {
+    handleCurrentChange(val) {
+      this.findpage(val, this.pagesize)
+    },
     findpage() {
       const state = JSON.parse(sessionStorage.getItem("state"));
       var _this = this;
@@ -293,10 +296,6 @@ export default {
           console.log(error);
         });
     },
-    // 改变页码数
-    // handleCurrentChange(val) {
-    //   this.findpage(val, this.pagesize);
-    // },
     goorder(val) {
       sessionStorage.setItem("orderid", this.tableData[val].id);
       this.$router.push("/Purchase");

@@ -67,23 +67,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <!-- 采购人员 -->
-        <el-form-item label="*采购人员:" class="form-input">
-          <el-select
-            v-model="formorder.buyerName"
-            size="mini"
-            filterable
-            placeholder="请选择采购员"
-          >
-            <el-option
-              v-for="item in headeroptions2"
-              :key="item.userName"
-              :value="item.userId"
-              :label="item.userName"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
 
 
         <el-form-item label="*默认仓库:" class="form-input">
@@ -92,6 +75,7 @@
             size="mini"
             filterable
             placeholder="请选择默认仓库"
+            @change="changedepot(depot)"
           >
             <el-option
               v-for="item in depotlist"
@@ -469,12 +453,17 @@ export default {
     },
   },
   methods: {
-     tableRowClassName({row, rowIndex}) {
+    changedepot(depot){
+      for(var i=this.productdata.length-1;i>=0;i--){
+        this.productdata[i].depotName=depot;
+      }
+    }
+    , tableRowClassName({row, rowIndex}) {
        console.log(row)
         console.log(rowIndex)
-        if (rowIndex == 1) {
+        if (rowIndex === 1) {
           return 'warning-row';
-        } else if (rowIndex == 3) {
+        } else if (rowIndex === 3) {
           return 'success-row';
         }
         return '';
@@ -559,6 +548,7 @@ export default {
     //提交审批（生成订单）
     examine(type) {
       const state = JSON.parse(sessionStorage.getItem("state"));
+      this.formorder.buyerName=state.userInfo.userName;
       const _this = this;
       //判断库存是否足够
       var ifnum = true;
@@ -617,6 +607,7 @@ export default {
           "YYYY-MM-DD HH:mm:ss"
         );
         this.formorder.createPeople = state.userInfo.userName;
+        
         this.axios({
           url: "http://localhost:8088/frameproject/purchaseOrder/add/" + type,
           method: "post",
@@ -649,7 +640,6 @@ export default {
       })
       .then(function (response) {
           _this.headeroptions1 = response.data.data.vendors;
-          _this.headeroptions2 = response.data.data.purchasemans;
       })
       .catch(function (error) {
         console.log(error);

@@ -57,24 +57,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <!-- 销售人员 -->
-        <el-form-item label="*采购人员:" class="form-input">
-          <el-select
-            v-model="formorder.buyerName"
-            size="mini"
-            filterable
-            placeholder="请选择采购人员"
-            :disabled="issale"
-          >
-            <el-option
-              v-for="item in headeroptions2"
-              :key="item.userName"
-              :value="item.userId"
-              :label="item.userName"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
       </el-form>
     </div>
     <!-- 表单表体 -->
@@ -140,10 +122,13 @@
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
           <el-pagination
-            style="float: left"
             background
             layout="prev, pager, next"
-            :total="1000"
+            :total="max"
+            :page-size="pagesize"
+            style="float: left"
+            @current-change="handleCurrentChange"
+            v-model:currentPage="currentPage"
           >
           </el-pagination>
           <div style="float: right">
@@ -521,19 +506,29 @@ export default {
       const receipt = JSON.parse(sessionStorage.getItem("receipt")); //获取是否绑定采购订单
       //如果采购入库单不来自采购订单 则判断库存是否足够
       console.log(receipt)
-      if (receipt == null) {
-        this.productdata.forEach((item) => {
-          if(this.formorder.purchaseman == ""){
+      this.formorder.buyerName=state.userInfo.userName;
+      if(this.formorder.vendorName==""||this.formorder.vendorName==null){
             this.$notify({
               title: "警告",
-              message: "请选择采购人员!",
+              message: "请选择供应商!",
               type: "warning",
               position: "top-left",
             });
             ifnum = false;
             return false;
-          }
-
+      }
+      if(this.productdata.length<1||this.productdata[0].productName==""){
+          this.$notify({
+            title: "警告",
+            message: "请选择入库产品！！！",
+            type: "warning",
+            position: "top-left",
+          });
+          ifnum = false;
+          return false;
+        }
+      if (receipt == null) {
+        this.productdata.forEach((item) => {
           if(item.productId == ""){
             this.$notify({
               title: "警告",

@@ -100,7 +100,7 @@
           type="primary"
           size="small"
           @click="goadd()"
-          >新增采购入库单</el-button
+          >新增采购退货单</el-button
         >
         <!-- 模糊查询 -->
         <div style="float: right">

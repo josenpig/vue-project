@@ -3,7 +3,7 @@
   <div class="deliverlist">
     <!-- 标题 -->
     <div class="page-tag">
-      <span style="float: left">采购入库单列表</span>
+      <span style="float: left">调拨单列表</span>
       <!-- 标签页 -->
     </div>
     <!-- 表单头部 筛选 -->
@@ -19,7 +19,7 @@
           <div>
             <!-- 出库日期 -->
             <div style="height: 50px">
-              <span>出库日期:</span>
+              <span>调拨日期:</span>
               <el-radio-group v-model="collection" size="small" @change="qbc()">
                 <el-radio-button label="全部"></el-radio-button>
                 <el-radio-button label="今天"></el-radio-button>
@@ -44,17 +44,16 @@
               </div>
             </div>
             <!-- 结案状态 -->
-            <span>审批状态:</span>
+            <span>订单状态:</span>
             <el-radio-group v-model="status" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="草稿"></el-radio-button>
               <el-radio-button label="待审批"></el-radio-button>
               <el-radio-button label="已驳回"></el-radio-button>
               <el-radio-button label="审批通过"></el-radio-button>
             </el-radio-group>
             <!-- 客户 -->
             <br /><br />
-            <span>供应商:</span>
+            <span>调出仓库:</span>
             <el-select
               v-model="value1"
               size="small"
@@ -67,6 +66,23 @@
                 :key="item.vendorId"
                 :label="item.vendorName"
                 :value="item.vendorId"
+              >
+              </el-option>
+            </el-select>
+            <!-- 调入仓库 -->
+            <span>调入仓库:</span>
+            <el-select
+              v-model="value3"
+              clearable
+              size="small"
+              filterable
+              @change="qbc()"
+            >
+              <el-option
+                v-for="item in options3"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName"
               >
               </el-option>
             </el-select>
@@ -87,23 +103,7 @@
               >
               </el-option>
             </el-select>
-            <!-- 采购人员 -->
-            <span>采购人员:</span>
-            <el-select
-              v-model="value3"
-              clearable
-              size="small"
-              filterable
-              @change="qbc()"
-            >
-              <el-option
-                v-for="item in options3"
-                :key="item.userId"
-                :value="item.userId"
-                :label="item.userName"
-              >
-              </el-option>
-            </el-select>
+            
           </div>
         </el-collapse-item>
       </el-collapse>
@@ -299,11 +299,11 @@ export default {
         }
       })
       return [
-        '出库日期: ' + this.collection,
+        '调拨日期: ' + this.collection,
         '审批状态: ' + this.status,
-        '供应商: ' + value1,
+        '出库仓库: ' + value1,
         '创建人: ' + value2,
-        '采购人员: ' + value3,
+        '入库仓库: ' + value3,
       ]
     },
   },
@@ -315,7 +315,7 @@ export default {
       const state = JSON.parse(sessionStorage.getItem('state'))
       var _this = this
       this.axios({
-        url: 'http://localhost:8088/frameproject/purchaseReceipt/conditionpage',
+        url: 'http://localhost:8088/frameproject/stockTransfer/conditionpage',
         method: 'post',
         data: {
           currentPage: _this.currentPage,
@@ -339,7 +339,7 @@ export default {
       this.findpage(val, this.pagesize)
     },
     goadd() {
-      this.$router.push('/AddPurchaseReceipt')
+      this.$router.push('/AddAllocate')
     },
     //条件查询
     qbc() {
