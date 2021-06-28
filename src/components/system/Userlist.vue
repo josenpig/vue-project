@@ -132,7 +132,7 @@
           type="primary"
           size="mini"
           @click="addnew()"
-          plain
+          v-has="{ action: 'user:add' }"
           >新增用户</el-button
         >
         <!-- 模糊查询 -->
@@ -150,45 +150,51 @@
         </div>
       </div>
       <el-table :data="tableData" style="width: 100%; margin-bottom: 20px">
-        <el-table-column prop="userId" label="用户编号" width="80" />
+        <el-table-column prop="userId" label="用户编号" />
         <el-table-column prop="userName" label="用户名称" />
         <el-table-column prop="userPhone" label="用户手机号" />
-        <el-table-column prop="userSex" label="用户性别" width="100px" />
+        <el-table-column prop="userSex" label="用户性别" />
         <el-table-column prop="userState" label="帐号状态">
           <template #default="scope">
             {{ tableData[scope.$index].userState == 0 ? '正常' : '禁用' }}
           </template>
         </el-table-column>
         <el-table-column prop="founder" label="创建人" />
-        <el-table-column prop="foundTime" label="创建时间" />
-        <el-table-column prop="updateTime" label="最后更新时间" />
-        <el-table-column prop="cz" label="操作">
+        <el-table-column prop="foundTime" label="创建时间" width="200px" />
+        <el-table-column prop="updateTime" label="最后更新时间" width="200px" />
+        <el-table-column prop="cz" label="操作" width="250px">
           <template #default="scope">
             <el-button
               type="text"
-              class="el-icon-edit"
-              size="samll"
+              class="power"
               @click="changeall(scope.$index)"
-              v-if="tableData[scope.$index].userId != 1"
-              >修改</el-button
             >
+              <el-button
+                type="text"
+                class="el-icon-edit"
+                size="samll"
+                v-if="tableData[scope.$index].userId != 1"
+                v-has="{ action: 'user:update' }"
+                >修改</el-button
+              >
+            </el-button>
             <el-button
               type="text"
               class="el-icon-delete"
               size="samll"
               @click="delet(scope.$index)"
               v-if="tableData[scope.$index].userId != 1"
+              v-has="{ action: 'user:delete' }"
               >删除</el-button
             >
-            <el-button type="text" class="power">
-              <el-button
-                type="text"
-                class="el-icon-key"
-                size="samll"
-                @click="change(scope.$index)"
-                >重置</el-button
-              >
-            </el-button>
+            <el-button
+              type="text"
+              class="el-icon-key"
+              size="samll"
+              @click="change(scope.$index)"
+              v-has="{ action: 'user:update' }"
+              >重置</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
