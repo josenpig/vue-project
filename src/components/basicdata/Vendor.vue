@@ -116,7 +116,7 @@
 			<div>
 				<p />
 				<span style="font-size: 14.5px;">负责人：</span>
-				<el-select v-model="selcharge" placeholder="请选择" size="mini" style="width:150px" @change="findpageByTypeOrCharge">
+				<el-select filterable v-model="selcharge" placeholder="请选择" size="mini" style="width:150px" @change="findpageByTypeOrCharge">
 					<el-option :label="selectAll" :value="selectAll"></el-option>
 					<el-option v-for="item in charge" :label="item.chargeName" :value="item.chargeName">
 					</el-option>
@@ -146,7 +146,7 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column type="selection" width="55" />
-				<el-table-column fixed label="操作" width="120">
+				<el-table-column fixed label="操作" width="100">
 					<template #default="scope">
 						<el-tooltip content="修改" placement="top">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
@@ -157,10 +157,17 @@
 						</el-tooltip>
 					</template>
 				</el-table-column>
+				<el-table-column fixed label="管理产品" width="70">
+					<template #default="scope">
+						<el-tooltip content="该供应商下的产品" placement="top">
+						<el-button size="small" @click="findpageByidToPro(scope.row.vendorId,name)" type="text" icon="el-icon-s-goods" circle></el-button>
+						</el-tooltip>
+					</template>
+				</el-table-column>
 				<el-table-column fixed prop="vendorId" label="供应商编号" sortable width="120" />
 				<el-table-column prop="vendorName" label="供应商名称" sortable width="120" />
 				<el-table-column prop="vendorType" label="供应商类型" sortable width="120" />
-				<el-table-column prop="accountsPayable" label="应付款金额(元)" sortable width="150" />
+				<el-table-column prop="accountsPayable" label="应付款金额()" sortable width="150" />
 				<el-table-column prop="address" label="地址"  width="120" />
 				<el-table-column prop="charge" label="负责人" sortable width="120" />
 				<el-table-column prop="contactName" label="联系人姓名"  width="120" />
@@ -169,8 +176,116 @@
 				<el-table-column prop="user" label="创建人" sortable width="120" />
 				<el-table-column prop="creationTime" label="创建时间" sortable width="150" />
 				<el-table-column prop="updateTime" label="更新时间" sortable width="150" />
+				
 			</el-table>
 		</div>
+		
+		<!--供应商关联的产品-->
+		<el-dialog title="供应商--产品管理" v-model="ProupdateDialogFormVisible">
+			
+			<!-- 新增供应商关联的产品 -->
+			<el-button type="text" size="small " @click="openAddPV" style="color: white;background-color: #459df5;width: 90px;margin-top: 15px;">
+				<i class="el-icon-plus"></i> 新增产品
+			</el-button>
+			
+			<!--搜索框-->
+			<div class="page-search">
+				<div style="float: right;">
+					<span style="float: left;margin: 10px 0px;size: 17px;">产品名称 :</span>
+					<div class="page-search-content">
+						<el-input v-model="pname" placeholder="请输入内容" size="small"></el-input>
+					</div>
+					<div style="float: left;">
+						<el-button @click="this.findpageByidToPro(this.vid,pname)" icon="el-icon-search" circle></el-button>
+					</div>
+				</div>
+			</div>
+			
+			<el-dialog title="新增供应商产品" v-model="addPVDialogFormVisible">
+					<hr style="margin-bottom: 20px;" />
+					<el-form :model="addProductVendor">
+						<el-form-item label="* 产品名称 *" :label-width="formLabelWidth" >
+							<el-select @change="judgePro" v-model="addProductVendor.productId" filterable placeholder="请选择产品  (必选)">
+								<el-option v-for="item in product" :label="item.productName" :value="item.productId" @click="sm(item)"></el-option>
+							</el-select>
+						</el-form-item>
+						<el-form-item label="标准采购单价" :label-width="formLabelWidth">
+							<el-input :disabled="true" v-model="this.SMoney" autocomplete="off" style="width: 220px;"></el-input>
+						</el-form-item>
+						
+						<el-form-item  label="调价比例(%)" :label-width="formLabelWidth" >
+								<el-input-number v-model="this.addProductVendor.priceRatio" :precision="2" :step="1" :min="0" @change="this.addProductVendor.money=this.addProductVendor.priceRatio*this.SMoney/100"></el-input-number>
+						</el-form-item >
+						<el-form-item  label="采购价格" :label-width="formLabelWidth" >
+								<el-input-number :precision="2" :step="1" :min="0" v-model="this.addProductVendor.money" @change="this.addProductVendor.priceRatio=this.addProductVendor.money/this.SMoney*100"></el-input-number> 
+						</el-form-item >
+					</el-form>
+					<template #footer>
+						<span class="dialog-footer">
+							<el-button @click="addPVDialogFormVisible = false">取 消</el-button>
+							<el-button type="primary" @click="AddPV">确 定</el-button>
+						</span>
+					</template>
+			</el-dialog>
+			
+			<el-dialog title="修改供应商产品" v-model="updataPVDialogFormVisible">
+					<hr style="margin-bottom: 20px;" />
+					<el-form :model="updateProductVendor">
+						<el-form-item label="* 产品名称 *" :label-width="formLabelWidth" >
+							<el-input :disabled="true" v-model="updateProductVendor.productName" autocomplete="off" style="width: 220px;"></el-input>
+						</el-form-item>
+						<el-form-item label="标准采购单价" :label-width="formLabelWidth">
+							<el-input :disabled="true" v-model="updateProductVendor.purchaseMoney" autocomplete="off" style="width: 220px;"></el-input>
+						</el-form-item>
+						
+						<el-form-item  label="调价比例(%)" :label-width="formLabelWidth" >
+							<el-input-number v-model="updateProductVendor.priceRatio" :precision="2" :step="1" :min="0" @change="this.updateProductVendor.money=this.updateProductVendor.priceRatio*this.updateProductVendor.purchaseMoney/100"></el-input-number>
+						</el-form-item >
+						<el-form-item  label="采购价格" :label-width="formLabelWidth" >
+							<el-input-number v-model="updateProductVendor.money" :precision="2" :step="1" :min="0" @change="this.updateProductVendor.priceRatio=this.updateProductVendor.money/this.updateProductVendor.purchaseMoney*100"></el-input-number>
+						</el-form-item >
+					</el-form>
+					<template #footer>
+						<span class="dialog-footer">
+							<el-button @click="updataPVDialogFormVisible = false">取 消</el-button>
+							<el-button type="primary" @click="updatePV">确 定</el-button>
+						</span>
+					</template>
+			</el-dialog>
+			
+			<div class="unit-mian">
+				<el-table :data="VendorPro" @selection-change="handleSelectionChange" border
+				 stripe>
+					<el-table-column prop="date" label="操作" width="100">
+						<template #default="scope">
+							<el-tooltip content="修改" placement="top">
+							<el-button size="small" @click="openUpdatePV(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+							</el-tooltip>
+							
+							<el-tooltip content="删除" placement="top">
+							<el-button size="small" @click="delPV(scope.row.vendorId,scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
+							</el-tooltip>
+						</template>
+					</el-table-column>
+					<el-table-column prop="vendorName" label="供应商名称" sortable width="170" />
+					<el-table-column prop="productId" label="产品编号" sortable width="152" />
+					<el-table-column prop="productName" label="产品名称" sortable width="152" />
+					<el-table-column prop="purchaseMoney" label="标准采购价格" sortable width="130" />
+					<el-table-column prop="priceRatio" label="调价比例(%)" sortable width="130" />
+					<el-table-column label="实际采购价格" sortable width="130">
+						<template #default="scope">
+							<span>{{(scope.row.purchaseMoney * scope.row.priceRatio / 100).toFixed(2)}}</span>
+						</template>
+					</el-table-column>
+				</el-table>
+			</div>
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="ProupdateDialogFormVisible = false">关闭</el-button>
+				</span>
+			</template>
+		</el-dialog>
+		
 		<!-- 表尾分页显示 -->
 		<div class="salelist-footer">
 			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
@@ -187,6 +302,7 @@
 		name: "vendor",
 		data() {
 			return {
+				formLabelWidth: '120px',
 				//新增供应商信息弹框
 				dialogFormVisible: false,
 				//修改供应商信息弹框
@@ -225,7 +341,7 @@
 				type: [{
 					label: '供应商名称'
 				}, {
-					label: '供应商编号'
+					label: '供应商编号',
 				}],
 				//选中客户类型
 				selVendorType: '全部',
@@ -243,10 +359,48 @@
 				pagesize: 5,
 				max: 0,
 				currentPage: 1,
-
+				
+				
 				//多选供应商
 				selectCus: [],
 
+				//供应商关联的产品信息信息弹框
+				ProupdateDialogFormVisible: false,
+				//供应商关联的产品信息
+				VendorPro:[],
+
+				//产品信息
+				product:[],
+
+				//供应商产品 
+				vid:'',
+				pname:'',//查询的产品名称
+				productRepeat:true,//判断新增的产品是否也供应商已有的产品重复
+				
+				//新增供应商关联的产品信息信息弹框
+				addPVDialogFormVisible: false,
+				//新增供应商关联的产品信息
+				addProductVendor:{
+					vendorId:'',//供应商id
+					productId:'',//产品id
+					priceRatio:100,//调剂比例
+					money:''//该产品在该供应商的采购价格
+				},
+				//选中产品标准采购单价
+				SMoney:'',
+				
+				//修改供应商关联的产品信息信息弹框
+				updataPVDialogFormVisible:false,
+				//修改供应商关联的产品信息
+				updateProductVendor:{
+					vendorId:'',//供应商id
+					productId:'',//产品id
+					productName:'',//产品名称
+					purchaseMoney:'',//产品价格
+					priceRatio:'',//调剂比例
+					money:''//该产品在该供应商的采购价格
+				}
+				
 			}
 		},
 		methods: {
@@ -269,6 +423,26 @@
 					.then(function(response) {
 						console.log(response.data.data)
 						_this.charge = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//查询所有产品
+			findAllPro() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseProduct/findAllProduct/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.product = response.data.data;
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -579,12 +753,234 @@
 							console.log(error);
 						});
 					}
+			},
+			
+			//根据供应商编号查询供应商下的产品
+			findpageByidToPro(vid,name) {
+				this.vid=vid
+				this.ProupdateDialogFormVisible =true
+				console.log("vid:"+vid+", name:"+name)
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					vid: vid,
+					pname: name
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseVendorProduct/findAllbaseVendorProduct/list",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.VendorPro = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
+			
+			//打开添加供应商下产品
+			openAddPV(){
+				this.addPVDialogFormVisible=true
+				this.addProductVendor.vendorId=this.vid
+				console.log(this.addProductVendor)
+			},
+			
+			//判断新增的产品是否与供应商已有的产品重复
+			judgePro(){
+				this.productRepeat=true
+				this.VendorPro.forEach((item)=>{
+					if(item.productId==this.addProductVendor.productId){
+						this.productRepeat=false
+						ElMessage.warning({
+							message: '不能重复添加商品！',
+							type: 'success'
+						});
+					}
+				})
+				console.log("是否与供应商已有的产品重复："+this.productRepeat)
+			},
+			
+			//选中产品标准价
+			sm(item){
+				this.SMoney=item.purchaseMoney
+				this.addProductVendor.money=this.addProductVendor.priceRatio*this.SMoney/100
+			},
+			
+			//添加供应商下产品
+			AddPV(){
+				console.log(this.addProductVendor)
+				if (this.addProductVendor.vendorId == '' ||
+					this.addProductVendor.productId == '' ||
+					this.addProductVendor.priceRatio == '' ||
+					this.addProductVendor.money == '') {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					this.judgePro();
+					
+					setTimeout(() => {
+						if (this.productRepeat==true) {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.dialogFormVisible = false
+					
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseVendorProduct/addBaseVendorProduct",
+							method: "post",
+							processData: false,
+							data: {
+								BaseVendorProduct: JSON.stringify(_this.addProductVendor)
+							},
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data)
+							ElMessage.success({
+								message: '添加成功',
+								type: 'success'
+							});
+							_this.addPVDialogFormVisible=false
+							_this.productRepeat=true
+							_this.addProductVendor={
+							vendorId:'',//供应商id
+							productId:'',//产品id
+							priceRatio:100,//调剂比例
+							money:''//该产品在该供应商的采购价格
+							}
+							_this.findpageByidToPro(_this.vid,null)
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+						}
+						}, 200)
+				}
+			},
+			
+			//打开修改供应商下产品
+			openUpdatePV(data){
+				this.updataPVDialogFormVisible=true
+				this.updateProductVendor.vendorId = data.vendorId
+				this.updateProductVendor.productId = data.productId
+				this.updateProductVendor.productName = data.productName
+				this.updateProductVendor.purchaseMoney = data.purchaseMoney
+				this.updateProductVendor.priceRatio = data.priceRatio
+				this.updateProductVendor.money = data.purchaseMoney * data.priceRatio/100
+				console.log(this.updateProductVendor)
+			},
+			
+			//修改供应商信息
+			updatePV(){
+				console.log(this.updateProductVendor)
+				if (
+					this.updateProductVendor.priceRatio == '' ||
+					this.updateProductVendor.money == '' ) {
+					ElMessage.error('必填或必须选不能为空！！！');
+				} else {
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					var updateProductVendor2={
+						vendorId: this.updateProductVendor.vendorId,//供应商id
+						productId: this.updateProductVendor.productId,//产品id
+						priceRatio: this.updateProductVendor.priceRatio,//调价比例
+					}
+					this.dialogFormVisible = false
+					//修改供应商
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseVendorProduct/updateVendorProduct",
+							method: "post",
+							processData: false,
+							data: {
+								ProductVendor: JSON.stringify(updateProductVendor2)
+							},
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log(response.data.data)
+							if(response.data.data!=null){
+								ElMessage.success({
+									message: '修改成功',
+									type: 'success'
+								});
+								_this.updataPVDialogFormVisible= false;
+							}else{
+								ElMessage.warning({
+									message: '修改失败，此供应商下的该产品存在未结案的采购单 无法修改！',
+									type: 'success'
+								});
+							}
+							_this.findpageByidToPro(_this.vid,null)
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+					}
+			},
+			
+			//删除供应商下产品
+			delPV(vid, pid) {
+				console.log(vid+",,,"+pid)
+				this.$confirm('此操作将永久该产品, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					var ids={
+								vid: vid,
+								pid: pid
+					}
+					const state = JSON.parse(sessionStorage.getItem("state"));
+					var _this = this;
+					this.axios({
+							url: "http://localhost:8088/frameproject/baseVendorProduct/delVendorProduct",
+							method: "get",
+							processData: false,
+							params:ids,
+							headers: {
+								JWTDemo: state.userInfo.token,
+							},
+						})
+						.then(function(response) {
+							console.log("删除是否成功：" + response.data.data);
+							if (response.data.data==true) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findpageByidToPro(_this.vid,null)
+							} else {
+								ElMessage.warning({
+									message:'该供应商下产品id为： '+pid+' 的产品存在未结案的采购单, 无法删除！',
+									type: 'success'
+								});
+							}
+						})
+						.catch(function(error) {
+							console.log(error);
+						});
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
 			}
 		},
 		computed: {},
 		created() {
 			this.findpage()
 			this.findAllCharge()
+			this.findAllPro()
 		}
 	};
 </script>

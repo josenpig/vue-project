@@ -5,12 +5,12 @@
 				<div class="grid-content bg-purple">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span>总收入</span>
+							<span style="font-size: 24px;margin-top: 10px;">总收入</span>
 						</div>
 						<div class="text item">
-							<span></span>
+							<span>{{this.rsum}}</span>
 							<div class="ik-pull-right">
-								￥<span v-text="debt.cost"></span>
+								￥
 							</div>
 						</div>
 					</el-card>
@@ -20,12 +20,12 @@
 				<div class="grid-content bg-purple">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span>总支出</span>
+							<span style="font-size: 24px;margin-top: 10px;">总支出</span>
 						</div>
 						<div class="text item">
-							<span></span>
+							<span>{{this.psum}}</span>
 							<div class="ik-pull-right">
-								￥<span v-text="debt.cost"></span>
+								￥
 							</div>
 						</div>
 					</el-card>
@@ -35,102 +35,128 @@
 				<div class="grid-content bg-purple">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span>库存</span>
+							<span style="font-size: 24px;">库存</span>
 						</div>
 						<div class="text item">
 							<span>总量</span>
 							<div class="ik-pull-right">
-								<span v-text="debt.amount"></span>
+								<span>{{this.ps}}</span>
 							</div>
 						</div>
 						<div class="text item">
-							<span>总成本</span>
-							<div class="ik-pull-right">
-								￥<span v-text="debt.cost"></span>
+							<span style="size: 20px;">总成本</span>
+							<div class="ik-pull-right" style="size: 20px;">
+								<span>{{(this.ms).toFixed(2)}}</span>￥
 							</div>
 						</div>
 					</el-card>
 				</div>
 			</el-col>
-
 		</el-row>
 		
+		<el-calendar v-model="value" style="width: 500px;height: 650px;">
+		</el-calendar>
 	</div>
 </template>
 
 <script>
+	import * as echarts from 'echarts'
 	export default {
 		name: "Workbench",
 		data() {
 			return {
-				// a:"123"
-				saleT: "按天",
-				salePurchaseT: "按天",
-				sellDate: {
-					now: "今天",
-					previously: "昨天"
-				},
-				sellPurchaseDate: {
-					now: "今天",
-					previously: "昨天"
-				},
-				sale: {
-					afterTime: "",
-					afterM: 100,
-					beforeTime: "",
-					beforeM: "100"
-				},
-				debt: {
-					deliverygAfterM: null,
-					saleBeforeSum: 1,
-					deliverygAfterSum: 0,
-					deliverygBeforeSum: 0,
-					saleAfterM: 1100,
-					supplier: 3,
-					deliverygBeforeM: null,
-					saleAfterSum: 2,
-					client: 5,
-					saleBeforeM: 1000,
-				},
-				activeName: "awaitApprove",
-				finishApproveData: [],
-				awaitApproveData: [],
-				rejectApproveData: [],
-				dialogTableVisible: false,
-				dialogTableClientVisible: false,
-				dialogTableSupplierVisible: false,
-				queryRepertoryVal: "",
-				queryClientVal: "",
-				querySupplierVal: "",
-				queryRepertoryData: [],
-				queryClientData: [],
-				querySupplierData: [],
+				value: new Date(),
+				//本期总收入
+				rsum:0,
+				//本期总支出
+				psum:0,
+				
+				value1: "全部", //仓库名称
+				value2: "全部", //产品名称
+				value3: "全部", //产品分类
+				value4: "否", //是否下架
+				pagesize: 5,
+				max: 0,
+				currentPage: 1,
+				
+				tableData:[],
+				
+				//库存总量
+				ps:0,
+				//总价值
+				ms:0
 			};
 		},
 		methods: {
-			handleCommand(c) {
-				// eslint-disable-next-line no-empty
-				this.saleT = "按" + c;
-				if (c === "天") {
-					this.sellDate.now = "今" + c;
-					this.sellDate.previously = "昨" + c;
-				} else {
-					this.sellDate.now = "本" + c;
-					this.sellDate.previously = "上" + c;
-				}
+			
+			//资金账户期间总收入和总支出
+			sum(){
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				console.log("time:"+this.customtime1)
+				var fd = {
+					startTime: null,
+					endTime: null
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/ReportFormController/fundAllRsumAndPsum",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.rsum = response.data.data[0];
+						_this.psum = response.data.data[1];
+						
+						console.log("rsum:"+_this.rsum)
+						console.log("psum:"+_this.psum)
+						
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
 			},
-			handleCommandPurchase(c) {
-				// eslint-disable-next-line no-empty
-				this.salePurchaseT = "按" + c;
-				if (c === "天") {
-					this.sellPurchaseDate.now = "今" + c;
-					this.sellPurchaseDate.previously = "昨" + c;
-				} else {
-					this.sellPurchaseDate.now = "本" + c;
-					this.sellPurchaseDate.previously = "上" + c;
-				}
-			}
+			//库存
+			findpagePro() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				console.log(this.value1+"+++"+this.value2+"+++"+this.value3+"+++"+this.value4)
+				this.axios({
+						url: "http://localhost:8088/frameproject/ReportFormController/findAllProductInventoryVo",
+						method: "get",
+						params: {
+							depotName: _this.value1,
+							productName: _this.value2,
+							productTypeName: _this.value3,
+							state: _this.value4,
+							currentPage: _this.currentPage,
+							pageSize: _this.pagesize
+						},
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data.rows)
+						_this.tableData = response.data.data.rows;
+						_this.tableData.forEach((item)=>{
+							_this.ps+=item.productNumber
+							_this.ms+=item.productNumber * item.purchaseUnitPrice
+						})
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
 		},
+		mounted() {
+			this.sum();
+			this.findpagePro();
+		}
 	};
 </script>
 
@@ -162,7 +188,8 @@
 	}
 
 	.workbench .text {
-		font-size: 14px;
+		font-size: 20px;
+		margin-top: 20px;
 	}
 
 	.item {

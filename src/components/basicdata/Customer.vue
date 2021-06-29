@@ -117,7 +117,7 @@
 			<div>
 				<p />
 				<span style="font-size: 14.5px;">负责人：</span>
-				<el-select v-model="selcharge" placeholder="请选择" size="mini" style="width:150px" @change="findpageByTypeOrCharge">
+				<el-select filterable v-model="selcharge" placeholder="请选择" size="mini" style="width:150px" @change="findpageByTypeOrCharge">
 					<el-option :label="selectAll" :value="selectAll"></el-option>
 					<el-option v-for="item in charge" :label="item.chargeName" :value="item.chargeName">
 					</el-option>

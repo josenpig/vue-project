@@ -205,9 +205,9 @@
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
-				<el-table-column :show-overflow-tooltip="true"  prop="productName" label="产品名称" sortable width="120" />
-				<el-table-column :show-overflow-tooltip="true"  prop="productSpec" label="规格" width="120" />
-				<el-table-column :show-overflow-tooltip="true"  prop="ingredient" label="成分" width="120" />
+				<el-table-column :show-overflow-tooltip="true"  prop="productName" label="产品名称" sortable width="150" />
+				<el-table-column :show-overflow-tooltip="true"  prop="productSpec" label="规格" width="140" />
+				<el-table-column :show-overflow-tooltip="true"  prop="ingredient" label="成分" width="140" />
 				<el-table-column prop="gramHeavy" label="克重" width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
