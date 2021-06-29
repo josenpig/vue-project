@@ -137,9 +137,14 @@
 			 stripe>
 				<el-table-column prop="date" label="操作" width="150">
 			 	<template #default="scope">
+					<el-tooltip content="修改" placement="top">
 			 		<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
-			 		<el-button size="small" @click="del(scope.row.capitalId)" type="text" icon="el-icon-delete" circle></el-button>
-			 	</template>
+			 		</el-tooltip>
+			 		
+			 		<el-tooltip content="删除" placement="top">
+					<el-button size="small" @click="del(scope.row.capitalId)" type="text" icon="el-icon-delete" circle></el-button>
+					</el-tooltip>
+				</template>
 				</el-table-column>
 				<el-table-column prop="capitalId" label="账户编号" sortable width="175" />
 				<el-table-column prop="fundAccount" label="账户名称" sortable width="164"/>
@@ -373,9 +378,9 @@
 						},
 					})
 					.then(function(response) {
-						console.log("id不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (response.data == false) {
+						console.log("id不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data == false) {
 							ElMessage.warning({
 								message: '资金账户ID重复',
 								type: 'success'
@@ -545,8 +550,8 @@
 						},
 					})
 					.then(function(response) {
-						console.log("结算类型名称不重复是否通过:" + response.data)
-						_this.judge = response.data
+						console.log("结算类型名称不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
 					})
 					.catch(function(error) {
 						console.log(error);

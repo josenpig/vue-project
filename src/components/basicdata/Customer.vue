@@ -14,7 +14,7 @@
 					<hr style="margin-bottom: 20px;" />
 					<el-form :model="form">
 						<el-form-item label="* 客户编号 * " :label-width="formLabelWidth">
-							<el-input v-model="form.customerNumber" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
+							<el-input @change="pdCID" v-model="form.customerNumber" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
 						<el-form-item label="* 客户名称 *" :label-width="formLabelWidth">
 							<el-input v-model="form.customerName" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
@@ -51,7 +51,7 @@
 					<template #footer>
 						<span class="dialog-footer">
 							<el-button @click="dialogFormVisible = false">取 消</el-button>
-							<el-button type="primary" @click="pdCID">确 定</el-button>
+							<el-button type="primary" @click="AddCustomer">确 定</el-button>
 						</span>
 					</template>
 				</el-dialog>
@@ -117,7 +117,7 @@
 			<div>
 				<p />
 				<span style="font-size: 14.5px;">负责人：</span>
-				<el-select v-model="selcharge" placeholder="请选择" size="mini" style="width:150px" @change="findpageByTypeOrCharge">
+				<el-select filterable v-model="selcharge" placeholder="请选择" size="mini" style="width:150px" @change="findpageByTypeOrCharge">
 					<el-option :label="selectAll" :value="selectAll"></el-option>
 					<el-option v-for="item in charge" :label="item.chargeName" :value="item.chargeName">
 					</el-option>
@@ -125,7 +125,7 @@
 			</div>
 		</div>
 		<!--批量删除-->
-		<div style="float: left;padding-top: 15px;">
+		<div style="float: left;padding-top: 20px;">
 			<el-button size="mini" @click="batchDel"><i class="el-icon-close"></i> 批量删除</el-button>
 		</div>
 		<!--搜索框-->
@@ -149,9 +149,14 @@
 				<el-table-column type="selection" width="55" />
 				<el-table-column fixed label="操作" width="120">
 					<template #default="scope">
+						<el-tooltip content="修改" placement="top">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.customerNumber,scope.$index)" type="text" icon="el-icon-delete"
+						</el-tooltip>
+						
+						<el-tooltip content="删除" placement="top">
+						<el-button size="small" @click="del(scope.row.customerNumber)" type="text" icon="el-icon-delete"
 						 circle></el-button>
+						 </el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="customerNumber" label="客户编号" sortable width="120" />
@@ -356,33 +361,40 @@
 					});
 			},
 			//删除客户
-			del(id, index) {
-				var _this=this;
-				this.$confirm('此操作将永久删除该客户, 是否继续?', '提示', {
+			del(id) {
+				this.$confirm('此操作将永久该客户, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功'
-					});
+					var ids = new Array()
+					ids.push(id)
+					console.log("del:"+ids)
 					const state = JSON.parse(sessionStorage.getItem("state"));
-					var pid = {
-						id: id
-					};
+					var _this = this;
 					this.axios({
-							url: "http://localhost:8088/frameproject/baseCustomer/delCustomer",
-							method: "get",
+							url: "http://localhost:8088/frameproject/baseCustomer/delCustomer/batch",
+							method: "delete",
 							processData: false,
-							params: pid,
+							data: ids,
 							headers: {
 								JWTDemo: state.userInfo.token,
 							},
 						})
 						.then(function(response) {
-							console.log(response.data.data);
-							_this.findpage()
+							console.log("删除是否成功：" + response.data.data);
+							if (response.data.data == null) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: response.data.data,
+									type: 'success'
+								});
+							}
 						})
 						.catch(function(error) {
 							console.log(error);
@@ -396,15 +408,11 @@
 			},
 			//批量删除客户
 			batchDel() {
-				this.$confirm('此操作将永久删除下列' + this.selectCus.length + ':个客户, 是否继续?', '提示', {
+				this.$confirm('此操作将永久删除下列 ' + this.selectCus.length + ' 个客户, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功'
-					});
 					var ids = new Array()
 					this.selectCus.forEach(v => {
 						ids.push(v.customerNumber)
@@ -421,8 +429,19 @@
 							},
 						})
 						.then(function(response) {
-							console.log(response.data.data)
-							_this.findpage()
+							console.log("批量删除是否成功：" + response.data.data);
+							if (response.data.data == null) {
+								_this.$message({
+									type: 'success',
+									message: '删除成功'
+								});
+								_this.findpage()
+							} else {
+								ElMessage.warning({
+									message: response.data.data,
+									type: 'success'
+								});
+							}
 						})
 						.catch(function(error) {
 							console.log(error);
@@ -438,7 +457,7 @@
 			handleSelectionChange(val) {
 				this.selectCus = val
 			},
-			//判断客户ID是否重复并添加客户
+			//判断客户ID是否重复
 			pdCID() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
@@ -455,15 +474,13 @@
 						},
 					})
 					.then(function(response) {
-						console.log("cid不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (response.data==false) {
+						console.log("cid不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data==false) {
 							ElMessage.warning({
 								message: '客户ID重复',
 								type: 'success'
 							});
-						}else{
-							_this.AddCustomer()
 						}
 					})
 					.catch(function(error) {
@@ -477,9 +494,13 @@
 					this.form.customerName == '' ||
 					this.form.customerType == '' ||
 					this.form.chargeName == '' ||
-					this.form.ratio == null || this.form.ratio == '') {
+					this.form.ratio == null) {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
+					this.pdCID();
+					
+					setTimeout(() => {
+						if (this.judge) {
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var _this = this;
 					this.form.user = state.userInfo.userName;
@@ -502,12 +523,15 @@
 								message: '添加成功',
 								type: 'success'
 							});
-							_this.form = {ratio: 100}
+							_this.form = {ratio: 0}
+							_this.judge = {}
 							_this.findpage()
 						})
 						.catch(function(error) {
 							console.log(error);
 						});
+						}
+						}, 200)
 				}
 			},
 			//打开修改框
@@ -530,7 +554,7 @@
 				if (
 					this.updateForm.customerType == '' ||
 					this.updateForm.chargeName == '' ||
-					this.updateForm.ratio == null || this.updateForm.ratio == '') {
+					this.updateForm.ratio == null) {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
 					const state = JSON.parse(sessionStorage.getItem("state"));

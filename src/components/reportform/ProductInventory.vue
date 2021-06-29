@@ -66,8 +66,8 @@
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
-				<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="120" />
-				<el-table-column :show-overflow-tooltip="true" prop="depotName" label="仓库名称" sortable width="140" />
+				<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="180" />
+				<el-table-column :show-overflow-tooltip="true" prop="depotName" label="仓库名称" sortable width="180" />
 				<el-table-column prop="openingNumber" label="期初数量" sortable width="140" />
 				<el-table-column prop="productNumber" label="当前库存" sortable width="140" />
 				<el-table-column prop="expectNumber" label="预计可用量" sortable width="140" />
@@ -86,9 +86,6 @@
 				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注" width="120" />
 				<el-table-column prop="purchaseMoney" label="采购单价(元)" sortable width="120" />
 				<el-table-column prop="purchaseUnitPrice" label="销售单价(元)" sortable width="120" />
-				<el-table-column prop="userName" label="创建人" sortable width="120" />
-				<el-table-column prop="creationTime" label="创建时间" sortable width="180" />
-				<el-table-column prop="updateTime" label="更新时间" sortable width="180" />
 			</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
