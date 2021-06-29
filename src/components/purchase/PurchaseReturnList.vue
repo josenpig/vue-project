@@ -203,15 +203,14 @@
     <!-- 表尾分页显示 -->
     <div class="deliverlist-footer" v-show="paging">
       <el-pagination
-        background
-        layout="prev, pager, next"
-        :total="max"
-        :page-size="pagesize"
-        style="margin-top: 50px"
-        @current-change="handleCurrentChange"
-        v-model:currentPage="currentPage"
-      >
-      </el-pagination>
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 30, 100]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="max">
+    </el-pagination>
     </div>
   </div>
 </template>
@@ -319,9 +318,18 @@ export default {
         })
     },
     //改变页码数
-    handleCurrentChange(val) {
-      this.findpage(val, this.pagesize)
+    handleSelectionChange(val) {
+      this.joinstockdata = val;
     },
+    handleCurrentChange(val) {
+        this.currentPage=val;
+        this.findpage();
+    },
+    handleSizeChange(val) {
+        this.pagesize=val;
+        this.currentPage=1;
+        this.findpage();
+      },
     goadd() {
       this.$router.push('/AddPurchaseReturn')
     },

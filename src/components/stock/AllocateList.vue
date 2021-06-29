@@ -63,9 +63,9 @@
             >
               <el-option
                 v-for="item in options1"
-                :key="item.vendorId"
-                :label="item.vendorName"
-                :value="item.vendorId"
+                :key="item.depotName"
+                :label="item.depotName"
+                :value="item.depotName"
               >
               </el-option>
             </el-select>
@@ -80,9 +80,9 @@
             >
               <el-option
                 v-for="item in options3"
-                :key="item.userId"
-                :value="item.userId"
-                :label="item.userName"
+                :key="item.depotName"
+                :value="item.depotName"
+                :label="item.depotName"
               >
               </el-option>
             </el-select>
@@ -116,7 +116,7 @@
           type="primary"
           size="small"
           @click="goadd()"
-          >新增采购入库单</el-button
+          >新增调拨单</el-button
         >
         <!-- 模糊查询 -->
         <div style="float: right">
@@ -140,7 +140,7 @@
       >
         <el-table-column
           prop="id"
-          label="采购入库单编号"
+          label="调拨单编号"
           fixed
           width="200"
         >
@@ -151,45 +151,36 @@
           </template>
         </el-table-column>
         <el-table-column
-          prop="inboundDate"
-          label="出库日期"
+          prop="transferDate"
+          label="调拨日期"
           fixed
           sortable
           width="150"
         />
-        <el-table-column prop="vendorName" label="供应商" width="120" />
-        <el-table-column prop="buyerName" label="采购人员" width="120" />
+        <el-table-column prop="inwarehouse" label="入库仓库" width="120" />
+        <el-table-column prop="outwarehouse" label="出库仓库" width="120" />
         <el-table-column
-          prop="offersPrice"
-          label="优惠后应收款(元)"
+          prop="documentDate"
+          label="单据日期"
           width="150"
         />
-        <el-table-column prop="vettingState" label="出库状态" width="120">
+        <el-table-column prop="state" label="调拨状态" width="120">
           <template #default="scope">
-            <span v-if="tableData[scope.$index].vettingState == 0">
-              未入库
+            <span v-if="tableData[scope.$index].state == 0">
+              调拨中
             </span>
-            <span v-if="tableData[scope.$index].vettingState == 1">
-              完全入库
+            <span v-if="tableData[scope.$index].state == 1">
+              调拨完成
             </span>
             <!-- <span v-else> 完全入库 </span> -->
           </template>
         </el-table-column>
-        <el-table-column
-          prop="createDate"
-          label="创建时间"
-          sortable
-          width="200"
-        />
-        <el-table-column prop="vettingState" label="审批状态" width="120">
+        <el-table-column prop="state" label="审批状态" width="120">
           <template #default="scope">
-            <span v-if="tableData[scope.$index].vettingState == 0">
-              待二级审批
+            <span v-if="tableData[scope.$index].state == 0">
+              审批中
             </span>
-            <span v-else-if="tableData[scope.$index].vettingState == -2">
-              草稿
-            </span>
-            <span v-else-if="tableData[scope.$index].vettingState == -1">
+            <span v-else-if="tableData[scope.$index].state == -1">
               审批未通过
             </span>
             <span v-else> 审批通过 </span>
@@ -208,8 +199,8 @@
           width="200"
         />
         <el-table-column
-          prop="lastVettingTime"
-          label="最后审批时间"
+          prop="updatePeople"
+          label="修改人"
           sortable
           width="200"
         />
@@ -309,7 +300,7 @@ export default {
   },
   methods: {
     goadd() {
-      this.$router.push('/AddPurchaseReceipt')
+      this.$router.push('/AddAllocate')
     },
     findpage() {
       const state = JSON.parse(sessionStorage.getItem('state'))
@@ -337,9 +328,6 @@ export default {
     //改变页码数
     handleCurrentChange(val) {
       this.findpage(val, this.pagesize)
-    },
-    goadd() {
-      this.$router.push('/AddAllocate')
     },
     //条件查询
     qbc() {
@@ -373,9 +361,9 @@ export default {
         },
       })
         .then(function (response) {
-          _this.options1 = response.data.data.vendors
+          _this.options1 = response.data.data.depots
           _this.options2 = response.data.data.notifiers
-          _this.options3 = response.data.data.purchasemans
+          _this.options3 = response.data.data.depots
         })
         .catch(function (error) {
           console.log(error)
@@ -383,7 +371,7 @@ export default {
     },
     goorder(val) {
       sessionStorage.setItem('orderid', this.tableData[val].id)
-      this.$router.push('/PurchaseReceipt')
+      this.$router.push('/Allocate')
     },
   },
   created: function () {
