@@ -144,36 +144,8 @@ import store from "../../store";
       };
     },
     methods: {
-      //触发按钮点击下载事件
-	exportData() {
-		this.excelData = this.tableData;  //将你要导出的数组数据（historyList）赋值给excelDate
-		this.export2Excel(); //调用export2Excel函数，填写表头（clomns里的type）和对应字段(historyList里的属性名)
-	  },
-    //表格数据写入excel
-    export2Excel() {
-      var that = this;
-      require.ensure([], () => {
-        const {
-          export_json_to_excel
-        } = require("@/excel/Export2Excel");  
-        //这里使用绝对路径( @表示src文件夹 )，使用@/+存放export2Excel的路径【也可以写成相对于你当前"xxx.vue"文件的相对路径，例如我的页面放在assets文件夹同级下的views文件夹下的“home.vue”里，那这里路径也可以写成"../assets/excel/Export2Excel"】
-        const tHeader = ["登陆日期", "姓名", "用户类别", "登陆方式"]; // 导出的excel表头名信息
-        const filterVal = [
-          "logintime",
-          "operator",
-          "typeofoperator",
-          "logintype"
-        ]; // 导出的excel表头字段名，需要导出表格字段名
-        const list = that.excelData;
-        const data = that.formatJson(filterVal, list);
 
-        export_json_to_excel(tHeader, data, "登录日志"); // 导出的表格名称，根据需要自己命名
-      });
-    },
-    //格式转换，直接复制即可,不需要修改什么
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => v[j]));
-    },
+    
 			//改变页码数
 			handleCurrentChange(val) {
 				this.findlogbyOperator(this.operator,val, this.pagesize,this.value2,this.operatorType);
