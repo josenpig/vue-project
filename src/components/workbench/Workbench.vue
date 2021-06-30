@@ -3,9 +3,9 @@
 		<h3 style="margin: 5px;">业务数据统计</h3>
 		<el-row :gutter="20">
 			<el-col :span="8">
-				<div class="grid-content bg-purple">
-					<el-card class="box-card">
-						<div slot="header" class="clearfix">
+				<div class="grid-content bg-purple" >
+					<el-card class="box-card" >
+						<div slot="header" class="clearfix" >
 							<span style="font-size: 24px;margin-top: 10px;">销售</span>
 						</div>
 						<div class="text item">

@@ -7,7 +7,7 @@
 			<div>
 				<el-button @click="findpage" type="primary" class="allType">
 					<i class="el-icon-caret-bottom" style="padding:10px 0px 0px 5px;"></i>全部
-					<el-button type="text" @click="openAdd(AllId)" style="float: right;color: white;" class="el-icon-circle-plus-outline">
+					<el-button type="text" @click="openAdd(AllId)" style="float: right;color: white;" class="el-icon-circle-plus-outline" v-has="{ action: 'sort:add' }">
 						<span style="font-size: 10px;">新增子分类</span>
 					</el-button>
 				</el-button>
@@ -17,15 +17,12 @@
 					<span class="custom-tree-node">
 						<span>{{ node.label }}</span>
 						<span style="padding: 10px;">
-							<el-tooltip content="新增子分类" placement="top">
-								<el-button type="text" @click="openAdd(data)" class="el-icon-circle-plus-outline"></el-button>
-							</el-tooltip>
-							<el-tooltip content="删除" placement="top">
-								<el-button type="text" @click="remove(data)" class="el-icon-delete"></el-button>
-							</el-tooltip>
-							<el-tooltip content="修改" placement="top">
-								<el-button type="text" @click="openupdateProType(data)" class="el-icon-edit"></el-button>
-							</el-tooltip>
+							<el-button type="text" @click="openAdd(data)" class="el-icon-circle-plus-outline" v-has="{ action: 'sort:add' }"></el-button>
+
+							<el-button type="text" @click="remove(data)" class="el-icon-delete" v-has="{ action: 'sort:delete' }"></el-button>
+
+							<el-button type="text" @click="openupdateProType(data)" v-has="{ action: 'sort:update' }" class="el-icon-edit"></el-button>
+
 						</span>
 					</span>
 				</template>
@@ -205,9 +202,9 @@
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
-				<el-table-column :show-overflow-tooltip="true"  prop="productName" label="产品名称" sortable width="150" />
-				<el-table-column :show-overflow-tooltip="true"  prop="productSpec" label="规格" width="140" />
-				<el-table-column :show-overflow-tooltip="true"  prop="ingredient" label="成分" width="140" />
+				<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="150" />
+				<el-table-column :show-overflow-tooltip="true" prop="productSpec" label="规格" width="140" />
+				<el-table-column :show-overflow-tooltip="true" prop="ingredient" label="成分" width="140" />
 				<el-table-column prop="gramHeavy" label="克重" width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
