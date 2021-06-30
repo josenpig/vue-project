@@ -288,11 +288,11 @@ import store from "../../store";
   background-color: white;
   text-align: center;
 }
-.block{
+.returnlist .block{
   float: left;
   margin-left: 10px;
 }
-.block1{
+.returnlist .block1{
  margin-top: 37px;
 }
 .returnlist-header .el-collapse{

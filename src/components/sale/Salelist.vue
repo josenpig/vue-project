@@ -462,6 +462,7 @@ export default {
       this.condition.orderId = this.vagueorderid
       this.findpage()
     },
+    //查询人员
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this

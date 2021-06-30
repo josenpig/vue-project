@@ -810,6 +810,12 @@ export default {
         .then(function (response) {
           _this.headeroptions1 = response.data.data.customers
           _this.headeroptions2 = response.data.data.salemans
+          //默认当前用户
+          _this.headeroptions2.forEach((item) => {
+            if (item.userName == state.userInfo.userName) {
+              _this.formorder.salesmen = item.userId
+            }
+          })
           _this.footeroptions = response.data.data.notifiers
           if (sessionStorage.getItem('draft') != null) {
             _this.showorder()
