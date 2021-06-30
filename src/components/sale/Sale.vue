@@ -246,7 +246,10 @@ import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    if (sessionStorage.getItem('orderid')!=null && sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'XSDD') {
+    if (
+      sessionStorage.getItem('orderid') != null &&
+      sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'XSDD'
+    ) {
       sessionStorage.removeItem('orderid')
     }
     next()
@@ -388,13 +391,7 @@ export default {
     approval(type) {
       //生成出库
       if (type == 2) {
-        if (this.formorder.orderState == 1) {
-          this.$notify({
-            title: '警告',
-            message: '该订单已结束执行，无法出库！',
-            type: 'warning',
-          })
-        } else if (this.formorder.deliveryId != null) {
+        if (this.formorder.deliveryId != null) {
           this.$notify({
             title: '警告',
             message: '该订单已完成出库，无法二次出库！',

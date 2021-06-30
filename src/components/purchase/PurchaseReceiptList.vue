@@ -157,7 +157,7 @@
           sortable
           width="150"
         />
-        <el-table-column prop="vendorName" label="供应商" width="200" />
+        <el-table-column :show-overflow-tooltip="true" prop="vendorName" label="供应商" width="200" />
         <el-table-column prop="buyerName" label="采购人员" width="120" />
         <el-table-column
           prop="offersPrice"

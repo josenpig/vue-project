@@ -150,11 +150,7 @@
           >新增收款</el-button
         >
       </div>
-      <el-table
-        :data="tableData"
-        style="width: 100%"
-        stripe
-      >
+      <el-table :data="tableData" style="width: 100%" stripe>
         <el-table-column label="操作" width="120" fixed>
           <template #default="scope">
             <el-button
@@ -167,11 +163,10 @@
             </el-button>
             <el-button
               type="text"
-              v-if="tableData[scope.$index].caseState == 0"
+              v-if="tableData[scope.$index].caseState == 1"
             >
-              结案
+              已完成收款
             </el-button>
-            <el-button type="text" v-else> 反结案 </el-button>
           </template>
         </el-table-column>
         <el-table-column prop="deliveryId" fixed label="单据编号" width="200">
@@ -208,7 +203,7 @@
         background
         layout="total,prev,pager,next,sizes"
         :total="max"
-        :page-sizes="[5,8,10,20]"
+        :page-sizes="[5, 8, 10, 20]"
         :page-size="pagesize"
         style="margin-top: 50px"
         @current-change="handleCurrentChange"

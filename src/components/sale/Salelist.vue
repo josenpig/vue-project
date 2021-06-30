@@ -197,13 +197,6 @@
       <el-table :data="tableData" style="width: 100%" stripe>
         <el-table-column fixed label="操作" width="150">
           <template #default="scope">
-            <el-button
-              type="text"
-              v-if="tableData[scope.$index].orderState == 0"
-            >
-              结束执行
-            </el-button>
-            <el-button type="text" v-else> 恢复执行 </el-button>
             <el-button type="text" @click="look(scope.$index)">
               查看出库
             </el-button>

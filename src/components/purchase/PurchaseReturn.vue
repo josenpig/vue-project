@@ -21,7 +21,7 @@
         <el-button
           size="mini"
           v-if="formorder.vettingState == 0"
-          v-has="{ action: 'approval' }"
+          v-has="{ action: 'preturn:approval' }"
           @click="approval(-1)"
           >驳回</el-button
         >
@@ -30,13 +30,14 @@
           size="mini"
           v-if="formorder.vettingState == -2"
           @click="approval(0)"
+          v-has="{ action: 'preturn:approval' }"
           >提交审批</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.vettingState == 0"
-          v-has="{ action: 'approval' }"
+          v-has="{ action: 'preturn:approval' }"
           @click="approval(1)"
           >审批通过</el-button
         >
@@ -121,13 +122,14 @@
         />
         <el-table-column prop="purchaseMoney" label="退货金额(元)" width="200" />
         <el-table-column prop="depotName" label="仓库" width="200" />
-        <el-table-column prop="ingredient" label="成分" width="200" />
+        <el-table-column prop="ingredient" :show-overflow-tooltip="true" label="成分" width="200" />
         <el-table-column prop="gramHeavy" label="克量" width="200" />
         <el-table-column
           :show-overflow-tooltip="true"
           prop="productDescribe"
           label="产品描述"
           width="200"
+          
         /> </el-table
       ><span>
         <el-alert
