@@ -159,7 +159,7 @@ export default {
                 _this.loginFormgo.userPhone
             )
             .then(function (response) {
-              ElMessage.success("验证码为" + response.data.data);
+              ElMessage.success("验证码已发送,请注意查收");
             })
             .catch(function (error) {
               console.log(error);
