@@ -159,7 +159,7 @@
             </el-button>
             <el-button
               type="text"
-              v-if="tableData[scope.$index].caseState == 2"
+              v-if="tableData[scope.$index].caseState == 1"
             >
               已完成付款
             </el-button>
