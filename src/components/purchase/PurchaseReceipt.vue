@@ -12,6 +12,7 @@
       >
         <el-step title="提交订单"></el-step>
         <el-step title="二级审批"></el-step>
+        <el-step title="订单收款"></el-step>
       </el-steps>
       <div class="deliver-shenpi">
         <!-- 提交 -->
@@ -49,18 +50,62 @@
       width="30%"
       :before-close="handleClose"
     >
-      <div style="float: left">
-        <span v-if="formorder.associatedOrder == null">关联采购订单：无</span>
-        <span v-else>关联采购订单：{{ formorder.associatedOrder }}</span>
-      </div>
+
+        <div style="float: left">
+          <span style="float: left">关联采购单：</span>
+          <span v-if="formorder.deliveassociatedOrderryId == null">无</span>
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(formorder.associatedOrder, '采购单')"
+              type="text"
+              >{{ formorder.associatedOrder }}</el-button
+            ></span
+          >
+        </div>
+
+
+        <div style="float: left; width: 100%; margin-top: 10px">
+          <span style="float: left">关联采购退货单：</span>
+          <span v-if="formorder.exitOrderId == null">无</span>
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              @click="goorder(formorder.exitOrderId, '销售退货单')"
+              type="text"
+              >{{ formorder.exitOrderId }}</el-button
+            ></span
+          >
+        </div>
+
+
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.exitOrderId == null">关联销售退货单：无</span>
-        <span v-else>关联销售退货单：{{ formorder.exitOrderId }}</span>
-      </div>
+          <span style="float: left">关联收款单：</span>
+          <span v-if="pamentBill.length == 0">无</span>
+          <span v-else style="float: left; width: 50%"
+            ><el-button
+              v-for="item in pamentBill"
+              @click="goorder(item.paymentId, '收款单')"
+              type="text"
+              >{{ item.paymentId }}</el-button
+            ></span
+          >
+        </div>
+
+
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.paymentOrder == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.paymentOrder }}</span>
+        <span v-if="ciaBills == null">关联核销单：无</span>
+        <span style="float: left">关联核销单：</span>
+          <span v-if="ciaBills.length == 0">无</span>
+          <span v-else style="float: left; width: 50%" >
+            <el-button v-for="item in ciaBills"
+            @click="goorder(item.saleId, '核销单')"
+              type="text"
+              >{{ item.saleId }}
+              </el-button></span>
       </div>
+
+
+
+
 
       <template #footer>
         <span class="dialog-footer">
@@ -161,8 +206,10 @@ import { ElMessage } from "element-plus";
 import store from "../../store";
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("orderid");
-    next();
+    if (sessionStorage.getItem('orderid')!=null&&sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'CGRKD') {
+      sessionStorage.removeItem('orderid')
+    }
+    next()
   },
   name: "PurchaseReceipt",
   data() {
@@ -172,6 +219,8 @@ export default {
       formorder: {},
       //表体销售商品信息
       productdata: [],
+      pamentBill:[],
+      ciaBills:[]
     };
   },
   computed: {
@@ -184,6 +233,20 @@ export default {
     },
   },
   methods: {
+    goorder(val, type) {
+      console.log(val,type)
+      sessionStorage.setItem('orderid', val)
+      if (type == '采购单') {
+        this.$router.push('/Purchase')
+      } else if (type == '采购退货单') {
+        this.$router.push('/PurchaseReturn')
+      } else if(type=='核销单'){
+        this.$router.push('/Writeoff')
+      }
+      else {
+        this.$router.push('/Payment')
+      }
+    },
     //提交审批
     approval(type) {
       const state = JSON.parse(sessionStorage.getItem("state"));
@@ -243,7 +306,8 @@ export default {
             console.log(response)
             _this.formorder = response.data.data.receipt;
             _this.productdata = response.data.data.receiptDetails;
-
+            _this.pamentBill = response.data.data.paymentBills;
+            _this.ciaBills = response.data.data.ciaBills;
           })
           .catch(function (error) {
             console.log(error);

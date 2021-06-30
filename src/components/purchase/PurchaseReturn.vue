@@ -21,7 +21,7 @@
         <el-button
           size="mini"
           v-if="formorder.vettingState == 0"
-          v-has="{ action: 'preturn:approval' }"
+          v-has="{ action: 'approval' }"
           @click="approval(-1)"
           >驳回</el-button
         >
@@ -30,15 +30,14 @@
           size="mini"
           v-if="formorder.vettingState == -2"
           @click="approval(0)"
-          v-has="{ action: 'preturn:approval' }"
           >提交审批</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.vettingState == 0"
+          v-has="{ action: 'approval' }"
           @click="approval(1)"
-          v-has="{ action: 'preturn:approval' }"
           >审批通过</el-button
         >
       </div>
@@ -50,20 +49,44 @@
       :before-close="handleClose"
     >
       <div style="float: left">
-        <span v-if="formorder.deliveryId == null">关联采购订单：无</span>
-        <span v-else>关联采购订单：{{ formorder.purchaseOrder }}</span>
+        <span v-if="formorder.purchaseOrder == null">关联采购订单：无</span>
+        <span v-else>
+          <el-button type="text" @click="goorder(formorder.purchaseOrder, '采购单')">
+          关联采购单：{{ formorder.purchaseOrder }}
+          </el-button>
+          </span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
         <span v-if="formorder.receiptOrder == null">关联采购入库单：无</span>
-        <span v-else>关联采购入库单：{{ formorder.receiptOrder }}</span>
+        <span v-else>
+          <el-button type="text" @click="goorder(formorder.receiptOrder, '采购入库单')">
+          关联采购入库单:{{ formorder.receiptOrder }}
+          </el-button>
+          </span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.paymentOrder == null">关联付款单：无</span>
-        <span v-else>关联付款单：{{ formorder.paymentOrder }}</span>
+        <span v-if="pamentBill == null">关联收款单：无</span>
+        <span style="float: left">关联收款单：</span>
+          <span v-if="pamentBill.length == 0">无</span>
+          <span v-else style="float: left; width: 50%" >
+            <el-button v-for="item in pamentBill"
+            @click="goorder(item.paymentId, '收款单')"
+              type="text"
+              >{{ item.paymentId }}
+              </el-button></span>
       </div>
+
+
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.cavOrder == null">关联核销单：无</span>
-        <span v-else>关联核销单：{{ formorder.cavOrder }}</span>
+        <span v-if="ciaBills == null">关联核销单：无</span>
+        <span style="float: left">关联核销单：</span>
+          <span v-if="ciaBills.length == 0">无</span>
+          <span v-else style="float: left; width: 50%" >
+            <el-button v-for="item in ciaBills"
+            @click="goorder(item.saleId, '核销单')"
+              type="text"
+              >{{ item.saleId }}
+              </el-button></span>
       </div>
       <template #footer>
         <span class="dialog-footer">
@@ -153,8 +176,10 @@ import { ElMessage } from "element-plus";
 import store from "../../store";
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("orderid");
-    next();
+    if (sessionStorage.getItem('orderid')!=null&&sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'CGTHD') {
+      sessionStorage.removeItem('orderid')
+    }
+    next()
   },
   name: "Sale",
   data() {
@@ -164,6 +189,8 @@ export default {
       formorder: {},
       //表体销售商品信息
       productdata: [],
+      pamentBill:[],
+      ciaBills:[]
     };
   },
   computed: {
@@ -177,6 +204,20 @@ export default {
     },
   },
   methods: {
+    goorder(val, type) {
+      console.log(val,type)
+      sessionStorage.setItem('orderid', val)
+      if (type == '采购单') {
+        this.$router.push('/Purchase')
+      } else if (type == '采购入库单') {
+        this.$router.push('/PurchaseReceipt')
+      } else if(type=='核销单'){
+        this.$router.push('/Writeoff')
+      }
+      else {
+        this.$router.push('/Payment')
+      }
+    },
     //审批
     approval(type) {
       const state = JSON.parse(sessionStorage.getItem("state"));
@@ -234,6 +275,8 @@ export default {
           .then(function (response) {
             _this.formorder = response.data.data.returns;
             _this.productdata = response.data.data.returnsDetails;
+            _this.pamentBill = response.data.data.payments;
+            _this.ciaBills = response.data.data.ciaBills;
           })
           .catch(function (error) {
             console.log(error);

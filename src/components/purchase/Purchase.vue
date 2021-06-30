@@ -61,16 +61,44 @@
       :before-close="handleClose"
     >
       <div style="float: left">
-        <span v-if="formorder.deliveryId == null">关联采购入库单：无</span>
-        <span v-else>关联采购入库单：{{ formorder.receiptOrderId }}</span>
+        <span v-if="formorder.receiptOrderId == null">关联采购入库单：无</span>
+        <span v-else>
+          <el-button type="text" @click="goorder(formorder.receiptOrderId, '采购入库单')">
+          关联采购入库单：{{ formorder.receiptOrderId }}
+          </el-button>
+          </span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">关联采购退货单：无</span>
-        <span v-else>关联采购退货单：{{ formorder.exitOrderId }}</span>
+        <span v-if="formorder.exitOrderId == null">关联采购退货单：无</span>
+        <span v-else>
+          <el-button type="text" @click="goorder(formorder.exitOrderId, '采购退货单')">
+          关联采购入库单：{{ formorder.exitOrderId }}
+          </el-button>
+          </span>
       </div>
       <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.paymentOrder }}</span>
+        <span v-if="pamentBill == null">关联收款单：无</span>
+        <span style="float: left">关联收款单：</span>
+          <span v-if="pamentBill.length == 0">无</span>
+          <span v-else style="float: left; width: 50%" >
+            <el-button v-for="item in pamentBill"
+            @click="goorder(item.paymentId, '收款单')"
+              type="text"
+              >{{ item.paymentId }}
+              </el-button></span>
+      </div>
+
+
+      <div style="float: left; width: 100%; margin-top: 10px">
+        <span v-if="ciaBills == null">关联核销单：无</span>
+        <span style="float: left">关联核销单：</span>
+          <span v-if="ciaBills.length == 0">无</span>
+          <span v-else style="float: left; width: 50%" >
+            <el-button v-for="item in ciaBills"
+            @click="goorder(item.saleId, '核销单')"
+              type="text"
+              >{{ item.saleId }}
+              </el-button></span>
       </div>
 
       <template #footer>
@@ -193,8 +221,10 @@ import { ElMessage } from "element-plus";
 import store from "../../store";
 export default {
   beforeRouteLeave(to, form, next) {
-    sessionStorage.removeItem("orderid");
-    next();
+    if (sessionStorage.getItem('orderid')!=null&&sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'CGDD') {
+      sessionStorage.removeItem('orderid')
+    }
+    next()
   },
   name: "Purchase",
   data() {
@@ -204,7 +234,9 @@ export default {
       formorder: {},
       //表体商品信息
       productdata: [],
-      issale:false
+      issale:false,
+      pamentBill:[],
+      ciaBills:[]
     };
   },
   computed: {
@@ -254,6 +286,19 @@ export default {
     },
   },
   methods: {
+    goorder(val, type) {
+      console.log(val,type)
+      sessionStorage.setItem('orderid', val)
+      if (type == '采购入库单') {
+        this.$router.push('/PurchaseReceipt')
+      } else if (type == '采购退货单') {
+        this.$router.push('/PurchaseReturn')
+      } else if(type=='核销单'){
+        this.$router.push('/Writeoff')
+      }else {
+        this.$router.push('/Payment')
+      }
+    },
     //付款
     goreceipt() {
       var receipt = {
@@ -327,9 +372,11 @@ export default {
           },
         })
           .then(function (response) {
-            console.log(response)
+            console.log(response.data.data.payments)
             _this.formorder = response.data.data.purchaseOrder;
             _this.productdata = response.data.data.list;
+            _this.pamentBill = response.data.data.payments;
+            _this.ciaBills = response.data.data.ciaBills;
             if(_this.formorder.vettingState==1){
               _this.issale=true;
             }
