@@ -18,23 +18,24 @@
         <el-button
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(-1)"
+          v-has="{ action: 'receipt:approval' }"
           >驳回</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == -2"
-          @click="approval(0)"
-          >提交审批</el-button
+          v-if="formorder.approvalState != 1"
+          @click="change()"
+          v-has="{ action: 'receipt:add' }"
+          >编辑</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(1)"
+          v-has="{ action: 'receipt:approval' }"
           >审批通过</el-button
         >
       </div>
@@ -216,6 +217,7 @@ export default {
           .catch(() => {})
       }
     },
+    //显示单据
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const orderid = sessionStorage.getItem('orderid')
@@ -240,6 +242,11 @@ export default {
             console.log(error)
           })
       }
+    },
+    //编辑
+    change() {
+      sessionStorage.setItem('draft', this.formorder.receiptId)
+      this.$router.push('/Addreceipt')
     },
   },
 

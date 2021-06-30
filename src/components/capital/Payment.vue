@@ -18,23 +18,24 @@
         <el-button
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(-1)"
+          v-has="{ action: 'payment:approval' }"
           >驳回</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == -2"
-          @click="approval(0)"
-          >提交审批</el-button
+          v-if="formorder.approvalState != 1"
+          @click="change()"
+          v-has="{ action: 'receipt:add' }"
+          >编辑</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(1)"
+          v-has="{ action: 'payment:approval' }"
           >审批通过</el-button
         >
       </div>
@@ -162,20 +163,6 @@ export default {
     //审批
     approval(type) {
       var tfok = true
-      // this.billdata.forEach((item) => {
-      //   if (item.unpaidMoney == 0 && tfok == true) {
-      //     var massage = "";
-      //     item.purchaseType == "销售出库单"
-      //       ? (massage = "订单：" + item.purchaseId + "已结案")
-      //       : (massage = "订单：" + item.purchaseId + "预付款金额不足");
-      //     this.$notify({
-      //       title: "操作失败",
-      //       message: massage,
-      //       type: "warning",
-      //     });
-      //     tfok = false;
-      //   }
-      // });
       if (tfok == true) {
         const state = JSON.parse(sessionStorage.getItem('state'))
         const orderid = sessionStorage.getItem('orderid')
@@ -230,12 +217,13 @@ export default {
           .catch(() => {})
       }
     },
+    //显示单据
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const orderid = sessionStorage.getItem('orderid')
       const _this = this
       if (orderid == null) {
-        this.$router.push('/Receiptlist')
+        this.$router.push('/Paymentlist')
       } else {
         this.axios({
           url:
@@ -254,6 +242,11 @@ export default {
             console.log(error)
           })
       }
+    },
+    //编辑
+    change() {
+      sessionStorage.setItem('draft', this.formorder.paymentId)
+      this.$router.push('/Addpayment')
     },
   },
 

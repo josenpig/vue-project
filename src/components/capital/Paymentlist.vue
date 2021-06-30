@@ -161,7 +161,6 @@
         <el-table-column prop="piaMoney" label="预付金额(元)" width="120" />
         <el-table-column prop="piaBalance" label="预付余额(元)" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
-        <el-table-column prop="remarks" label="单据备注" width="120" />
         <el-table-column prop="approvalState" label="审批状态" width="120">
           <template #default="scope">
             <span v-if="tableData[scope.$index].approvalState == 0">
@@ -188,7 +187,7 @@
     <div class="paymentlist-footer" v-show="paging">
       <el-pagination
         background
-        layout="total,sizes, prev, pager, next"
+        layout="total,prev,pager,next,sizes"
         :total="max"
         :page-sizes="[5,8,10,20]"
         :page-size="pagesize"

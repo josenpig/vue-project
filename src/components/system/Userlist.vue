@@ -166,18 +166,17 @@
           <template #default="scope">
             <el-button
               type="text"
-              class="power"
+              class="el-icon-edit"
+              size="samll"
+              v-if="
+                tableData[scope.$index].userId != 1 &&
+                tableData[scope.$index].userName !=
+                  $store.state.userInfo.userName
+              "
+              v-has="{ action: 'user:update' }"
               @click="changeall(scope.$index)"
+              >修改</el-button
             >
-              <el-button
-                type="text"
-                class="el-icon-edit"
-                size="samll"
-                v-if="tableData[scope.$index].userId != 1"
-                v-has="{ action: 'user:update' }"
-                >修改</el-button
-              >
-            </el-button>
             <el-button
               type="text"
               class="el-icon-delete"

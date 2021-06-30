@@ -6,7 +6,17 @@
       <span>新增收款</span>
       <div class="addreceipt-shenpi">
         <!-- 提交 -->
-        <el-button type="primary" size="mini" @click="examine(0)"
+        <el-button
+          size="mini"
+          @click="examine(-2)"
+          v-has="{ action: 'receipt:add' }"
+          >保存草稿</el-button
+        >
+        <el-button
+          type="primary"
+          size="mini"
+          @click="examine(0)"
+          v-has="{ action: 'receipt:add' }"
           >提交审批</el-button
         >
       </div>
@@ -105,8 +115,9 @@
               placeholder="请输入订单编号"
               style="width: 250px"
               size="small"
+              clearable
             />
-            <el-button icon="el-icon-search" size="small">查询</el-button>
+            <el-button icon="el-icon-search" size="small" @click="join()">查询</el-button>
           </div>
         </div>
         <el-table
@@ -258,7 +269,7 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="settlementTypeName" label="账户类型" />
+        <el-table-column prop="settlementType" label="账户类型" />
         <el-table-column prop="thisMoney" label="本次收款金额">
           <template #default="scope">
             <el-input-number
@@ -309,6 +320,7 @@ import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
     sessionStorage.removeItem('receipt')
+    sessionStorage.removeItem('draft')
     next()
   },
   name: 'Addreceipt',
@@ -429,6 +441,12 @@ export default {
         },
       ]
     },
+    //模糊查询单据
+    join(){
+      this.condition.saleId = this.findstock
+      this.findbill();
+    },
+    //查询可收款
     findbill() {
       this.condition.customer = this.formorder.customer
       const state = JSON.parse(sessionStorage.getItem('state'))
@@ -511,6 +529,7 @@ export default {
         rows.splice(index, 1) //删掉该行
       }
     },
+    //修改收款方式
     settype(index) {
       this.options.forEach((item) => {
         if (item.capitalId == this.accountdata[index].fundAccount) {
@@ -521,6 +540,7 @@ export default {
     },
     //提交审批（生成订单）
     examine(type) {
+      console.log(this.formorder)
       var tfok = true
       if (tfok == true) {
         this.accountdata.forEach((item) => {
@@ -595,6 +615,7 @@ export default {
           })
       }
     },
+    //查询是否来自收款单
     findcan() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const receipt = JSON.parse(sessionStorage.getItem('receipt'))
@@ -635,6 +656,50 @@ export default {
           console.log(error)
         })
     },
+    //显示单据----编辑单
+    showorder() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = sessionStorage.getItem('draft')
+      const _this = this
+      this.axios({
+        url:
+          'http://localhost:8088/frameproject/capitalReceipt/find/' + orderid,
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.formorder = response.data.data.receipt
+          _this.headeroptions1.forEach((item) => {
+            if (item.customerName == _this.formorder.customer) {
+              _this.formorder.customer = item.customerNumber
+            }
+          })
+          _this.headeroptions2.forEach((item) => {
+            if (item.userName == _this.formorder.payee) {
+              _this.formorder.payee = item.userId
+            }
+          })
+          _this.billdata = response.data.data.bills
+          _this.accountdata = response.data.data.accounts
+          for (var i = 0; i < _this.options.length; i++) {
+            for (var j = 0; j < _this.accountdata.length; j++) {
+              if (
+                _this.accountdata[j].fundAccount == _this.options[i].fundAccount
+              ) {
+                _this.accountdata[j].fundAccount = _this.options[i].capitalId
+                _this.accountdata[j].settlementType =
+                  _this.options[i].settlementType
+              }
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    //查询账户
     findoptions() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this
@@ -660,6 +725,7 @@ export default {
           console.log(error)
         })
     },
+    //查询人员
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this
@@ -674,6 +740,9 @@ export default {
           _this.headeroptions1 = response.data.data.customers
           _this.headeroptions2 = response.data.data.salemans
           _this.footeroptions = response.data.data.notifiers
+          if (sessionStorage.getItem('draft') != null) {
+            _this.showorder()
+          }
         })
         .catch(function (error) {
           console.log(error)
@@ -681,12 +750,11 @@ export default {
     },
   },
   created: function () {
-    const receipt = JSON.parse(sessionStorage.getItem('receipt'))
-    if (receipt != null) {
-      this.findcan()
-    }
     this.findoptions()
     this.findsaleman()
+    if (sessionStorage.getItem('receipt') != null) {
+      this.findcan()
+    }
   },
 }
 </script>
