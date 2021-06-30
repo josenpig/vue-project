@@ -6,7 +6,6 @@
       <span>新增付款</span>
       <div class="addpayment-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
           >提交审批</el-button
         >
@@ -366,7 +365,7 @@ export default {
         purchaseId: '',
       },
       //分页
-      pagesize: 5,
+      pagesize: 8,
       max: 0,
       currentPage: 1,
     }
@@ -645,6 +644,13 @@ export default {
       })
         .then(function (response) {
           _this.options = response.data.data
+          _this.options.forEach((item) => {
+            if (item.state == 1) {
+              _this.accountdata[0].fundAccount = item.capitalId
+              _this.accountdata[0].settlementTypeName = item.settlementType
+              _this.accountdata[0].settlementType = item.settlementTypeId
+            }
+          })
         })
         .catch(function (error) {
           console.log(error)

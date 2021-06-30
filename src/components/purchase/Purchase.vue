@@ -25,23 +25,24 @@
         <el-button
           size="mini"
           v-if="formorder.vettingState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(-1)"
+          v-has="{ action: 'purchase:approval' }"
           >驳回</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.vettingState == -2"
+          v-if="formorder.vettingState == 0"
           @click="approval(0)"
-          >提交审批</el-button
+          v-has="{ action: 'purchase:approval' }"
+          >保存</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.vettingState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(1)"
+          v-has="{ action: 'purchase:approval' }"
           >审批通过</el-button
         >
         <el-button
@@ -110,13 +111,27 @@
         <el-table-column prop="productId" label="产品编号" width="200" />
         <el-table-column prop="remark" label="备注" width="200" />
         <el-table-column prop="productUnit" label="单位" width="200" />
-        <el-table-column prop="productNum" label="数量" width="200" />
+        <el-table-column prop="productNum" label="数量" width="230">
+          <template #default="scope">
+            <el-input-number
+              v-model="productdata[scope.$index].productNum"
+              :controls="false"
+              :min="1"
+              :disabled="issale"
+              width="120"
+            />
+          </template>
+        </el-table-column>
         <el-table-column
           prop="purchaseUnitPrice"
           label="采购单价(元)"
           width="200"
         />
-        <el-table-column prop="purchaseMoney" label="采购金额(元)" width="200" />
+        <el-table-column prop="purchaseMoney" label="采购金额" width="200">
+          <template #default="scope">
+            {{ saleMoney(scope.$index)}}
+          </template>
+        </el-table-column>
         <el-table-column prop="depotName" label="仓库" width="200" />
         <el-table-column
           :show-overflow-tooltip="true"
@@ -187,18 +202,55 @@ export default {
       dialogVisible: false,
       //订单信息
       formorder: {},
-      //表体销售商品信息
+      //表体商品信息
       productdata: [],
+      issale:false
     };
   },
   computed: {
     //采购总金额
+    saleMoney() {
+      return function (id) {
+        this.productdata[id].purchaseMoney =
+          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*1000)/1000
+        return (
+          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*1000)/1000
+        );
+      };
+    },
+    //采购总金额
     total: function () {
       var allmoney = 0;
-      this.productdata.forEach((money) => {
-        allmoney += money.purchaseMoney;
-      });
-      return Math.round(allmoney * 1000) / 1000;
+      for (var i = 0; i < this.productdata.length; i++) {
+        allmoney +=
+          this.productdata[i].purchaseUnitPrice * this.productdata[i].productNum;
+      }
+      this.formorder.offersPrice =
+        Math.round(
+          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
+            1000
+        ) / 1000;
+      return (
+        Math.round(
+          (allmoney - (parseInt(this.formorder.disrate) / 100) * allmoney) *
+            1000
+        ) / 1000
+      );
+    },
+    //采购优惠金额
+    distotal: function () {
+      var allmoney = 0;
+      for (var i = 0; i < this.productdata.length; i++) {
+        allmoney +=
+          this.productdata[i].purchaseUnitPrice * this.productdata[i].productNum;
+      }
+      this.formorder.dismoney =
+        Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
+        100;
+      return (
+        Math.round((parseInt(this.formorder.disrate) / 100) * allmoney * 100) /
+        100
+      );
     },
   },
   methods: {
@@ -233,8 +285,11 @@ export default {
           .then(() => {
             this.axios({
               url: "http://localhost:8088/frameproject/purchaseOrder/approval",
-              method: "get",
+              method: "post",
               processData: false,
+              data:{
+                product: this.productdata
+              },
               params: fd,
               headers: {
                 JWTDemo: state.userInfo.token,
@@ -275,6 +330,9 @@ export default {
             console.log(response)
             _this.formorder = response.data.data.purchaseOrder;
             _this.productdata = response.data.data.list;
+            if(_this.formorder.vettingState==1){
+              _this.issale=true;
+            }
           })
           .catch(function (error) {
             console.log(error);

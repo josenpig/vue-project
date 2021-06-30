@@ -148,8 +148,6 @@
       <el-table
         :data="tableData"
         style="width: 100%"
-        max-height="400"
-        @selection-change="handleSelectionChange"
         stripe
       >
         <el-table-column label="操作" width="120" fixed>
@@ -203,11 +201,13 @@
     <div class="payable-footer" v-show="paging">
       <el-pagination
         background
-        layout="prev, pager, next"
+        layout="total,sizes, prev, pager, next"
         :total="max"
+        :page-sizes="[5,8,10,20]"
         :page-size="pagesize"
         style="margin-top: 50px"
         @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
         v-model:currentPage="currentPage"
       >
       </el-pagination>
@@ -384,6 +384,15 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
+    },
+    //改变页码大小
+    handleSizeChange(val) {
+      this.pagesize = val
+      this.findpage()
+    },
+    //改变页码数
+    handleCurrentChange(val) {
+      this.findpage()
     },
   },
   created: function () {

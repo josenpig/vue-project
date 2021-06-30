@@ -25,35 +25,48 @@
           @click="goreceipt()"
           >收款</el-button
         >
-        <el-button @click="approval(-1)" class="power">
-          <el-button
-            type="danger"
-            size="mini"
-            v-if="formorder.approvalState == 0"
-            v-has="{ action: 'approval' }"
-            >驳回</el-button
-          >
-        </el-button>
+        <el-button
+          type="danger"
+          size="mini"
+          v-if="formorder.approvalState < 0"
+          @click="del()"
+          >删除</el-button
+        >
+        <el-button
+          type="danger"
+          size="mini"
+          v-if="formorder.approvalState == 1"
+          @click="cancel()"
+          >废弃</el-button
+        >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == -2"
-          @click="approval(0)"
+          v-if="formorder.approvalState != 1"
+          @click="change()"
           >编辑</el-button
         >
-        <el-button @click="approval(1)" class="power">
-          <el-button
-            type="primary"
-            size="mini"
-            v-if="formorder.approvalState == 0"
-            v-has="{ action: 'approval' }"
-            >审批通过</el-button
-          >
-        </el-button>
+        <el-button
+          type="danger"
+          size="mini"
+          @click="approval(-1)"
+          v-if="formorder.approvalState == 0"
+          v-has="{ action: 'approval' }"
+          >驳回</el-button
+        >
+        <el-button
+          type="primary"
+          size="mini"
+          @click="approval(1)"
+          v-if="formorder.approvalState == 0"
+          v-has="{ action: 'approval' }"
+          >审批通过</el-button
+        >
         <el-button
           type="primary"
           size="mini"
           @click="approval(2)"
+          v-if="formorder.approvalState == 1"
           >生成出库单</el-button
         >
       </div>
@@ -90,11 +103,9 @@
         <div style="float: left; width: 100%; margin-top: 10px">
           <span style="float: left">关联收款单：</span>
           <span v-if="formorder.receipts.length == 0">无</span>
-          <span
-            v-else
-            v-for="item in formorder.receipts"
-            style="float: left; width: 50%"
+          <span v-else style="float: left; width: 50%"
             ><el-button
+              v-for="item in formorder.receipts"
               @click="goorder(item.receiptId, '收款单')"
               type="text"
               >{{ item.receiptId }}</el-button
@@ -210,10 +221,12 @@
 import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
-  // beforeRouteLeave(to, form, next) {
-  //   sessionStorage.removeItem('orderid')
-  //   next()
-  // },
+  beforeRouteLeave(to, form, next) {
+    if (sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'XSDD') {
+      sessionStorage.removeItem('orderid')
+    }
+    next()
+  },
   name: 'Sale',
   data() {
     return {
@@ -254,77 +267,169 @@ export default {
       sessionStorage.setItem('receipt', JSON.stringify(receipt))
       this.$router.push('/Addreceipt')
     },
-    //审批
-    approval(type) {
-      //编辑
-      if (type == 0) {
-        sessionStorage.setItem('draft', this.formorder.orderId)
-        this.$router.push('/Addsale')
-      } else {
-        //生成出库
-        if (type == 2) {
+    //删除
+    del() {
+      this.$confirm('此操作将永久删除该单据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(() => {
+          const state = JSON.parse(sessionStorage.getItem('state'))
+          const _this = this
+          this.axios({
+            url:
+              'http://localhost:8088/frameproject/saleorder/detele/' +
+              _this.formorder.orderId,
+            method: 'post',
+            headers: {
+              JWTDemo: state.userInfo.token,
+            },
+          })
+            .then(function (response) {
+              if (response.data.data == true) {
+                _this.$router.push('/Salelist')
+              }
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+        })
+        .catch(() => {})
+    },
+    //废弃
+    cancel() {
+      this.$confirm('确认废弃该单据？', '废弃', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(() => {
+          //判断单据是否可作废
           if (this.formorder.deliveryId != null) {
             this.$notify({
               title: '警告',
-              message: '该订单已完成出库，无法二次出库！',
+              message: '该订单已生成关联单据，不能操作！',
+              type: 'warning',
+            })
+          } else if (this.formorder.receipts.length > 0) {
+            this.$notify({
+              title: '警告',
+              message: '该单据已产生收款记录，无法废弃。',
+              type: 'warning',
+            })
+          } else if (this.formorder.returnId != null) {
+            this.$notify({
+              title: '警告',
+              message: '该单据已产生退货记录，无法废弃。',
               type: 'warning',
             })
           } else {
-            var obj = { order: this.formorder, product: this.productdata }
-            sessionStorage.setItem('saledeliver', JSON.stringify(obj))
-            this.$router.push('/Adddeliver')
-          }
-        } else {
-          //审批
-          const state = JSON.parse(sessionStorage.getItem('state'))
-          const orderid = sessionStorage.getItem('orderid')
-          var _this = this
-          var inputPattern
-          var inputErrorMessage
-          if (type == -1) {
-            inputPattern = /\s\S+|S+\s|\S/
-            inputErrorMessage = '驳回理由不能为空'
-          }
-          this.$prompt('请输入审批备注', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            inputPattern: inputPattern,
-            inputErrorMessage: inputErrorMessage,
-          })
-            .then(({ value }) => {
-              var fd = {
-                orderid: orderid,
-                type: type,
-                user: state.userInfo.userName,
-                approvalremarks: value,
-              }
-              this.axios({
-                url: 'http://localhost:8088/frameproject/saleorder/approval',
-                method: 'get',
-                processData: false,
-                params: fd,
-                headers: {
-                  JWTDemo: state.userInfo.token,
-                },
-              })
-                .then(function (response) {
-                  if (response.data.code == 200) {
-                    _this.$notify({
-                      title: '操作成功',
-                      message: '订单信息已被修改',
-                      type: 'success',
-                    })
-                    _this.showorder()
-                  }
-                })
-                .catch(function (error) {
-                  console.log(error)
-                })
+            const state = JSON.parse(sessionStorage.getItem('state'))
+            const _this = this
+            this.axios({
+              url:
+                'http://localhost:8088/frameproject/saleorder/update/' +
+                _this.formorder.orderId,
+              method: 'post',
+              headers: {
+                JWTDemo: state.userInfo.token,
+              },
             })
-            .catch(() => {})
+              .then(function (response) {
+                if (response.data.code == 200) {
+                  _this.$notify({
+                    title: '操作成功',
+                    message: '订单信息已被修改',
+                    type: 'success',
+                  })
+                  _this.showorder()
+                }
+              })
+              .catch(function (error) {
+                console.log(error)
+              })
+          }
+        })
+        .catch(() => {})
+    },
+    //编辑
+    change() {
+      sessionStorage.setItem('draft', this.formorder.orderId)
+      this.$router.push('/Addsale')
+    },
+    //审批
+    approval(type) {
+      //生成出库
+      if (type == 2) {
+        if(this.formorder.orderState==1){
+          this.$notify({
+            title: '警告',
+            message: '该订单已结束执行，无法出库！',
+            type: 'warning',
+          })
+        }else if (this.formorder.deliveryId != null) {
+          this.$notify({
+            title: '警告',
+            message: '该订单已完成出库，无法二次出库！',
+            type: 'warning',
+          })
+        } else {
+          var obj = { order: this.formorder, product: this.productdata }
+          sessionStorage.setItem('saledeliver', JSON.stringify(obj))
+          this.$router.push('/Adddeliver')
         }
+      } else {
+        //审批
+        const state = JSON.parse(sessionStorage.getItem('state'))
+        const orderid = sessionStorage.getItem('orderid')
+        var _this = this
+        var inputPattern
+        var inputErrorMessage
+        if (type == -1) {
+          inputPattern = /\s\S+|S+\s|\S/
+          inputErrorMessage = '驳回理由不能为空'
+        }
+        this.$prompt('请输入审批备注', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPattern: inputPattern,
+          inputErrorMessage: inputErrorMessage,
+        })
+          .then(({ value }) => {
+            var fd = {
+              orderid: orderid,
+              type: type,
+              user: state.userInfo.userName,
+              approvalremarks: value,
+            }
+            this.axios({
+              url: 'http://localhost:8088/frameproject/saleorder/approval',
+              method: 'get',
+              processData: false,
+              params: fd,
+              headers: {
+                JWTDemo: state.userInfo.token,
+              },
+            })
+              .then(function (response) {
+                if (response.data.code == 200) {
+                  _this.$notify({
+                    title: '操作成功',
+                    message: '订单信息已被修改',
+                    type: 'success',
+                  })
+                  _this.showorder()
+                }
+              })
+              .catch(function (error) {
+                console.log(error)
+              })
+          })
+          .catch(() => {})
       }
     },
+    //显示单据
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const orderid = sessionStorage.getItem('orderid')

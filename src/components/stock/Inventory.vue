@@ -13,44 +13,14 @@
           size="mini"
           >删除</el-button
         >
-        <el-button
-          size="mini"
-          >生成关联单据</el-button
-        >
       </div>
     </div>
-    <el-dialog
-      title="关联单据"
-      v-model="dialogVisible"
-      width="30%"
-      :before-close="handleClose"
-    >
-      <div style="float: left">
-        <span v-if="formorder.deliveryId == null">关联销售出库单：无</span>
-        <span v-else>关联销售出库单：{{ formorder.deliveryId }}</span>
-      </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.returnId == null">关联销售退货单：无</span>
-        <span v-else>关联销售退货单：{{ formorder.returnId }}</span>
-      </div>
-      <div style="float: left; width: 100%; margin-top: 10px">
-        <span v-if="formorder.receiptId == null">关联收款单：无</span>
-        <span v-else>关联收款单：{{ formorder.receiptId }}</span>
-      </div>
-
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button type="primary" @click="dialogVisible = false"
-            >确 定</el-button
-          >
-        </span>
-      </template>
-    </el-dialog>
     <!-- 表单头部 -->
     <div class="sale-header">
       <el-row :gutter="20">
         <el-col :span="4">单据编号：{{ formorder.id }}</el-col>
         <el-col :span="4">盘点时间：{{ formorder.inventoryTime }}</el-col>
+        <el-col :span="4">盘点仓库：{{ formorder.depotName }}</el-col>
         <el-col :span="4">盘点产品量：{{ formorder.inventorycount }}</el-col>
         <el-col :span="4">已盘点产品量：{{ formorder.inventorycounter }}</el-col>
       </el-row>
@@ -62,14 +32,14 @@
         <!-- 产品详细信息 -->
         <el-table-column type="index" width="40" />
         <el-table-column prop="productName" label="产品名称" width="200" />
-        <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpe" label="产品规格" width="120" />
-        <el-table-column prop="productType" label="产品分类" width="120" />
-        <el-table-column prop="productUnit" label="产品单位" width="120" />
-        <el-table-column prop="systemNum" label="系统数量" width="120" />
-        <el-table-column prop="inventoryNum" label="盘点数量" width="120" />
-        <el-table-column prop="unitPl" label="盘盈盘亏" width="120" />
-        <el-table-column prop="remarks" label="备注" width="120" />
+        <el-table-column prop="productId" label="产品编号" width="200" />
+        <el-table-column prop="productSpe" label="产品规格" width="200" />
+        <el-table-column prop="productType" label="产品分类" width="200" />
+        <el-table-column prop="productUnit" label="产品单位" width="200" />
+        <el-table-column prop="systemNum" label="系统数量" width="200" />
+        <el-table-column prop="inventoryNum" label="盘点数量" width="200" />
+        <el-table-column prop="unitPl" label="盘盈盘亏" width="200" />
+        <el-table-column prop="remarks" label="备注" width="200" />
         </el-table
       ><span>
         <el-alert
@@ -78,7 +48,17 @@
           center
           :closable="false"
         >
-          订单销售总金额：{{ total }}元
+          库存盘点总数量：{{ total }}
+        </el-alert>
+      </span>
+      <span>
+        <el-alert
+          style="font-size: 35px"
+          class="el-icon-s-finance"
+          center
+          :closable="false"
+        >
+          盘盈盘亏总和：{{ total }}
         </el-alert>
       </span>
       <!-- 备注 -->
@@ -96,36 +76,10 @@
       <el-divider content-position="left">其他信息</el-divider>
       <!-- 表单表尾 -->
       <div class="sale-footer">
+        
+        
         <el-row :gutter="24">
-          <el-col :span="5">优惠率(%)：{{ formorder.disrate }} %</el-col>
-          <el-col :span="6">优惠金额(元)： {{ formorder.dismoney }}元</el-col>
-          <el-col :span="6"
-            >优惠后应收款(元)： {{ formorder.receivables }}元</el-col
-          >
-        </el-row>
-        <el-row :gutter="24">
-          <el-col :span="5">客户联系人：{{ formorder.contacts }}</el-col>
-          <el-col :span="6"
-            >客户联系人电话：{{ formorder.contactsPhone }}</el-col
-          >
-          <el-col :span="6">客户地址：{{ formorder.contactsAddress }}</el-col>
-        </el-row>
-        <el-row :gutter="24">
-          <el-col :span="5">创建人：{{ formorder.founder }}</el-col>
-          <el-col :span="6">创建时间：{{ formorder.foundTime }}</el-col>
-          <el-col :span="6">订单已收款：{{ formorder.advance }}元</el-col>
-        </el-row>
-        <el-row
-          :gutter="24"
-          v-if="formorder.approvalState == 1 || formorder.approvalState == -1"
-        >
-          <el-col :span="5">一级审批人：{{ formorder.approver }}</el-col>
-          <el-col :span="6"
-            >一级审批时间：{{ formorder.lastApprovalTime }}</el-col
-          >
-          <el-col :span="6"
-            >一级审批备注：{{ formorder.approvalRemarks }}</el-col
-          >
+          <el-col :span="5">盘点人：{{ formorder.inventorypeople }}</el-col>
         </el-row>
       </div>
     </div>
@@ -151,11 +105,17 @@ export default {
     };
   },
   computed: {
-    //销售总金额
+    inventorypl: function () {
+      var allmoney = 0;
+      this.productdata.forEach((money) => {
+        allmoney += money.unitPl;
+      });
+      return Math.round(allmoney * 1000) / 1000;
+    },
     total: function () {
       var allmoney = 0;
       this.productdata.forEach((money) => {
-        allmoney += money.saleMoney;
+        allmoney += money.inventoryNum;
       });
       return Math.round(allmoney * 1000) / 1000;
     },

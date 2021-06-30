@@ -13,7 +13,7 @@
 					<hr style="margin-bottom: 20px;" />
 					<el-form :model="form">
 						<el-form-item label="* 仓库编号 *" :label-width="formLabelWidth">
-							<el-input v-model="form.depotId" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
+							<el-input @change="pdID" v-model="form.depotId" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
 						</el-form-item>
 						<el-form-item label="* 仓库名称 *" :label-width="formLabelWidth">
 							<el-input v-model="form.depotName" autocomplete="off" placeholder="(必填)" maxlength="20" show-word-limit></el-input>
@@ -37,7 +37,7 @@
 					<template #footer>
 						<span class="dialog-footer">
 							<el-button @click="dialogFormVisible = false">取 消</el-button>
-							<el-button type="primary" @click="pdID">确 定</el-button>
+							<el-button type="primary" @click="Add">确 定</el-button>
 						</span>
 					</template>
 				</el-dialog>
@@ -104,27 +104,36 @@
 		<div class="Warehouse-mian">
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
-				<el-table-column prop="date" fixed label="操作" width="202">
+				<el-table-column prop="date" fixed label="操作" width="100">
 					<template #default="scope">
+						<el-tooltip content="修改" placement="top">
 						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						</el-tooltip>
+						
+						<el-tooltip content="删除" placement="top">
 						<el-button size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: coral;color: white;">禁用</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: lightgreen ;color: white;">启用</el-button>
+						</el-tooltip>
 					</template>
 				</el-table-column>
-				<el-table-column prop="depotId" fixed label="仓库编号" sortable width="130" />
-				<el-table-column prop="depotName" label="仓库名称" sortable width="140" />
-				<el-table-column prop="depotAddress" label="仓库地址"  width="130" />
-				<el-table-column prop="chargeName" label="负责人" sortable width="120" />
-				<el-table-column prop="contactNumber" label="联系电话"  width="120" />
-				<el-table-column prop="remarks" label="备注"  width="120" />
-				<el-table-column prop="state" label="状态" sortable width="120">
+				<el-table-column prop="date" fixed label="修改状态" width="100">
+					<template #default="scope">
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;">禁用</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6) ;color: white;">启用</el-button>
+					</template>
+				</el-table-column>
+				<el-table-column prop="state" label="状态" sortable width="100">
 					<template #default="scope">
 						<span v-if="scope.row.state==0" style="color: orangered;">禁用</span>
 						<span v-if="scope.row.state==1" style="color: seagreen;">启用</span>
 					</template>
 				</el-table-column>
-			</el-table>
+				<el-table-column prop="depotId" fixed label="仓库编号" sortable width="130" />
+				<el-table-column prop="depotName" label="仓库名称" sortable width="140" />
+				<el-table-column :show-overflow-tooltip="true" prop="depotAddress" label="仓库地址"  width="130" />
+				<el-table-column :show-overflow-tooltip="true" prop="chargeName" label="负责人" sortable width="100" />
+				<el-table-column prop="contactNumber" label="联系电话"  width="110" />
+				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注"  width="109" />
+				</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
 		<div class="salelist-footer">
@@ -185,6 +194,8 @@
 				pagesize: 5,
 				max: 0,
 				currentPage: 1,
+				
+				judge:''
 			}
 		},
 		methods: {
@@ -314,7 +325,7 @@
 					});
 				});
 			},
-			//判断仓库ID是否重复并添加仓库
+			//判断仓库ID是否重复
 			pdID() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
@@ -331,15 +342,13 @@
 						},
 					})
 					.then(function(response) {
-						console.log("id不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (response.data == false) {
+						console.log("id不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data == false) {
 							ElMessage.warning({
 								message: '仓库ID重复',
 								type: 'success'
 							});
-						} else {
-							_this.Add()
 						}
 					})
 					.catch(function(error) {
@@ -354,6 +363,10 @@
 					this.form.chargeName == '') {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
+					this.pdID()
+					
+					setTimeout(() => {
+						if (this.judge) {
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var _this = this;
 					this.form.user = state.userInfo.userName;
@@ -377,11 +390,14 @@
 								type: 'success'
 							});
 							_this.form = {}
+							_this.judge = {}
 							_this.findpage()
 						})
 						.catch(function(error) {
 							console.log(error);
 						});
+						}
+						}, 200)
 				}
 			},
 			//打开修改框
@@ -466,13 +482,18 @@
 						})
 						.then(function(response) {
 							console.log(response.data.data);
-							if (response.data.data) {
+							if (response.data.data==true) {
 								_this.$message({
 									type: 'success',
 									message: able+'成功'
 								});
+								_this.findpage()
+							}else{
+								ElMessage.warning({
+									message: '该仓库存在相关单据，无法修改状态',
+									type: 'success'
+								});
 							}
-							_this.findpage()
 						})
 						.catch(function(error) {
 							console.log(error);

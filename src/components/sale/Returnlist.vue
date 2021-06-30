@@ -47,6 +47,7 @@
             <span>审批状态:</span>
             <el-radio-group v-model="status" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
+              <el-radio-button label="废弃"></el-radio-button>
               <el-radio-button label="草稿"></el-radio-button>
               <el-radio-button label="待审批"></el-radio-button>
               <el-radio-button label="已驳回"></el-radio-button>
@@ -135,7 +136,6 @@
       <el-table
         :data="tableData"
         style="width: 100%"
-        @selection-change="handleSelectionChange"
         stripe
       >
         <el-table-column prop="orderId" label="退货订单编号" fixed width="200">
@@ -204,11 +204,13 @@
     <div class="returnlist-footer" v-show="paging">
       <el-pagination
         background
-        layout="prev, pager, next"
+        layout="total,sizes, prev, pager, next"
         :total="max"
+        :page-sizes="[5,8,10,20]"
         :page-size="pagesize"
         style="margin-top: 50px"
         @current-change="handleCurrentChange"
+        @size-change="handleSizeChange"
         v-model:currentPage="currentPage"
       >
       </el-pagination>
@@ -294,6 +296,7 @@ export default {
     goadd() {
       this.$router.push('/Addreturn')
     },
+    //分页条件查询
     findpage() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       var _this = this
@@ -338,6 +341,7 @@ export default {
       this.condition.orderId = this.vagueorderid
       this.findpage()
     },
+    //查询人员
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this
@@ -357,9 +361,14 @@ export default {
           console.log(error)
         })
     },
+    //改变页码大小
+    handleSizeChange(val) {
+      this.pagesize = val
+      this.findpage()
+    },
     //改变页码数
     handleCurrentChange(val) {
-      this.findpage(val, this.pagesize)
+      this.findpage()
     },
     goorder(val) {
       sessionStorage.setItem('orderid', this.tableData[val].returnId)

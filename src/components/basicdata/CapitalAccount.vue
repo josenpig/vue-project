@@ -68,7 +68,7 @@
 							<el-input v-model="updateForm.fundAccount" autocomplete="off"></el-input>
 						</el-form-item>
 						<el-form-item label="结算类型" :label-width="formLabelWidth">
-							<el-select v-model="settlementTypeName" placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
+							<el-select v-model="settlementTypeName" filterable placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
 								<el-option v-for="item in SettlementType" :label="item.settlementType" :value="item.id" />
 							</el-select>
 							
@@ -135,21 +135,26 @@
 		<div class="CapitalAccount-mian">
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
-				<el-table-column prop="capitalId" label="账户编号" sortable width="120" />
-				<el-table-column prop="fundAccount" label="账户名称" sortable width="120"/>
-				<el-table-column prop="settlementType" label="结算类型" sortable width="120" />
+				<el-table-column prop="date" label="操作" width="150">
+			 	<template #default="scope">
+					<el-tooltip content="修改" placement="top">
+			 		<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+			 		</el-tooltip>
+			 		
+			 		<el-tooltip content="删除" placement="top">
+					<el-button size="small" @click="del(scope.row.capitalId)" type="text" icon="el-icon-delete" circle></el-button>
+					</el-tooltip>
+				</template>
+				</el-table-column>
+				<el-table-column prop="capitalId" label="账户编号" sortable width="175" />
+				<el-table-column prop="fundAccount" label="账户名称" sortable width="164"/>
+				<el-table-column prop="settlementType" label="结算类型" sortable width="140" />
 				<el-table-column prop="initialAmount" label="初期金额(元)" sortable width="120" />
 				<el-table-column prop="currentAmount" label="当前金额(元)" sortable width="120" />
-				<el-table-column prop="state" label="是否为默认" sortable width="120">
+				<el-table-column prop="state" label="是否为默认" sortable width="150">
 					<template #default="scope">
-						<span>{{scope.row.state==1?"默认账户":" "}}</span>
-					</template>
-				</el-table-column>
-				<el-table-column prop="date" label="操作" width="250">
-					<template #default="scope">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.capitalId)" type="text" icon="el-icon-delete" circle></el-button>
-						<el-button size="small" @click="setState(scope.row.capitalId,0)" v-if="scope.row.state==0" round style="background-color: orange;color: white;">
+						<span style="color: red;">{{scope.row.state==1?"默认账户":" "}}</span>
+						<el-button size="small" @click="setState(scope.row.capitalId,0)" v-if="scope.row.state==0" round style="background-color: skyblue;color: white;">
 							设为默认
 						</el-button>
 					</template>
@@ -373,9 +378,9 @@
 						},
 					})
 					.then(function(response) {
-						console.log("id不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (response.data == false) {
+						console.log("id不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data == false) {
 							ElMessage.warning({
 								message: '资金账户ID重复',
 								type: 'success'
@@ -545,8 +550,8 @@
 						},
 					})
 					.then(function(response) {
-						console.log("结算类型名称不重复是否通过:" + response.data)
-						_this.judge = response.data
+						console.log("结算类型名称不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -662,7 +667,6 @@
 	/* 内容表体 */
 	.CapitalAccount-mian {
 		background-color: #e9eef3;
-		;
 		padding-top: 10px;
 	}
 

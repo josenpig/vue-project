@@ -6,8 +6,11 @@
       <span>库存盘点</span>
       <div class="addsale-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(0)">临时保存</el-button>
+        <el-button size="mini" @click="examine(0)"
+        v-has="{ action: 'Inventory:add' }"
+        >临时保存</el-button>
         <el-button type="primary" size="mini" @click="examine(1)"
+          v-has="{ action: 'Inventory:add' }"
           >盘点完成</el-button
         >
       </div>
@@ -48,6 +51,7 @@
         <!-- 盘点仓库 -->
         <el-form-item label="盘点仓库:">
           <el-input
+            @click="isdialog=true"
             v-model="formorder.depotName"
             readonly="readonly"
             placeholder="盘点仓库"
@@ -79,11 +83,20 @@
     <el-dialog title="选择库存产品" v-model="dialogTableVisible" width="65%">
       <!-- 分类 -->
       <div style="width: 20%; height: 500px; float: left">
+        <el-button
+          class="el-icon-menu"
+          @click="dialogopen(0)"
+          type="primary"
+          style="width: 90%"
+        >
+          全部
+        </el-button>
         <el-tree
-          :data="data"
+          :data="ProType"
+          :default-expand-all="true"
           :props="defaultProps"
-          accordion
-          @node-click="handleNodeClick"
+          @node-click="findByType"
+          style="font-size: 15px"
         >
         </el-tree>
       </div>
@@ -130,16 +143,15 @@
         <div
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
-          <el-pagination
-            background
-            layout="prev, pager, next"
-            :total="max"
-            :page-size="pagesize"
-            style="float: left"
-            @current-change="handleCurrentChange"
-            v-model:currentPage="currentPage"
-          >
-          </el-pagination>
+      <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 30, 100]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="max">
+    </el-pagination>
           <div style="float: right">
             <el-button type="primary" @click="addproduct()">确定</el-button>
           </div>
@@ -158,7 +170,7 @@
               <el-button
                 size="mini"
                 icon="el-icon-plus"
-                @click="addrow(productdata)"
+                @click="dialogopen(0)"
                 type="primary"
                 circle
               />
@@ -187,16 +199,15 @@
                 icon="el-icon-more"
                 type="text"
                 style="font-size: 20px"
-                @click="dialogopen()"
+                @click="dialogopen(0)"
               />
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpe" label="产品规格" width="120" />
-        <el-table-column prop="productType" label="产品分类" width="120" />
-        <el-table-column prop="productUnit" label="产品单位" width="120" />
-        <el-table-column prop="inventoryNum" label="盘点数量" width="120">
+        <el-table-column prop="productId" label="产品编号" width="200" />
+        <el-table-column prop="productType" label="产品分类" width="200" />
+        <el-table-column prop="productUnit" label="产品单位" width="200" />
+        <el-table-column prop="inventoryNum" label="盘点数量" width="200">
           <template #default="scope">
             <el-input-number
               v-model="productdata[scope.$index].inventoryNum"
@@ -205,9 +216,9 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="systemNum" label="系统数量" width="120" />
+        <el-table-column prop="systemNum" label="系统数量" width="200" />
 
-        <el-table-column prop="inventoryPl" label="盘盈盘亏" width="120">
+        <el-table-column prop="inventoryPl" label="盘盈盘亏" width="200">
           <template #default="scope">
             {{ calcyk(scope.$index) }}
           </template>
@@ -296,11 +307,9 @@ export default {
       max: 0,
       currentPage: 1,
       depot: {},
-      depots:[]
-
-
-
-
+      depots:[],
+      ProType:[],
+      type:"",
     }
   },computed: {
     //弹出框已选产品数量计算
@@ -405,9 +414,22 @@ export default {
         this.formorder.orderTime=new Date()
       }
     },
+    //改变页码数
+    // handleCurrentChange(val) {
+    //   this.dialogopen(val, this.pagesize);
+    // },
     handleSelectionChange(val) {
       this.joinstockdata = val;
     },
+    handleCurrentChange(val) {
+        this.currentPage=val;
+        this.dialogopen();
+    },
+    handleSizeChange(val) {
+        this.pagesize=val;
+        this.currentPage=1;
+        this.dialogopen();
+      },
     setcontacts() {
       this.headeroptions1.forEach((item) => {
         if (item.customerName == this.formorder.customer) {
@@ -417,13 +439,38 @@ export default {
         }
       });
     },
-    //选择产品
-    dialogopen() {
+    findByType(type) {
+      this.type = type.label
+      this.dialogopen()
+    },
+    findAllProType() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/baseProductType/findProType',
+        method: 'get',
+        processData: false,
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.ProType = response.data.data
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    dialogopen(val) {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
+      if(val==0){
+        this.type="";
+      }
       var fd = {
         currentPage: this.currentPage,
         pageSize: this.pagesize,
+        type:this.type
       };
       this.axios({
         url: "http://localhost:8088/frameproject/stockInventory/allProduct/"+this.formorder.depotName,
@@ -437,7 +484,6 @@ export default {
         .then(function (response) {
           _this.stockdata = response.data.data.rows;
           _this.max = response.data.data.total;
-          console.log(response)
         })
         .catch(function (error) {
           console.log(error);
@@ -468,10 +514,7 @@ export default {
 
       console.log(this.productdata)
     },
-    //改变页码数
-    handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize);
-    },
+    
     //新增一行
     addrow(productdata, event) {
       productdata.push({
@@ -537,7 +580,7 @@ export default {
       }
     },
   created: function () {
-    
+    this.findAllProType();
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
     this.axios({

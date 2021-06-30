@@ -6,8 +6,12 @@
       <span>调拨单</span>
       <div class="addsale-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
+        <el-button size="mini" @click="examine(-2)"
+        v-has="{ action: 'ocate:add' }"
+        >保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
+        v-has="{ action: 'ocate:add' }"
+        
           >提交审批</el-button
         >
       </div>
@@ -91,11 +95,20 @@
     <el-dialog title="选择库存产品" v-model="dialogTableVisible" width="65%">
       <!-- 分类 -->
       <div style="width: 20%; height: 500px; float: left">
+        <el-button
+          class="el-icon-menu"
+          @click="dialogopen(0)"
+          type="primary"
+          style="width: 90%"
+        >
+          全部
+        </el-button>
         <el-tree
-          :data="data"
+          :data="ProType"
+          :default-expand-all="true"
           :props="defaultProps"
-          accordion
-          @node-click="handleNodeClick"
+          @node-click="findByType"
+          style="font-size: 15px"
         >
         </el-tree>
       </div>
@@ -175,7 +188,7 @@
               <el-button
                 size="mini"
                 icon="el-icon-plus"
-                @click="addrow(productdata)"
+                @click="dialogopen(0)"
                 type="primary"
                 circle
               />
@@ -204,7 +217,7 @@
                 icon="el-icon-more"
                 type="text"
                 style="font-size: 20px"
-                @click="dialogopen()"
+                @click="dialogopen(0)"
               />
             </el-tooltip>
           </template>
@@ -338,6 +351,8 @@ export default {
       max: 0,
       currentPage: 1,
       depots: [],
+      ProType:[],
+      type:"",
     };
   },
   computed: {
@@ -347,16 +362,42 @@ export default {
     },
   },
   methods: {
+    findByType(type) {
+      this.type = type.label
+      this.dialogopen()
+    },
+    findAllProType() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/baseProductType/findProType',
+        method: 'get',
+        processData: false,
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.ProType = response.data.data
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
     handleSelectionChange(val) {
       this.joinstockdata = val;
     },
     //选择产品
-    dialogopen() {
+    dialogopen(val) {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
+      if(val==0){
+        this.type="";
+      }
       var fd = {
         currentPage: this.currentPage,
         pageSize: this.pagesize,
+        type:this.type
       };
       this.axios({
         url: "http://localhost:8088/frameproject/stockInventory/allProduct/"+this.formorder.outwarehouse,
@@ -511,6 +552,7 @@ export default {
     },
   },
   created: function () {
+    this.findAllProType();
     const state = JSON.parse(sessionStorage.getItem("state"));
     const _this = this;
     this.axios({

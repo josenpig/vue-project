@@ -5,40 +5,29 @@
 		<h4 class="title">产品分类</h4>
 		<div>
 			<div>
-				<el-button @click="findpage" class="allType">
-					<i class="el-icon-caret-bottom" style="padding-right: 5px;"></i>全部
-					<a @click="openAdd(AllId)" style="float: right;">
-						<i class="el-icon-circle-plus-outline"></i>
+				<el-button @click="findpage" type="primary" class="allType">
+					<i class="el-icon-caret-bottom" style="padding:10px 0px 0px 5px;"></i>全部
+					<el-button type="text" @click="openAdd(AllId)" style="float: right;color: white;" class="el-icon-circle-plus-outline" v-has="{ action: 'sort:add' }">
 						<span style="font-size: 10px;">新增子分类</span>
-					</a>
+					</el-button>
 				</el-button>
 			</div>
-			<el-tree :data="ProType" node-key="1000" @node-click="findByType" :expand-on-click-node="false" style="font-size: 15px;padding: 5px 0px;">
+			<el-tree :data="ProType" node-key="1000" @node-click="findByType" style="font-size: 15px;padding: 5px 15px;">
 				<template #default="{ node, data }">
 					<span class="custom-tree-node">
 						<span>{{ node.label }}</span>
 						<span style="padding: 10px;">
-							<el-tooltip content="新增子分类" placement="top">
-							<a @click="openAdd(data)" style="padding: 4px;">
-								<i class="el-icon-circle-plus-outline"></i>
-							</a>
-							</el-tooltip>
-							<el-tooltip content="删除" placement="top">
-							<a @click="remove(data)" style="padding: 4px;">
-								<i class="el-icon-delete"></i>
-							</a>
-							</el-tooltip>
-							<el-tooltip content="修改" placement="top">
-							<a @click="openupdateProType(data)" style="padding: 4px;">
-								<i class="el-icon-edit"></i>
-							</a>
-							</el-tooltip>
+							<el-button type="text" @click="openAdd(data)" class="el-icon-circle-plus-outline" v-has="{ action: 'sort:add' }"></el-button>
+
+							<el-button type="text" @click="remove(data)" class="el-icon-delete" v-has="{ action: 'sort:delete' }"></el-button>
+
+							<el-button type="text" @click="openupdateProType(data)" v-has="{ action: 'sort:update' }" class="el-icon-edit"></el-button>
+
 						</span>
 					</span>
 				</template>
 			</el-tree>
 		</div>
-
 	</div>
 
 	<!--新增子分类-->
@@ -47,7 +36,8 @@
 			<hr style="margin-bottom: 20px;" />
 			<el-form :model="ProTypeForm">
 				<el-form-item label="分类名称" :label-width="formLabelWidth">
-					<el-input @change="pdProductTypeName(ProTypeForm.label)" v-model="ProTypeForm.label" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+					<el-input @change="pdProductTypeName(ProTypeForm.label)" v-model="ProTypeForm.label" placeholder="单位名称不能重复 (必填)"
+					 autocomplete="off"></el-input>
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -58,14 +48,15 @@
 			</template>
 		</el-dialog>
 	</div>
-	
+
 	<!--修改分类名称-->
 	<div>
 		<el-dialog title="修改子分类" v-model="PTupdateDialogFormVisible">
 			<hr style="margin-bottom: 20px;" />
 			<el-form :model="updateProTypeForm">
 				<el-form-item label="分类名称" :label-width="formLabelWidth">
-					<el-input @change="pdProductTypeName(updateProTypeForm.label)" v-model="updateProTypeForm.label" placeholder="单位名称不能重复 (必填)" autocomplete="off"></el-input>
+					<el-input @change="pdProductTypeName(updateProTypeForm.label)" v-model="updateProTypeForm.label" placeholder="单位名称不能重复 (必填)"
+					 autocomplete="off"></el-input>
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -76,7 +67,7 @@
 			</template>
 		</el-dialog>
 	</div>
-	
+
 	<!-- 主内容 -->
 	<div class="product">
 		<!-- 标题 -->
@@ -84,7 +75,7 @@
 			<span>产品列表</span>
 			<div class="shenpi">
 				<!-- 新增产品 -->
-				<el-button type="text" size="small " @click="ToAdd" style="color: white;background-color: #459df5;width: 90px;margin: 3px;">
+				<el-button type="text" v-has="{ action: 'product:add' }" size="small " @click="ToAdd" style="color: white;background-color: #459df5;width: 90px;margin: 3px;">
 					<i class="el-icon-plus"></i> 新增产品
 				</el-button>
 			</div>
@@ -99,7 +90,7 @@
 					<el-form-item label="产品编号" :label-width="formLabelWidth">
 						<el-input :disabled="true" v-model="updateForm.productId" autocomplete="off"></el-input>
 					</el-form-item>
-					<el-form-item label="产品名称"  :label-width="formLabelWidth">
+					<el-form-item label="产品名称" :label-width="formLabelWidth">
 						<el-input v-model="updateForm.productName" autocomplete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="成分" :label-width="formLabelWidth">
@@ -111,7 +102,7 @@
 					<el-form-item label="克重" :label-width="formLabelWidth">
 						<el-input v-model="updateForm.gramHeavy" autocomplete="off"></el-input>
 					</el-form-item>
-					<el-form-item label="单位"  :label-width="formLabelWidth">
+					<el-form-item label="单位" :label-width="formLabelWidth">
 						<el-select v-model="updateForm.unitId" filterable placeholder="请选择单位 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
 							<el-option v-for="item in unit" :label="item.unitName" :value="item.unitId"></el-option>
 						</el-select>
@@ -120,7 +111,7 @@
 						<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;margin-left: 20px;">
 							<i class="el-icon-plus"></i> 新增单位
 						</el-button>
-						
+
 						<el-dialog title="新增单位" v-model="dialogFormVisible">
 							<hr style="margin-bottom: 20px;" />
 							<el-form :model="form">
@@ -137,7 +128,7 @@
 						</el-dialog>
 
 					</el-form-item>
-					<el-form-item label="产品分类" :label-width="formLabelWidth" >
+					<el-form-item label="产品分类" :label-width="formLabelWidth">
 						<el-select v-model="updateForm.productTypeId" filterable placeholder="请选择结算类型 (必选)" @change="this.updateForm.settlementTypeId = this.settlementTypeName">
 							<el-option v-for="item in ProTypeList" :label="item.label" :value="item.id"></el-option>
 						</el-select>
@@ -155,10 +146,11 @@
 						<el-input v-model="updateForm.remarks" autocomplete="off"></el-input>
 					</el-form-item>
 					<el-form-item label="产品状态" :label-width="formLabelWidth">
-						<span v-if="updateForm.state==0" style="background-color: coral;color: white;padding: 15px;">下架</span>
-						<span v-if="updateForm.state==1" style="background-color: skyblue;color: white;padding: 15px;">上架</span>
-						<el-button v-if="updateForm.state==1" @click="disableOrEnable(updateForm,1)" round style="background-color: coral;color: white;margin-left: 40px;">下架</el-button>
-						<el-button v-if="updateForm.state==0" @click="disableOrEnable(updateForm,1)" round style="background-color: lightgreen ;color: white;margin-left: 40px">上架</el-button>
+						<span style="color: #ff4949;padding: 15px;">下架</span>
+						<el-switch @change="disableOrEnable(updateForm)" v-model="updateForm.SWstate" active-color="#13ce66"
+						 inactive-color="#ff4949">
+						</el-switch>
+						<span style="color: #13ce66;padding: 15px;">上架</span>
 					</el-form-item>
 				</el-form>
 				<template #footer>
@@ -196,35 +188,35 @@
 				<el-table-column fixed label="操作" width="100">
 					<template #default="scope">
 						<el-tooltip content="修改" placement="top">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+							<el-button type="text" size="small" @click="openupdate(scope.row)" icon="el-icon-edit" circle></el-button>
 						</el-tooltip>
 						<el-tooltip content="删除" placement="top">
-						<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
+							<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column fixed label="状态" width="80">
 					<template #default="scope">
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row,0)" round style="background-color: coral;color: white;padding: 7px;">下架</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row,0)" round style="background-color: lightgreen ;color: white;padding: 7px;">上架</el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;padding: 7px;">下架</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6);color: white;padding: 7px;">上架</el-button>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
-				<el-table-column prop="productName" label="产品名称" sortable width="120" />
-				<el-table-column prop="productSpec" label="规格" width="120" />
-				<el-table-column prop="ingredient" label="成分" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="150" />
+				<el-table-column :show-overflow-tooltip="true" prop="productSpec" label="规格" width="140" />
+				<el-table-column :show-overflow-tooltip="true" prop="ingredient" label="成分" width="140" />
 				<el-table-column prop="gramHeavy" label="克重" width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
-				<el-table-column prop="opingNumber" label="初期数量" sortable width="120" />
+				<el-table-column prop="opingNumber" label="初期总数量" sortable width="120" />
 				<el-table-column prop="state" label="状态" sortable width="120">
 					<template #default="scope">
 						<span v-if="scope.row.state==0" style="color: orangered;">下架</span>
 						<span v-if="scope.row.state==1" style="color: seagreen;">上架</span>
 					</template>
 				</el-table-column>
-				<el-table-column :show-overflow-tooltip="true" prop="productDescribe" label="产品描述" width="120" />
-				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="productDescribe" label="产品描述" width="200" />
+				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注" width="150" />
 				<el-table-column prop="purchaseMoney" label="采购单价(元)" sortable width="120" />
 				<el-table-column prop="purchaseUnitPrice" label="销售单价(元)" sortable width="120" />
 				<el-table-column prop="userName" label="创建人" sortable width="120" />
@@ -253,7 +245,7 @@
 				// 分类数据
 				ProType: [],
 				//不封装 分类数据
-				ProTypeList:[],
+				ProTypeList: [],
 				//表单数据
 				tableData: [],
 				//分页
@@ -274,9 +266,9 @@
 
 				//多选产品
 				selectPro: [],
-				
+
 				//单位数据
-				unit:[],
+				unit: [],
 				//新增单位信息弹框
 				dialogFormVisible: false,
 				//修改产品信息弹框
@@ -285,22 +277,22 @@
 				form: {
 					unitName: '' //单位名称
 				},
-				
+
 				//新增产品分类弹框
 				PTdialogFormVisible: false,
 				//修改产品分类弹框
 				PTupdateDialogFormVisible: false,
 				//新增产品分类
-				ProTypeForm:{
-					productTypeParentId:'',//父级分类id
-					label:''//分类名称
+				ProTypeForm: {
+					productTypeParentId: '', //父级分类id
+					label: '' //分类名称
 				},
 				//修改产品分类
-				updateProTypeForm:{
-					id:'',//分类id
-					label:'',//分类名称
+				updateProTypeForm: {
+					id: '', //分类id
+					label: '', //分类名称
 				},
-				
+
 				//修改产品表单
 				updateForm: {
 					productId: '', //产品编号
@@ -314,10 +306,11 @@
 					purchaseMoney: '', //采购单价
 					remarks: '', //备注
 					productDescribe: '', //产品描述
-					state: '' //产品状态
+					state: '', //产品状态
+					SWstate: '', //switch产品状态
 				},
 				//全部分类
-				AllId:{
+				AllId: {
 					id: 0
 				},
 				judge: '',
@@ -526,7 +519,7 @@
 				this.selectPro = val
 			},
 			//下架或上架
-			disableOrEnable(val,index) {
+			disableOrEnable(val) {
 				var _this = this;
 				var able;
 				if (val.state == 1) {
@@ -535,11 +528,7 @@
 				if (val.state == 0) {
 					able = '上架'
 				};
-				var remind="";
-				if(index==1){
-					remind='设置默认账户会导致之前修改的信息丢失，如果在此之前修改了账户信息请先提交修改！              '
-				}
-				this.$confirm(remind+'是否 "' + able + '" 该产品！', '提示', {
+				this.$confirm('是否 "' + able + '" 该产品！', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
@@ -565,7 +554,7 @@
 							if (response.data.data == null) {
 								_this.$message({
 									type: 'success',
-									message: able+'成功'
+									message: able + '成功'
 								});
 								_this.findpage()
 							} else {
@@ -573,6 +562,7 @@
 									message: response.data.data,
 									type: 'success'
 								});
+								_this.updateForm.SWstate = val.state == 0 ? false : true
 							}
 						})
 						.catch(function(error) {
@@ -583,6 +573,7 @@
 						type: 'info',
 						message: '已取消' + able
 					});
+					_this.updateForm.SWstate = val.state == 0 ? false : true
 				});
 			},
 			//根据分类查询商品
@@ -652,9 +643,9 @@
 						},
 					})
 					.then(function(response) {
-						console.log("单位名称不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if(!response.data){
+						console.log("单位名称不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data == false) {
 							ElMessage.warning({
 								message: '单位名称重复！',
 								type: 'success'
@@ -706,7 +697,7 @@
 					}, 200)
 				}
 			},
-			
+
 			//打开分类新增
 			openAdd(data) {
 				this.PTdialogFormVisible = true
@@ -714,7 +705,7 @@
 				console.log("add:")
 				console.log(data)
 			},
-			
+
 			//判断分类名称是否重复
 			pdProductTypeName(val) {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -732,9 +723,9 @@
 						},
 					})
 					.then(function(response) {
-						console.log("产品名称不重复是否通过:" + response.data)
-						_this.judge2 = response.data
-						if(!response.data){
+						console.log("产品名称不重复是否通过:" + response.data.data)
+						_this.judge2 = response.data.data
+						if (response.data.data == false) {
 							ElMessage.warning({
 								message: '产品名称重复！',
 								type: 'success'
@@ -745,7 +736,7 @@
 						console.log(error);
 					});
 			},
-			
+
 			//新增产品子分类
 			append() {
 				console.log("append:")
@@ -800,7 +791,7 @@
 			//修改产品分类信息
 			updateProType() {
 				console.log(this.updateProTypeForm)
-				if (this.updateProTypeForm.label == '' ||this.updateProTypeForm.label == null) {
+				if (this.updateProTypeForm.label == '' || this.updateProTypeForm.label == null) {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
 					const state = JSON.parse(sessionStorage.getItem("state"));
@@ -814,7 +805,7 @@
 								cancelButtonText: '取消',
 								type: 'warning'
 							}).then(() => {
-			
+
 								this.axios({
 										url: "http://localhost:8088/frameproject/baseProductType/updateProductType",
 										method: "post",
@@ -839,7 +830,7 @@
 									.catch(function(error) {
 										console.log(error);
 									});
-			
+
 							}).catch(() => {
 								this.$message({
 									type: 'info',
@@ -855,7 +846,7 @@
 					}, 500)
 				}
 			},
-			
+
 			//删除分类--
 			remove(data) {
 				console.log("remove:")
@@ -866,7 +857,7 @@
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-				
+
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var id = {
 						id: data.id
@@ -899,7 +890,7 @@
 						.catch(function(error) {
 							console.log(error);
 						});
-				
+
 				}).catch(() => {
 					this.$message({
 						type: 'info',
@@ -907,11 +898,11 @@
 					});
 				});
 			},
-			
+
 			//打开产品修改框
 			openupdate(val) {
 				this.updateDialogFormVisible = true;
-			
+
 				this.updateForm.productId = val.productId
 				this.updateForm.productName = val.productName
 				this.updateForm.ingredient = val.ingredient
@@ -926,6 +917,7 @@
 				this.updateForm.productDescribe = val.productDescribe
 				this.updateForm.pictureId = val.pictureId
 				this.updateForm.state = val.state
+				this.updateForm.SWstate = val.state == 0 ? false : true
 			},
 			//修改产品信息---
 			update() {
@@ -942,7 +934,7 @@
 					const state = JSON.parse(sessionStorage.getItem("state"));
 					var _this = this;
 					this.dialogFormVisible = false
-					
+
 					this.axios({
 							url: "http://localhost:8088/frameproject/baseProduct/updateProduct",
 							method: "post",
@@ -990,18 +982,15 @@
 		color: #459df5;
 		background-color: #f9f9f9;
 		height: 30px;
-		width: 100%;
 		padding: 15px;
 		margin-top: 0px;
 	}
 
 	.allType {
 		padding: 4px;
-		width: 222px;
+		width: 100%;
 		text-align: left;
 		font-size: 17px;
-		color: white;
-		background: lightblue;
 	}
 
 	.typelabel {

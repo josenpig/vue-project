@@ -40,7 +40,7 @@
 
 		<!--横向条状图-->
 		<div class="Echarts">
-			<div id="main" style="width: 540px;height:250px;padding: 10px 0px 0px 75px;"></div>
+			<div id="main" style="width: 540px;height:250px;padding: 10px 0px 0px 230px;"></div>
 		</div>
 		<!---->
 
@@ -49,12 +49,12 @@
 
 			<el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange" stripe>
 				<el-table-column prop="capitalId" label="资金账户编号" fixed width="200" />
-				<el-table-column prop="fundAccount" label="资金账户名称" width="190" />
-				<el-table-column prop="settlementType" label="结算类型名称" width="150" />
-				<el-table-column prop="receiptMoney" label="收入合计(元)" width="120" />
-				<el-table-column prop="paymentMoney" label="支出合计(元)" width="120" />
-				<el-table-column prop="initialAmount" label="初期金额" width="120" />
-				<el-table-column prop="currentAmount" label="当前金额" width="120" />
+				<el-table-column prop="fundAccount" label="资金账户名称" width="250" />
+				<el-table-column prop="settlementType" label="结算类型名称" width="200" />
+				<el-table-column prop="receiptMoney" label="收入合计(元)" width="150" />
+				<el-table-column prop="paymentMoney" label="支出合计(元)" width="150" />
+				<el-table-column prop="initialAmount" label="初期金额" width="150" />
+				<el-table-column prop="currentAmount" label="当前金额" width="150" />
 			</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
@@ -125,14 +125,6 @@
 					return [start1, end1]
 				})(),
 				options1: [],
-
-				//条件查询数据
-				vagueorderid: '',
-				condition: {
-					orderTime: '' //单据日期
-				},
-				dialogTableVisible: false,
-				pstatus: [],
 
 				//表单数据
 				tableData: [],
@@ -273,7 +265,7 @@
 						_this.psum = response.data.data[1];
 						
 						console.log("rsum:"+_this.rsum)
-						console.log("rsum:"+_this.psum)
+						console.log("psum:"+_this.psum)
 						_this.myEcharts();
 					})
 					.catch(function(error) {

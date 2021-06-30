@@ -6,8 +6,11 @@
       <span>新增采购退货单</span>
       <div class="addreturn-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
+        <el-button size="mini" @click="examine(-2)"
+        v-has="{ action: 'preturn:add' }"
+        >保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
+        v-has="{ action: 'preturn:add' }"
           >提交审批</el-button
         >
       </div>

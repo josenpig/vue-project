@@ -58,7 +58,7 @@
 					<el-input-number v-model="proForm.purchaseUnitPrice" :precision="2" :step="1" :min="0"></el-input-number>
 				</el-form-item>
 				<el-form-item label="* 采购单价 " :label-width="formLabelWidth">
-					<el-input-number v-model="proForm.purchaseMoney" :precision="2" :step="1" :min="0"></el-input-number>
+					<el-input-number @change="changeMoney" v-model="proForm.purchaseMoney" :precision="2" :step="1" :min="0"></el-input-number>
 				</el-form-item>
 				<el-form-item label="产品描述" :label-width="formLabelWidth">
 					<el-input v-model="proForm.productDescribe" autocomplete="off"></el-input>
@@ -75,15 +75,15 @@
 			<!-- 表体内容 -->
 			<div>
 				<el-table :data=" stockForm" style="width: 100%" @selection-change="handleSelectionChange" border stripe>
-					<el-table-column prop="depotName" label="仓库" sortable width="406">
+					<el-table-column prop="depotName" label="仓库" :show-overflow-tooltip="true" sortable width="406">
 						<template #default="scope">
-							<el-select v-model=" stockForm[scope.$index].depotName" style="width:150px">
+							<el-select v-model="stockForm[scope.$index].depotName" filterable style="width:230px">
 								<el-option v-for="item in depot" :key="item.depotName" :label="item.depotName" :value="item.depotName">
 								</el-option>
 							</el-select>
 						</template>
 					</el-table-column>
-					<el-table-column prop="openingNumber" label="初期库存" sortable width="300">
+					<el-table-column prop="openingNumber" label="初期库存"  sortable width="300">
 						<template #default="scope">
 							<el-input-number v-model=" stockForm[scope.$index].openingNumber" :precision="0" :step="1" :min="0"></el-input-number>
 						</template>
@@ -101,6 +101,49 @@
 				</el-table>
 			</div>
 		</el-tab-pane>
+		
+		<!--////////产品供应////////////-->
+		<el-tab-pane label="采购价格">
+			<!-- 表体内容 -->
+			<div>
+				<div style="margin: 10px 10px 10px 0px;">
+					<span style="font-size: 15px;;">产品标准采购价格：</span>
+					<el-input-number  @change="changeMoney" v-model="proForm.purchaseMoney" :precision="2" :step="1" :min="0"></el-input-number>
+				</div>
+				<el-table :data="supplyForm" style="width: 100%" @selection-change="handleSelectionChange" border stripe>
+					<el-table-column label="操作" width="100" fixed>
+						<template #default="scope">
+							<el-tooltip content="新增" placement="top">
+								<el-button size="mini" icon="el-icon-plus" @click="addrow2()" type="primary" circle />
+							</el-tooltip>
+							<el-tooltip content="删除" placement="top">
+								<el-button size="mini" icon="el-icon-delete" @click="delrow2(scope.$index,  supplyForm)" type="primary" circle />
+							</el-tooltip>
+						</template>
+					</el-table-column>
+					<el-table-column prop="vendor_name" label="供应商名称" :show-overflow-tooltip="true" sortable width="300">
+						<template #default="scope">
+							<el-select v-model=" supplyForm[scope.$index].vendor_id" filterable style="width:230px">
+								<el-option v-for="item in vendor" :key="item.vendorName" :label="item.vendorName" :value="item.vendorId">
+								</el-option>
+							</el-select>
+						</template>
+					</el-table-column>
+					<el-table-column prop="price_ratio" label="调价比例(%)" sortable width="300">
+						<template #default="scope">
+							<el-input-number v-model=" supplyForm[scope.$index].price_ratio" :precision="2" :step="1" :min="0" @change="supplyForm[scope.$index].money=supplyForm[scope.$index].price_ratio*this.proForm.purchaseMoney/100"></el-input-number>
+						</template>
+					</el-table-column>
+					<el-table-column label="采购价格" sortable width="287">
+						<template #default="scope">
+							<el-input-number :precision="2" :step="1" :min="0" v-model="supplyForm[scope.$index].money" @change="supplyForm[scope.$index].price_ratio=supplyForm[scope.$index].money/this.proForm.purchaseMoney*100"></el-input-number>
+						</template>
+					</el-table-column>
+					
+				</el-table>
+			</div>
+		</el-tab-pane>
+		
 	</el-tabs>
 </template>
 
@@ -127,10 +170,18 @@
 					pictureId: 1, //图片id： 连接图片表
 				},
 
-				//库存数据
+				//产品库存
 				 stockForm: [{
 					depotName: '', //仓库名称
-					openingNumber: 0 ,//期初数量
+					openingNumber: 0 ,//期初数量 默认：0
+				}],
+				
+				//产品供应
+				 supplyForm: [{
+					vendor_id: '', //供应商id
+					vendor_name: '', //供应商名称
+					price_ratio: 100 ,//调价比例 默认：100
+					money:'' //采购单价 
 				}],
 
 				//单位数据
@@ -146,9 +197,10 @@
 
 				//产品分类数据
 				proType: [],
-
 				//仓库数据
 				depot: [],
+				//供应商数据
+				vendor: [],
 
 				//判断
 				judge: '',
@@ -162,17 +214,34 @@
 				this.$router.push("/Product")
 			},
 			
-			//新增一行
+			//新增一行  产品库存
 			addrow() {
 				this. stockForm.push({
 					depotName: '', //仓库名称
 					openingNumber: 0 //期初数量
 				});
 			},
-			//移除一行
+			//移除一行  产品库存
 			delrow(index, rows) {
 				console.log(this. stockForm)
 				if (this. stockForm.length > 1) {
+					rows.splice(index, 1); //删掉该行
+				}
+			},
+			
+			//新增一行  --产品供应
+			addrow2() {
+				this.supplyForm.push({
+					vendor_id: '', //供应商id
+					vendor_name: '', //供应商名称
+					price_ratio: 100 ,//调剂比例 默认：100
+					money:this.proForm.purchaseMoney //采购单价 
+				});
+			},
+			//移除一行  --产品供应
+			delrow2(index, rows) {
+				console.log(this.supplyForm)
+				if (this.supplyForm.length > 1) {
 					rows.splice(index, 1); //删掉该行
 				}
 			},
@@ -240,6 +309,27 @@
 					});
 			},
 			
+			//查询所有供应商
+			findAllVendor() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseVendor/findAllVendor/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.vendor = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			
 			//判断产品ID是否重复
 			pdID() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -257,15 +347,14 @@
 						},
 					})
 					.then(function(response) {
-						console.log("pid不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (response.data==false) {
+						console.log("pid不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data==false) {
 							ElMessage.warning({
 								message: '产品ID重复',
 								type: 'success'
 							});
 						}else{
-							// _this.AddCustomer()
 							console.log(response.data)
 						}
 					})
@@ -278,6 +367,7 @@
 			AddPro() {
 				console.log(this.proForm)
 				console.log(this.stockForm)
+				console.log(this.supplyForm)
 				if (this.proForm.productId == '' ||
 					this.proForm.productName == '' ||
 					this.proForm.ingredient == '' ||
@@ -287,14 +377,54 @@
 					this.proForm.purchaseMoney == '') {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
+					
+					var df=true;
+					var vf=true;
+					if(this.stockForm.size!=0){
+						this.stockForm.forEach((item)=>{
+							var dname=item.depotName
+							this.stockForm.forEach((item2)=>{
+								if(item!=item2){
+								if(item2.depotName==dname){
+									df=false
+								}}
+							})
+						})
+					}
+					if(this.supplyForm.size!=0){
+						this.supplyForm.forEach((item)=>{
+							var vid=item.vendor_id
+							this.supplyForm.forEach((item2)=>{
+								if(item!=item2){
+								if(item2.vendor_id==vid){
+									vf=false
+								}}
+							})
+						})
+					}
+					if(df==false){
+						ElMessage.warning({
+							message: '不能选中重复的仓库！',
+							type: 'success'
+						});
+					}
+					if(vf==false){
+						ElMessage.warning({
+							message: '不能选中重复的供应商！',
+							type: 'success'
+						});
+					}
+					
+					
 					this.pdID()
+					if(vf==true && df==true){
 					setTimeout(() => {
 						if (this.judge) {
 							const state = JSON.parse(sessionStorage.getItem("state"));
 							var _this = this;
 							var user = state.userInfo.userName;
 							this.dialogFormVisible = false
-							//添加仓库
+							
 							this.axios({
 									url: "http://localhost:8088/frameproject/baseProduct/addProduct",
 									method: "post",
@@ -302,7 +432,8 @@
 									data: {
 										User: JSON.stringify(user),
 										Product: JSON.stringify(_this.proForm),
-										Stock: JSON.stringify(_this.stockForm)
+										Stock: JSON.stringify(_this.stockForm),
+										Supply: JSON.stringify(_this.supplyForm)
 									},
 									headers: {
 										JWTDemo: state.userInfo.token,
@@ -327,7 +458,7 @@
 								type: 'success'
 							});
 						}
-					}, 200)
+					}, 200);}
 				}
 			},
 			
@@ -351,6 +482,7 @@
 						console.log(error);
 					});
 			},
+			
 			//判断单位名称是否重复
 			pdName(val) {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -381,6 +513,7 @@
 						console.log(error);
 					});
 			},
+			
 			//添加单位
 			Add() {
 				console.log(this.form)
@@ -393,7 +526,7 @@
 							const state = JSON.parse(sessionStorage.getItem("state"));
 							var _this = this;
 							this.dialogFormVisible = false
-							//添加仓库
+							//添加单位
 							this.axios({
 									url: "http://localhost:8088/frameproject/baseUnit/addUnit",
 									method: "post",
@@ -421,13 +554,22 @@
 						}
 					}, 200)
 				}
+			},
+			
+			//改变采购价格
+			changeMoney() {
+				this.supplyForm.forEach((item)=>{
+					item.money=this.proForm.purchaseMoney*item.price_ratio/100
+				})
 			}
 		},
-		computed: {},
+		computed: {
+		},
 			created() {
 				this.findAllUnit()
 				this.findAllProType()
 				this.findAllDepot()
+				this.findAllVendor()
 			}
 	}
 </script>

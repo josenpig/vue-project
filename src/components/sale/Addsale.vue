@@ -91,20 +91,33 @@
     <el-dialog title="选择库存产品" v-model="dialogTableVisible" width="65%">
       <!-- 分类 -->
       <div style="width: 20%; height: 500px; float: left">
+        <el-button
+          class="el-icon-menu"
+          @click="dialogopen(0)"
+          type="primary"
+          style="width: 90%"
+        >
+          全部
+        </el-button>
         <el-tree
-          :data="data"
+          :data="ProType"
+          :default-expand-all="true"
           :props="defaultProps"
-          accordion
-          @node-click="handleNodeClick"
+          @node-click="findByType"
+          style="font-size: 15px"
         >
         </el-tree>
       </div>
-      <!-- 。。。库存产品 -->
+      <!--库存产品 -->
       <div
         style="width: 80%; height: 500px; margin-left: 20%; position: relative"
       >
         <div style="width: 100%; height: 50px">
-          <el-button icon="el-icon-plus" type="primary" size="small"
+          <el-button
+            icon="el-icon-plus"
+            type="primary"
+            size="small"
+            @click="goaddproduct()"
             >新增产品</el-button
           >
           已选<span style="color: #409eff">{{ thisrow }}</span
@@ -116,8 +129,11 @@
               placeholder="请输入产品名称"
               style="width: 250px"
               size="small"
+              clearable
             />
-            <el-button icon="el-icon-search" size="small">查询</el-button>
+            <el-button icon="el-icon-search" @click="join()" size="small"
+              >查询</el-button
+            >
           </div>
         </div>
         <el-table
@@ -153,7 +169,7 @@
         >
           <el-pagination
             background
-            layout="prev, pager, next"
+            layout="total, prev, pager, next"
             :total="max"
             :page-size="pagesize"
             style="float: left"
@@ -367,10 +383,20 @@ export default {
       //库存商品div
       dialogTableVisible: false,
       //库存产品--分类
-      data: [],
+      ProType: [],
       defaultProps: {
         children: 'children',
         label: 'label',
+        value: 'id',
+      },
+      //产品分页查询
+      pagesize: 8,
+      max: 0,
+      currentPage: 1,
+      //查询条件
+      condition: {
+        productTypeId: '',
+        productName: '',
       },
       findstock: '', //库存产品名称查询
       stockdata: [], //库存产品--信息
@@ -395,10 +421,8 @@ export default {
         contacts: '', //客户联系人
         contactsPhone: '', //客户联系人电话
         contactsAddress: '', //客户地址
-        //订单信息额外
-        founder: '',
+        founder: '', //订单创建人
       },
-
       //表体销售商品信息
       productdata: [
         {
@@ -419,10 +443,6 @@ export default {
       //抄送对象信息
       footeroptions: [],
       notice: [], //抄送对象
-      //分页
-      pagesize: 5,
-      max: 0,
-      currentPage: 1,
     }
   },
   computed: {
@@ -494,23 +514,59 @@ export default {
           this.formorder.contacts = item.contact
           this.formorder.contactsPhone = item.contactNumber
           this.formorder.contactsAddress = item.contactAddress
-          this.formorder.disrate=item.ratio
+          this.formorder.disrate = item.ratio
         }
       })
     },
-    //选择产品
-    dialogopen() {
+    //查询所有产品分类
+    findAllProType() {
       const state = JSON.parse(sessionStorage.getItem('state'))
-      const _this = this
-      var fd = {
-        currentPage: this.currentPage,
-        pageSize: this.pagesize,
-      }
+      var _this = this
       this.axios({
-        url: 'http://localhost:8088/frameproject/baseProduct/allsaleproduct',
+        url: 'http://localhost:8088/frameproject/baseProductType/findProType',
         method: 'get',
         processData: false,
-        params: fd,
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.ProType = response.data.data
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    //新增产品
+    goaddproduct() {
+      this.$router.push('/AddProduct')
+    },
+    //产品模糊查询
+    join() {
+      this.condition.productName = this.findstock
+      this.dialogopen()
+    },
+    //选则类别
+    findByType(type) {
+      this.condition.productTypeId = type.id
+      this.dialogopen()
+    },
+    //选择产品
+    dialogopen(type) {
+      if (type == 0) {
+        this.condition = {}
+      }
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/baseProduct/allsaleproduct',
+        method: 'post',
+        processData: false,
+        data: {
+          currentPage: _this.currentPage,
+          pageSize: _this.pagesize,
+          condition: JSON.stringify(_this.condition),
+        },
         headers: {
           JWTDemo: state.userInfo.token,
         },
@@ -548,7 +604,7 @@ export default {
     },
     //改变页码数
     handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize)
+      this.dialogopen()
     },
     //新增一行
     addrow(productdata, event) {
@@ -667,10 +723,17 @@ export default {
             }
           })
           for (var i = 0; i < response.data.data.orderdetails.length; i++) {
-            _this.productdata[i].productNum =
-              response.data.data.orderdetails[i].productNum
-            _this.productdata[i].depot =
-              response.data.data.orderdetails[i].depot
+            for (var j = 0; j < _this.productdata.length; j++) {
+              if (
+                _this.productdata[j].productId ==
+                response.data.data.orderdetails[i].productId
+              ) {
+                _this.productdata[j].productNum =
+                  response.data.data.orderdetails[i].productNum
+                _this.productdata[j].depot =
+                  response.data.data.orderdetails[i].depot
+              }
+            }
           }
           _this.formorder = response.data.data.order
           _this.headeroptions1.forEach((item) => {
@@ -711,6 +774,7 @@ export default {
   },
   created: function () {
     this.findmen()
+    this.findAllProType()
     if (sessionStorage.getItem('draft') != null) {
       this.showorder()
     }
@@ -724,12 +788,6 @@ export default {
   background-color: white;
 }
 /* 顶部 */
-.addsale .el-carousel__arrow--right,
-.el-notification.right {
-  top: 110px !important;
-  background-color: #f2dede;
-  border-color: #ebccd1;
-}
 .addsale-page-tag {
   height: 40px;
   padding: 0 10px;

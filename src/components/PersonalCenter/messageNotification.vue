@@ -105,6 +105,7 @@ import {
       //查看订单
       queryrow(val){
         sessionStorage.setItem('orderid',val.orderid);
+        
         this.$router.push('/Sale')
       },
       //标记已读
