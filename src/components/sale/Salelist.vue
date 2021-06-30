@@ -194,11 +194,7 @@
           >
         </div>
       </div>
-      <el-table
-        :data="tableData"
-        style="width: 100%"
-        stripe
-      >
+      <el-table :data="tableData" style="width: 100%" stripe>
         <el-table-column fixed label="操作" width="150">
           <template #default="scope">
             <el-button
@@ -276,9 +272,9 @@
     <div class="salelist-footer" v-show="paging">
       <el-pagination
         background
-        layout="total,sizes, prev, pager, next"
+        layout="total,prev,pager,next,sizes"
         :total="max"
-        :page-sizes="[5,8,10,20]"
+        :page-sizes="[5, 8, 10, 20]"
         :page-size="pagesize"
         style="margin-top: 50px"
         @current-change="handleCurrentChange"
@@ -466,6 +462,7 @@ export default {
       this.condition.orderId = this.vagueorderid
       this.findpage()
     },
+    //查询人员
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this

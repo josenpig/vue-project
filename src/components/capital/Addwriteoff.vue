@@ -6,7 +6,17 @@
       <span>新增核销单</span>
       <div class="addwriteoff-shenpi">
         <!-- 提交 -->
-        <el-button type="primary" size="mini" @click="examine(0)"
+        <el-button
+          size="mini"
+          @click="examine(-2)"
+          v-has="{ action: 'writeoff:add' }"
+          >保存草稿</el-button
+        >
+        <el-button
+          type="primary"
+          size="mini"
+          @click="examine(0)"
+          v-has="{ action: 'writeoff:add' }"
           >提交审批</el-button
         >
       </div>
@@ -114,12 +124,13 @@
           <!-- 模糊查询 -->
           <div style="float: right">
             <el-input
-              v-model="findstock"
+              v-model="findstock1"
               placeholder="请输入订单编号"
               style="width: 250px"
               size="small"
+              clearable
             />
-            <el-button icon="el-icon-search" size="small">查询</el-button>
+            <el-button icon="el-icon-search" size="small" @click="join(1)">查询</el-button>
           </div>
         </div>
         <el-table
@@ -177,12 +188,13 @@
           <!-- 模糊查询 -->
           <div style="float: right">
             <el-input
-              v-model="findstock"
+              v-model="findstock2"
               placeholder="请输入订单编号"
               style="width: 250px"
               size="small"
+              clearable
             />
-            <el-button icon="el-icon-search" size="small">查询</el-button>
+            <el-button icon="el-icon-search" size="small" @click="join(2)">查询</el-button>
           </div>
         </div>
         <el-table
@@ -393,6 +405,7 @@ import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
     sessionStorage.removeItem('receipt')
+    sessionStorage.removeItem('draft')
     next()
   },
   name: 'addwriteoff',
@@ -401,9 +414,10 @@ export default {
       //订单div
       dialogbill: false,
       dialogcap: false,
-      findstock: '', //查询
-      allbilldata: [], //库存产品--信息
-      joinallbilldata: [], //已选库存产品
+      findstock1: '', //查询
+      findstock2: '', //查询
+      allbilldata: [], //单据--信息
+      joinallbilldata: [], //已选单据
       allcapdata: [],
       joinallcapdata: [],
       // 表单头部下拉列表信息
@@ -415,7 +429,7 @@ export default {
         //表头单据信息
         cavId: 'HXD' + Date.now(), //单据编号
         orderTime: new Date(), //单据时间
-        otherParty: '', //客户
+        otherParty: '', //客户--供应商
         cavBy: '', //核销人
         cavType: '预收冲应收', //核销方式
         thisMoney: '', //本次核销余额
@@ -455,7 +469,8 @@ export default {
       //条件查询订单
       condition: {
         otherParty: '',
-        saleId: '',
+        saleId: '',//应收付单id
+        capitalId:'',//预收付单id
       },
       //应收付分页
       pagesize1: 5,
@@ -501,6 +516,16 @@ export default {
       } else {
         this.joinallcapdata = val
       }
+    },
+    join(type){
+      if(type==1){
+        this.condition.saleId = this.findstock1
+        this.findbill();
+      }else{
+        this.condition.capitalId = this.findstock2
+        this.findcap();
+      }
+      
     },
     //改变收款方式
     changetype(type) {
@@ -702,10 +727,10 @@ export default {
               message: '本次核销金额不能大于未核销金额',
               type: 'warning',
             })
-          }else if (item.unwrittenMoney==0 && tfok == true) {
+          } else if (item.unwrittenMoney == 0 && tfok == true) {
             this.$notify({
               title: '警告',
-              message:'订单' +item.capitalId+ '未核销金额不足',
+              message: '订单' + item.capitalId + '未核销金额不足',
               type: 'warning',
             })
           }
@@ -769,6 +794,51 @@ export default {
           })
       }
     },
+    //显示单据----编辑单
+    showorder() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const orderid = JSON.parse(sessionStorage.getItem('draft'))
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/capitalCavCia/find',
+        method: 'get',
+        params: {
+          cavId: orderid.cavId,
+          cavType: orderid.cavType,
+        },
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.billdata = response.data.data.bills
+          _this.capdata = response.data.data.caps
+
+          _this.formorder = response.data.data.order
+          if (orderid.cavType == '预收冲应收') {
+            _this.headeroptions1.forEach((item) => {
+              if (item.customerName == _this.formorder.otherParty) {
+                _this.formorder.otherParty = item.customerNumber
+              }
+            })
+          } else {
+            _this.headeroptions3.forEach((item) => {
+              if (item.vendorName == _this.formorder.otherParty) {
+                _this.formorder.otherParty = item.vendorId
+              }
+            })
+          }
+          _this.headeroptions2.forEach((item) => {
+            if (item.userName == _this.formorder.cavBy) {
+              _this.formorder.cavBy = item.userId
+            }
+          })
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    //查询人员
     findsaleman() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const _this = this
@@ -781,9 +851,18 @@ export default {
       })
         .then(function (response) {
           _this.headeroptions1 = response.data.data.customers
-          _this.headeroptions2 = response.data.data.salemans
+          _this.headeroptions2 = response.data.data.capitals
+          //默认当前用户
+          _this.headeroptions2.forEach((item) => {
+            if (item.userName == state.userInfo.userName) {
+              _this.formorder.cavBy = item.userId
+            }
+          })
           _this.headeroptions3 = response.data.data.vendors
           _this.footeroptions = response.data.data.notifiers
+          if (sessionStorage.getItem('draft') != null) {
+            _this.showorder()
+          }
         })
         .catch(function (error) {
           console.log(error)

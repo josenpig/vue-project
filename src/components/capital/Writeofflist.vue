@@ -211,7 +211,7 @@
     <div class="writeofflist-footer" v-show="paging">
       <el-pagination
         background
-        layout="total,sizes, prev, pager, next"
+        layout="total,prev,pager,next,sizes"
         :total="max"
         :page-sizes="[5,8,10,20]"
         :page-size="pagesize"

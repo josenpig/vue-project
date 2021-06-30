@@ -159,7 +159,6 @@
         <el-table-column prop="ciaMoney" label="预收金额(元)" width="120" />
         <el-table-column prop="ciaBalance" label="预收余额(元)" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
-        <el-table-column prop="remarks" label="单据备注" width="120" />
         <el-table-column prop="approvalState" label="审批状态" width="120">
           <template #default="scope">
             <span v-if="tableData[scope.$index].approvalState == 0">
@@ -186,7 +185,7 @@
     <div class="receiptlist-footer" v-show="paging">
       <el-pagination
         background
-        layout="total,sizes, prev, pager, next"
+        layout="total,prev,pager,next,sizes"
         :total="max"
         :page-sizes="[5,8,10,20]"
         :page-size="pagesize"

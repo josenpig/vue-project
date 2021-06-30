@@ -6,8 +6,17 @@
       <span>新增销售退货单</span>
       <div class="addreturn-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
-        <el-button type="primary" size="mini" @click="examine(0)"
+        <el-button
+          size="mini"
+          @click="examine(-2)"
+          v-has="{ action: 'sreturn:add' }"
+          >保存草稿</el-button
+        >
+        <el-button
+          type="primary"
+          size="mini"
+          @click="examine(0)"
+          v-has="{ action: 'sreturn:add' }"
           >提交审批</el-button
         >
       </div>
@@ -108,9 +117,24 @@
         <!-- 产品详细信息 -->
         <el-table-column prop="productName" label="产品名称" width="200" />
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="remark" label="备注" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
+        <el-table-column
+          prop="remark"
+          label="备注"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="productSpec"
+          label="规格"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="productUnit"
+          label="单位"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column prop="returnNum" label="退货数量" width="120">
           <template #default="scope">
             <el-input-number
@@ -128,8 +152,18 @@
           </template>
         </el-table-column>
         <el-table-column prop="depot" label="仓库" width="120" />
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
+        <el-table-column
+          prop="ingredient"
+          label="成分"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="gramHeavy"
+          label="克量"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column
           prop="productDescribe"
           label="产品描述"

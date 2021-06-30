@@ -346,23 +346,23 @@ import {
   text-align: center;
 }
 /* 内容表尾 */
-.returnlist-footerme {
+.returnlistme .returnlist-footerme {
   padding: 25px 15px;
   background-color: white;
   text-align: center;
 }
-.ss{
+.returnlistme .ss{
 	margin-top:0px;
 	
 }
 .returnlist-header1 .el-input{
   width: 210px;
 }
-.block{
+.returnlistme .block{
 	float: left;
 }
 
-.yd{
+.returnlistme .yd{
   float: right;
 }
 </style>

@@ -18,22 +18,23 @@
         <el-button
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
+          v-has="{ action: 'writeoff:approval' }"
           @click="approval(-1)"
           >驳回</el-button
         >
         <el-button
           type="primary"
           size="mini"
-          v-if="formorder.approvalState == -2"
-          @click="approval(0)"
-          >提交审批</el-button
+          v-if="formorder.approvalState != 1"
+          @click="change()"
+          v-has="{ action: 'writeoff:add' }"
+          >修改</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
+          v-has="{ action: 'writeoff:approval' }"
           @click="approval(1)"
           >审批通过</el-button
         >
@@ -231,10 +232,10 @@ export default {
           .catch(() => {})
       }
     },
+    //显示单据
     showorder() {
       const state = JSON.parse(sessionStorage.getItem('state'))
       const orderid = JSON.parse(sessionStorage.getItem('orderid'))
-      console.log(orderid)
       const _this = this
       if (orderid == null) {
         this.$router.push('/Receiptlist')
@@ -259,6 +260,15 @@ export default {
             console.log(error)
           })
       }
+    },
+    //编辑
+    change() {
+      var order = {
+        cavId: this.formorder.cavId,
+        cavType: this.formorder.cavType,
+      }
+      sessionStorage.setItem('draft', JSON.stringify(order))
+      this.$router.push('/Addwriteoff')
     },
   },
 

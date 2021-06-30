@@ -23,6 +23,7 @@
           size="mini"
           v-if="formorder.approvalState == 1"
           @click="goreceipt()"
+          v-has="{ action: 'receipt:add' }"
           >收款</el-button
         >
         <el-button
@@ -30,13 +31,15 @@
           size="mini"
           v-if="formorder.approvalState < 0"
           @click="del()"
+          v-has="{ action: 'sale:delete' }"
           >删除</el-button
         >
         <el-button
           type="danger"
           size="mini"
           v-if="formorder.approvalState == 1"
-          @click="cancel()"
+          @click="cancel(-3)"
+          v-has="{ action: 'sale:approval' }"
           >废弃</el-button
         >
         <el-button
@@ -44,6 +47,7 @@
           size="mini"
           v-if="formorder.approvalState != 1"
           @click="change()"
+          v-has="{ action: 'sale:add' }"
           >编辑</el-button
         >
         <el-button
@@ -51,7 +55,7 @@
           size="mini"
           @click="approval(-1)"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
+          v-has="{ action: 'sale:approval' }"
           >驳回</el-button
         >
         <el-button
@@ -59,7 +63,7 @@
           size="mini"
           @click="approval(1)"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
+          v-has="{ action: 'sale:approval' }"
           >审批通过</el-button
         >
         <el-button
@@ -137,8 +141,18 @@
         <el-table-column type="index" width="40" />
         <el-table-column prop="productName" label="产品名称" width="200" />
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="remark" label="备注" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
+        <el-table-column
+          prop="remark"
+          label="备注"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="productSpec"
+          label="规格"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column prop="productUnit" label="单位" width="120" />
         <el-table-column prop="productNum" label="数量" width="120" />
         <el-table-column
@@ -148,8 +162,18 @@
         />
         <el-table-column prop="saleMoney" label="销售金额(元)" width="120" />
         <el-table-column prop="depot" label="仓库" width="120" />
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
+        <el-table-column
+          prop="ingredient"
+          label="成分"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="gramHeavy"
+          label="克量"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column
           :show-overflow-tooltip="true"
           prop="productDescribe"
@@ -297,8 +321,8 @@ export default {
         })
         .catch(() => {})
     },
-    //废弃
-    cancel() {
+    //修改-----  -3废弃1结束执行
+    cancel(type) {
       this.$confirm('确认废弃该单据？', '废弃', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -328,10 +352,12 @@ export default {
             const state = JSON.parse(sessionStorage.getItem('state'))
             const _this = this
             this.axios({
-              url:
-                'http://localhost:8088/frameproject/saleorder/update/' +
-                _this.formorder.orderId,
+              url: 'http://localhost:8088/frameproject/saleorder/update',
               method: 'post',
+              params: {
+                id: _this.formorder.orderId,
+                type: type,
+              },
               headers: {
                 JWTDemo: state.userInfo.token,
               },
@@ -362,13 +388,13 @@ export default {
     approval(type) {
       //生成出库
       if (type == 2) {
-        if(this.formorder.orderState==1){
+        if (this.formorder.orderState == 1) {
           this.$notify({
             title: '警告',
             message: '该订单已结束执行，无法出库！',
             type: 'warning',
           })
-        }else if (this.formorder.deliveryId != null) {
+        } else if (this.formorder.deliveryId != null) {
           this.$notify({
             title: '警告',
             message: '该订单已完成出库，无法二次出库！',

@@ -10,9 +10,14 @@
           size="mini"
           @click="examine(-2)"
           v-if="formorder.orderId == null"
+          v-has="{ action: 'delivery:add' }"
           >保存草稿</el-button
         >
-        <el-button type="primary" size="mini" @click="examine(0)"
+        <el-button
+          type="primary"
+          size="mini"
+          @click="examine(0)"
+          v-has="{ action: 'delivery:add' }"
           >提交审批</el-button
         >
       </div>
@@ -94,7 +99,7 @@
           type="primary"
           style="width: 90%"
         >
-          全部
+          全部类别
         </el-button>
         <el-tree
           :data="ProType"
@@ -115,6 +120,7 @@
             type="primary"
             size="small"
             @click="goaddproduct()"
+            v-has="{ action: 'product:add' }"
             >新增产品</el-button
           >
           已选<span style="color: #409eff">{{ thisrow }}</span
@@ -144,14 +150,39 @@
           <el-table-column prop="productName" label="产品名称" width="200" />
           <el-table-column prop="productId" label="产品编号" width="120" />
           <el-table-column prop="productType" label="产品类别" width="120" />
-          <el-table-column prop="remark" label="备注" width="120" />
-          <el-table-column prop="productSpec" label="规格" width="120" />
-          <el-table-column prop="productUnit" label="单位" width="120" />
+          <el-table-column
+            prop="remark"
+            label="备注"
+            width="120"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="productSpec"
+            label="规格"
+            width="120"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="productUnit"
+            label="单位"
+            width="120"
+            :show-overflow-tooltip="true"
+          />
           <el-table-column prop="productNum" label="库存总量" width="120" />
           <el-table-column prop="expectNum" label="预计可用量" width="120" />
           <el-table-column prop="saleUnitPrice" label="销售单价" width="120" />
-          <el-table-column prop="ingredient" label="成分" width="120" />
-          <el-table-column prop="gramHeavy" label="克量" width="120" />
+          <el-table-column
+            prop="ingredient"
+            label="成分"
+            width="120"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="gramHeavy"
+            label="克量"
+            width="120"
+            :show-overflow-tooltip="true"
+          />
           <el-table-column
             prop="productDescribe"
             label="产品描述"
@@ -230,8 +261,18 @@
           </template>
         </el-table-column>
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
+        <el-table-column
+          prop="productSpec"
+          label="规格"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="productUnit"
+          label="单位"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column prop="productNum" label="数量" width="120">
           <template #default="scope">
             <el-input-number
@@ -275,9 +316,24 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
-        <el-table-column prop="remark" label="产品备注" width="120" />
+        <el-table-column
+          prop="ingredient"
+          label="成分"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="gramHeavy"
+          label="克量"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="remark"
+          label="产品备注"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column
           prop="productDescribe"
           label="产品描述"
@@ -528,6 +584,9 @@ export default {
       })
         .then(function (response) {
           _this.ProType = response.data.data
+          if (sessionStorage.getItem('draft') != null) {
+            _this.showorder()
+          }
         })
         .catch(function (error) {
           console.log(error)
@@ -706,6 +765,12 @@ export default {
         .then(function (response) {
           _this.headeroptions1 = response.data.data.customers
           _this.headeroptions2 = response.data.data.salemans
+          //默认当前用户
+          _this.headeroptions2.forEach((item) => {
+            if (item.userName == state.userInfo.userName) {
+              _this.formorder.salesmen = item.userId
+            }
+          })
           _this.footeroptions = response.data.data.notifiers
           //判断是否来自订单
           const sale = JSON.parse(sessionStorage.getItem('saledeliver'))
@@ -788,9 +853,6 @@ export default {
   created: function () {
     this.findAllProType()
     this.findmen()
-    if (sessionStorage.getItem('draft') != null) {
-      this.showorder()
-    }
   },
 }
 </script>

@@ -21,7 +21,7 @@
         <el-button
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
+          v-has="{ action: 'sreturn:approval' }"
           @click="approval(-1)"
           >驳回</el-button
         >
@@ -30,13 +30,15 @@
           size="mini"
           v-if="formorder.approvalState < 0"
           @click="del()"
+          v-has="{ action: 'sreturn:delete' }"
           >删除</el-button
         >
         <el-button
           type="danger"
           size="mini"
           v-if="formorder.approvalState == 1"
-          @click="cancel()"
+          @click="cancel(-3)"
+          v-has="{ action: 'sreturn:approval' }"
           >废弃</el-button
         >
         <el-button
@@ -44,14 +46,15 @@
           size="mini"
           v-if="formorder.approvalState != 1"
           @click="change()"
+          v-has="{ action: 'sreturn:add' }"
           >编辑</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.approvalState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(1)"
+          v-has="{ action: 'sreturn:approval' }"
           >审批通过</el-button
         >
       </div>
@@ -135,9 +138,24 @@
         <el-table-column type="index" width="40" />
         <el-table-column prop="productName" label="产品名称" width="200" />
         <el-table-column prop="productId" label="产品编号" width="120" />
-        <el-table-column prop="remark" label="备注" width="120" />
-        <el-table-column prop="productSpec" label="规格" width="120" />
-        <el-table-column prop="productUnit" label="单位" width="120" />
+        <el-table-column
+          prop="remark"
+          label="备注"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="productSpec"
+          label="规格"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="productUnit"
+          label="单位"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column prop="returnNum" label="退货数量" width="120" />
         <el-table-column
           prop="saleUnitPrice"
@@ -146,8 +164,18 @@
         />
         <el-table-column prop="saleMoney" label="销售金额(元)" width="120" />
         <el-table-column prop="depot" label="仓库" width="120" />
-        <el-table-column prop="ingredient" label="成分" width="120" />
-        <el-table-column prop="gramHeavy" label="克量" width="120" />
+        <el-table-column
+          prop="ingredient"
+          label="成分"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
+        <el-table-column
+          prop="gramHeavy"
+          label="克量"
+          width="120"
+          :show-overflow-tooltip="true"
+        />
         <el-table-column
           :show-overflow-tooltip="true"
           prop="productDescribe"
@@ -286,7 +314,7 @@ export default {
         .catch(() => {})
     },
     //废弃
-    cancel() {
+    cancel(type) {
       this.$confirm('确认废弃该单据？', '废弃', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -310,10 +338,12 @@ export default {
             const state = JSON.parse(sessionStorage.getItem('state'))
             const _this = this
             this.axios({
-              url:
-                'http://localhost:8088/frameproject/salereturn/update/' +
-                _this.formorder.returnId,
+              url: 'http://localhost:8088/frameproject/salereturn/update',
               method: 'post',
+              params: {
+                id: _this.formorder.returnId,
+                type: type,
+              },
               headers: {
                 JWTDemo: state.userInfo.token,
               },

@@ -142,6 +142,7 @@
           type="primary"
           size="small"
           @click="goadd()"
+          v-has="{ action: 'payment:add' }"
           >新增付款</el-button
         >
       </div>
@@ -156,6 +157,7 @@
               type="text"
               v-if="tableData[scope.$index].caseState == 0"
               @click="goreceipt(scope.$index)"
+              v-has="{ action: 'payment:add' }"
             >
               付款
             </el-button>
@@ -182,7 +184,6 @@
         <el-table-column prop="payables" label="应付金额" width="120" />
         <el-table-column prop="paid" label="已付金额" width="120" />
         <el-table-column prop="unpaid" label="未付金额" width="120" />
-        <el-table-column prop="remarks" label="单据备注" width="120" />
         <el-table-column prop="founder" label="创建人" width="120" />
         <el-table-column
           prop="receiptRemark"
@@ -201,7 +202,7 @@
     <div class="payable-footer" v-show="paging">
       <el-pagination
         background
-        layout="total,sizes, prev, pager, next"
+        layout="total,prev,pager,next,sizes"
         :total="max"
         :page-sizes="[5,8,10,20]"
         :page-size="pagesize"

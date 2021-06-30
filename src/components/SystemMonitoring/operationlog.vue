@@ -244,17 +244,17 @@ import {
   background-color: white;
   text-align: center;
 }
-.ss{
+.returnlist .ss{
 	margin-top:0px;
 	
 }
 .returnlist-header1 .el-input{
   width: 210px;
 }
-.block{
+.returnlist .block{
 	float: left;
 }
-.el-button{
+.returnlist .el-button{
   margin-left: 10px;
 }
 
