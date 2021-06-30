@@ -764,7 +764,9 @@
 				var _this = this;
 				var fd = {
 					vid: vid,
-					pname: name
+					pid: null,
+					pname: name,
+					
 				};
 				this.axios({
 						url: "http://localhost:8088/frameproject/baseVendorProduct/findAllbaseVendorProduct/list",
