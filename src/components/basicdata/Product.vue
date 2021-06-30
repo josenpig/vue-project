@@ -801,6 +801,7 @@
 				this.PTupdateDialogFormVisible = true
 				this.updateProTypeForm.id = data.id
 				this.updateProTypeForm.productTypeParentId = data.productTypeParentId
+				this.updateProTypeForm.label = data.label
 				console.log("update:")
 				console.log(data)
 			},
