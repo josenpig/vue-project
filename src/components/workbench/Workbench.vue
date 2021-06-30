@@ -1,16 +1,20 @@
 <template>
 	<div class="workbench">
+		<h3 style="margin: 5px;">业务数据统计</h3>
 		<el-row :gutter="20">
 			<el-col :span="8">
 				<div class="grid-content bg-purple">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span style="font-size: 24px;margin-top: 10px;">总收入</span>
+							<span style="font-size: 24px;margin-top: 10px;">销售</span>
 						</div>
 						<div class="text item">
-							<span>{{this.rsum}}</span>
+							<span>￥{{this.rsum}}</span>
 							<div class="ik-pull-right">
-								￥
+								<span
+								    class="stats__badge"
+								    v-text="this.rcount + '笔'"
+								  ></span>
 							</div>
 						</div>
 					</el-card>
@@ -20,12 +24,15 @@
 				<div class="grid-content bg-purple">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span style="font-size: 24px;margin-top: 10px;">总支出</span>
+							<span style="font-size: 24px;margin-top: 10px;">采购</span>
 						</div>
 						<div class="text item">
-							<span>{{this.psum}}</span>
+							<span>￥{{this.psum}}</span>
 							<div class="ik-pull-right">
-								￥
+								<span
+								    class="stats__badge"
+								    v-text="this.pcount + '笔'"
+								  ></span>
 							</div>
 						</div>
 					</el-card>
@@ -39,14 +46,15 @@
 						</div>
 						<div class="text item">
 							<span>总量</span>
-							<div class="ik-pull-right">
+							<div class="text2">
 								<span>{{this.ps}}</span>
 							</div>
 						</div>
 						<div class="text item">
 							<span style="size: 20px;">总成本</span>
-							<div class="ik-pull-right" style="size: 20px;">
-								<span>{{(this.ms).toFixed(2)}}</span>￥
+							<div class="text2">
+								<span>￥</span>
+								<span>{{(this.ms).toFixed(2)}} </span>
 							</div>
 						</div>
 					</el-card>
@@ -79,7 +87,11 @@
 				rsum: 0,
 				//本期总支出
 				psum: 0,
-
+				//付款总条数
+				rcount:'',
+				//收款总条数
+				pcount:'',
+				
 				value1: "全部", //仓库名称
 				value2: "全部", //产品名称
 				value3: "全部", //产品分类
@@ -168,6 +180,31 @@
 						console.log(error);
 					});
 			},
+			//资金账户期间总条数
+			count() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				console.log("time:" + this.customtime1)
+				this.axios({
+						url: "http://localhost:8088/frameproject/ReportFormController/fundAllCount",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.pcount = response.data.data[0];
+						_this.rcount = response.data.data[1];
+			
+						console.log("pcount:" + _this.pcount)
+						console.log("rcount:" + _this.rcount)
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
 			//库存
 			findpagePro() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -236,6 +273,7 @@
 			this.sum();
 		},
 		created(){
+			this.count();
 			this.findpagePro();
 			this.findSalesTop();
 		}
@@ -307,15 +345,15 @@
 	}
 
 	.ik-pull-right {
-		float: right;
+		margin: -15px 0px 0px 80px;
 	}
 
 	.stats__badge {
-		min-width: 48px;
-		line-height: 16px;
+		min-width: 54px;
+		line-height: 20px;
 		text-align: center;
 		margin-left: 10px;
-		font-size: 12px;
+		font-size: 15px;
 		border-radius: 2px;
 		vertical-align: middle;
 		display: inline-block;
@@ -390,4 +428,9 @@
 		width: 500px;
 		height: 650px;
 	}
+	
+	.text2{
+		size: 20px;float: right;
+	}
+	
 </style>
