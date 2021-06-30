@@ -164,14 +164,14 @@
 						</el-tooltip>
 					</template>
 				</el-table-column>
-				<el-table-column fixed prop="vendorId" label="供应商编号" sortable width="120" />
-				<el-table-column prop="vendorName" label="供应商名称" sortable width="120" />
+				<el-table-column :show-overflow-tooltip="true" fixed prop="vendorId" label="供应商编号" sortable width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="vendorName" label="供应商名称" sortable width="180" />
 				<el-table-column prop="vendorType" label="供应商类型" sortable width="120" />
 				<el-table-column prop="accountsPayable" label="应付款金额()" sortable width="150" />
-				<el-table-column prop="address" label="地址"  width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="address" label="地址"  width="150" />
 				<el-table-column prop="charge" label="负责人" sortable width="120" />
-				<el-table-column prop="contactName" label="联系人姓名"  width="120" />
-				<el-table-column prop="contactNumber" label="联系人电话"  width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="contactName" label="联系人姓名"  width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="contactNumber" label="联系人电话"  width="120" />
 				<el-table-column prop="contactAddress" label="联系人地址"  width="120" />
 				<el-table-column prop="user" label="创建人" sortable width="120" />
 				<el-table-column prop="creationTime" label="创建时间" sortable width="150" />
@@ -287,9 +287,16 @@
 		</el-dialog>
 		
 		<!-- 表尾分页显示 -->
-		<div class="salelist-footer">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
-			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
+		<div class="vendor-footer">
+			<!-- 表尾分页显示 -->
+			  <el-pagination
+			  @size-change="handleSizeChange"
+			  @current-change="handleCurrentChange"
+			  :current-page="currentPage"
+			  :page-sizes="[5, 10, 30, 100]"
+			  :page-size="pagesize"
+			  layout="total, sizes, prev, pager, next, jumper"
+			  :total="max">
 			</el-pagination>
 		</div>
 	</div>
@@ -405,9 +412,18 @@
 		},
 		methods: {
 			//改变页码数
-			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize);
+			handleSelectionChange(val) {
+			  this.joinstockdata = val;
 			},
+			handleCurrentChange(val) {
+			    this.currentPage=val;
+			    this.findpage();
+			},
+			handleSizeChange(val) {
+			    this.pagesize=val;
+			    this.currentPage=1;
+			    this.findpage();
+			  },
 			//查询所有负责人
 			findAllCharge() {
 				const state = JSON.parse(sessionStorage.getItem("state"));

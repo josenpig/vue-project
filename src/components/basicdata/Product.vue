@@ -201,7 +201,7 @@
 						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6);color: white;padding: 7px;" v-has="{ action: 'sort:update' }">上架</el-button>
 					</template>
 				</el-table-column>
-				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
+				<el-table-column :show-overflow-tooltip="true" fixed prop="productId" label="产品编号" sortable width="120" />
 				<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="150" />
 				<el-table-column :show-overflow-tooltip="true" prop="productSpec" label="规格" width="140" />
 				<el-table-column :show-overflow-tooltip="true" prop="ingredient" label="成分" width="140" />
@@ -225,9 +225,16 @@
 			</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
-		<div class="salelist-footer">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 10px"
-			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
+		<div class="product-footer">
+			<!-- 表尾分页显示 -->
+			  <el-pagination
+			  @size-change="handleSizeChange"
+			  @current-change="handleCurrentChange"
+			  :current-page="currentPage"
+			  :page-sizes="[5, 10, 30, 100]"
+			  :page-size="pagesize"
+			  layout="total, sizes, prev, pager, next, jumper"
+			  :total="max">
 			</el-pagination>
 		</div>
 	</div>
@@ -324,9 +331,18 @@
 				this.$router.push("/AddProduct")
 			},
 			//改变页码数
-			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize);
+			handleSelectionChange(val) {
+			  this.joinstockdata = val;
 			},
+			handleCurrentChange(val) {
+			    this.currentPage=val;
+			    this.findpage();
+			},
+			handleSizeChange(val) {
+			    this.pagesize=val;
+			    this.currentPage=1;
+			    this.findpage();
+			  },
 			//查询所有产品分类
 			findAllProType() {
 				const state = JSON.parse(sessionStorage.getItem("state"));

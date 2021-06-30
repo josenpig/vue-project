@@ -48,9 +48,9 @@
 				<el-table :data="tableData" @selection-change="handleSelectionChange" border
 				 stripe>
 					<el-table-column prop="vendorId" label="供应商编号" sortable width="200" />
-					<el-table-column prop="vendorName" label="供应商名称" sortable width="200" />
+					<el-table-column :show-overflow-tooltip="true" prop="vendorName" label="供应商名称" sortable width="230" />
 					<el-table-column prop="productId" label="产品编号" sortable width="200" />
-					<el-table-column prop="productName" label="产品名称" sortable width="200" />
+					<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="200" />
 					<el-table-column prop="purchaseMoney" label="标准采购价格(￥)" sortable width="200" />
 					<el-table-column prop="priceRatio" label="调价比例(%)" sortable width="200" />
 					<el-table-column label="实际采购价格(￥)" sortable width="200">
@@ -63,9 +63,16 @@
 		</div>
 		<!-- 表尾分页显示 -->
 		<div class="VendorProductList-footer" v-show="paging">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
-			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
-			</el-pagination>
+				<!-- 表尾分页显示 -->
+				  <el-pagination
+				  @size-change="handleSizeChange"
+				  @current-change="handleCurrentChange"
+				  :current-page="currentPage"
+				  :page-sizes="[5, 10, 30, 100]"
+				  :page-size="pagesize"
+				  layout="total, sizes, prev, pager, next, jumper"
+				  :total="max">
+				</el-pagination>
 		</div>
 	</div>
 </template>
@@ -111,16 +118,25 @@
 			},
 			all: function() {
 				return [
-					"仓库名称: " + this.value1,
+					"供应商名称: " + this.value1,
 					"产品名称: " + this.value2,
 				];
 			},
 		},
 		methods: {
-			// 改变页码数
-			handleCurrentChange(val) {
-			  this.findpage(val, this.pagesize);
+			//改变页码数
+			handleSelectionChange(val) {
+			  this.joinstockdata = val;
 			},
+			handleCurrentChange(val) {
+			    this.currentPage=val;
+			    this.findpage();
+			},
+			handleSizeChange(val) {
+			    this.pagesize=val;
+			    this.currentPage=1;
+			    this.findpage();
+			  },
 			//查询所有供应商
 			findAllVendor() {
 				const state = JSON.parse(sessionStorage.getItem("state"));

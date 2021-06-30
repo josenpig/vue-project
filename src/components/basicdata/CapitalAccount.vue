@@ -146,11 +146,11 @@
 					</el-tooltip>
 				</template>
 				</el-table-column>
-				<el-table-column prop="capitalId" label="账户编号" sortable width="175" />
-				<el-table-column prop="fundAccount" label="账户名称" sortable width="164"/>
-				<el-table-column prop="settlementType" label="结算类型" sortable width="140" />
-				<el-table-column prop="initialAmount" label="初期金额(元)" sortable width="120" />
-				<el-table-column prop="currentAmount" label="当前金额(元)" sortable width="120" />
+				<el-table-column prop="capitalId" label="账户编号" sortable width="160" />
+				<el-table-column :show-overflow-tooltip="true" prop="fundAccount" label="账户名称" sortable width="180"/>
+				<el-table-column prop="settlementType" label="结算类型" sortable width="150" />
+				<el-table-column prop="initialAmount" label="初期金额(元)" sortable width="150" />
+				<el-table-column prop="currentAmount" label="当前金额(元)" sortable width="150" />
 				<el-table-column prop="state" label="是否为默认" sortable width="150">
 					<template #default="scope">
 						<span style="color: red;">{{scope.row.state==1?"默认账户":" "}}</span>
@@ -162,9 +162,16 @@
 			</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
-		<div class="salelist-footer">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
-			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
+		<div class="CapitalAccount-footer">
+			<!-- 表尾分页显示 -->
+			  <el-pagination
+			  @size-change="handleSizeChange"
+			  @current-change="handleCurrentChange"
+			  :current-page="currentPage"
+			  :page-sizes="[5, 10, 30, 100]"
+			  :page-size="pagesize"
+			  layout="total, sizes, prev, pager, next, jumper"
+			  :total="max">
 			</el-pagination>
 		</div>
 
@@ -235,9 +242,18 @@
 		},
 		methods: {
 			//改变页码数
-			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize);
+			handleSelectionChange(val) {
+			  this.joinstockdata = val;
 			},
+			handleCurrentChange(val) {
+			    this.currentPage=val;
+			    this.findpage();
+			},
+			handleSizeChange(val) {
+			    this.pagesize=val;
+			    this.currentPage=1;
+			    this.findpage();
+			  },
 			//分页查询
 			findpage() {
 				const state = JSON.parse(sessionStorage.getItem("state"));

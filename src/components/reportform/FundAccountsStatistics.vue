@@ -33,6 +33,17 @@
 								</el-date-picker>
 							</div>
 						</div>
+						
+						<!--资金账户名称-->
+						<div style="margin: 7px 0px;">
+							<span>资金账户名称:</span>
+							<el-select v-model="value1" filterable placeholder="请选择" @change="findpage">
+								<el-option :label="SAll" :value="SAll">
+								</el-option>
+								<el-option v-for="item in capital" :key="item.fundAccount" :label="item.fundAccount" :value="item.fundAccount">
+								</el-option>
+							</el-select>
+						</div>
 					</div>
 				</el-collapse-item>
 			</el-collapse>
@@ -59,8 +70,15 @@
 		</div>
 		<!-- 表尾分页显示 -->
 		<div class="salelist-footer" v-show="paging">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
-			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
+			<!-- 表尾分页显示 -->
+			  <el-pagination
+			  @size-change="handleSizeChange"
+			  @current-change="handleCurrentChange"
+			  :current-page="currentPage"
+			  :page-sizes="[5, 10, 30, 100]"
+			  :page-size="pagesize"
+			  layout="total, sizes, prev, pager, next, jumper"
+			  :total="max">
 			</el-pagination>
 		</div>
 	</div>
@@ -71,9 +89,13 @@
 		name: 'Receivable',
 		data() {
 			return {
+				//全部
+				SAll:"全部",
 				//默认展开
 				activeNames: '1',
 				//筛选框
+				value1: "全部", 
+				
 				billdate: '全部', //单据日期
 				customtime1: '', //自定义时间
 				date1: (() => { //上周
@@ -133,6 +155,9 @@
 				max: 0,
 				currentPage: 1,
 				
+				//资金账户数据
+				capital:[],
+				
 				//本期总收入
 				rsum:0,
 				//本期总支出
@@ -154,28 +179,47 @@
 					}
 				})
 				return [
-					'单据日期: ' + this.billdate
+					'单据日期: ' + this.billdate,
+					'资金账户: ' + this.value1
 				]
 			}
 		},
 		methods: {
 			//改变页码数
-			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize);
+			handleSelectionChange(val) {
+			  this.joinstockdata = val;
 			},
+			handleCurrentChange(val) {
+			    this.currentPage=val;
+			    this.findpage();
+			},
+			handleSizeChange(val) {
+			    this.pagesize=val;
+			    this.currentPage=1;
+			    this.findpage();
+			  },
 			//分页查询
 			findpage() {
-				console.log(this.billdate)
-				console.log(this.customtime1[0])
-				console.log(this.customtime1[1])
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
+				var c=this.value1;
+				if(this.value1=="全部"){
+					c=null
+				}else{
+					this.capital.forEach((item)=>{
+						if(c==item.fundAccount){
+							c=item.capitalId
+						}
+					})
+				}
 				var fd = {
 					currentPage: this.currentPage,
 					pageSize: this.pagesize,
 					startTime: this.customtime1[0],
-					endTime: this.customtime1[1]
+					endTime: this.customtime1[1],
+					capitalId: c
 				};
+				console.log(fd)
 				this.axios({
 						url: "http://localhost:8088/frameproject/ReportFormController/fundAllFundAccountsStatisticsVo",
 						method: "get",
@@ -271,7 +315,27 @@
 					.catch(function(error) {
 						console.log(error);
 					});
-			}
+			},
+			//查询所有供应商
+			findAllCapital() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/baseCapitalAccount/findAllCapitalAccountVo/list",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.capital = response.data.data;
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
 
 		},
 		mounted() {
@@ -281,6 +345,7 @@
 			},500)
 		},
 		created: function() {
+			this.findAllCapital()
 		},
 	}
 </script>
