@@ -53,9 +53,18 @@
 				</div>
 			</el-col>
 		</el-row>
-		
-		<el-calendar v-model="value" style="width: 500px;height: 650px;">
-		</el-calendar>
+		<div style="float: left;margin-top: 30px;">
+			<!--横向条状图-->
+			<div class="Echarts">
+				<div id="main" style="width: 900px;height:700px;"></div>
+			</div>
+			<!---->
+		</div>
+		<div style="float: right;">
+			<div id="f"></div>
+			<el-calendar v-model="value" class="calen">
+			</el-calendar>
+		</div>
 	</div>
 </template>
 
@@ -67,10 +76,10 @@
 			return {
 				value: new Date(),
 				//本期总收入
-				rsum:0,
+				rsum: 0,
 				//本期总支出
-				psum:0,
-				
+				psum: 0,
+
 				value1: "全部", //仓库名称
 				value2: "全部", //产品名称
 				value3: "全部", //产品分类
@@ -78,22 +87,61 @@
 				pagesize: 5,
 				max: 0,
 				currentPage: 1,
-				
-				tableData:[],
-				
+
+				tableData: [],
+
 				//库存总量
-				ps:0,
+				ps: 0,
 				//总价值
-				ms:0
+				ms: 0,
+				//产品销售top
+				SalesTop:[],
+				salesTop2:[],
 			};
 		},
 		methods: {
-			
+			myEcharts() {
+				var chartDom = document.getElementById('main');
+				var myChart = echarts.init(chartDom);
+				var option;
+				
+				option = {
+				    title: {
+				        text: '产品销售 TOP10',
+				        subtext: '销售产品前十名',
+				        left: 'center'
+				    },
+				    tooltip: {
+				        trigger: 'item'
+				    },
+				    legend: {
+				        orient: 'vertical',
+				        left: 'left',
+				    },
+				    series: [
+				        {
+				            name: '产品销售',
+				            type: 'pie',
+				            radius: '50%',
+				            data: this.salesTop2,
+				            emphasis: {
+				                itemStyle: {
+				                    shadowBlur: 10,
+				                    shadowOffsetX: 0,
+				                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+				                }
+				            }
+				        }
+				    ]
+				};
+				
+				option && myChart.setOption(option);
+			},
 			//资金账户期间总收入和总支出
-			sum(){
+			sum() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
-				console.log("time:"+this.customtime1)
+				console.log("time:" + this.customtime1)
 				var fd = {
 					startTime: null,
 					endTime: null
@@ -111,10 +159,10 @@
 						console.log(response.data.data)
 						_this.rsum = response.data.data[0];
 						_this.psum = response.data.data[1];
-						
-						console.log("rsum:"+_this.rsum)
-						console.log("psum:"+_this.psum)
-						
+
+						console.log("rsum:" + _this.rsum)
+						console.log("psum:" + _this.psum)
+						_this.myEcharts();
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -124,7 +172,7 @@
 			findpagePro() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
-				console.log(this.value1+"+++"+this.value2+"+++"+this.value3+"+++"+this.value4)
+				console.log(this.value1 + "+++" + this.value2 + "+++" + this.value3 + "+++" + this.value4)
 				this.axios({
 						url: "http://localhost:8088/frameproject/ReportFormController/findAllProductInventoryVo",
 						method: "get",
@@ -143,10 +191,41 @@
 					.then(function(response) {
 						console.log(response.data.data.rows)
 						_this.tableData = response.data.data.rows;
-						_this.tableData.forEach((item)=>{
-							_this.ps+=item.productNumber
-							_this.ms+=item.productNumber * item.purchaseUnitPrice
+						_this.tableData.forEach((item) => {
+							_this.ps += item.productNumber
+							_this.ms += item.productNumber * item.purchaseUnitPrice
 						})
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//查询产品销售top10
+			findSalesTop() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/capitalPayment/findSalesTop",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.SalesTop = response.data.data;
+						var f=10;
+						if(_this.SalesTop.size<10){
+							f=_this.SalesTop.size
+						}
+						for(var i=0;i<f;i++){
+							_this.salesTop2.push({
+								name: _this.SalesTop[i].productName,
+								value: _this.SalesTop[i].psum,
+							})
+						}
+						console.log(_this.salesTop2)
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -155,7 +234,10 @@
 		},
 		mounted() {
 			this.sum();
+		},
+		created(){
 			this.findpagePro();
+			this.findSalesTop();
 		}
 	};
 </script>
@@ -292,5 +374,20 @@
 
 	.el-tabs__nav-scroll {
 		margin-left: 10px;
+	}
+
+	#f {
+		width: 250px;
+		height: 33px;
+		background-color: white;
+		z-index: 99;
+		position: relative;
+		top: 45px;
+		left: 50%;
+	}
+	
+	.calen{
+		width: 500px;
+		height: 650px;
 	}
 </style>
