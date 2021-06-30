@@ -245,7 +245,7 @@ import { ElMessage } from 'element-plus'
 import store from '../../store'
 export default {
   beforeRouteLeave(to, form, next) {
-    if (sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
+    if (sessionStorage.getItem('orderid')!=null && sessionStorage.getItem('orderid').match(/^[a-z|A-Z]+/gi) == 'XSTHD') {
       sessionStorage.removeItem('orderid')
     }
     next()

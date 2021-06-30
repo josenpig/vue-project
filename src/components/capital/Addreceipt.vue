@@ -269,7 +269,7 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="settlementType" label="账户类型" />
+        <el-table-column prop="settlementTypeName" label="账户类型" />
         <el-table-column prop="thisMoney" label="本次收款金额">
           <template #default="scope">
             <el-input-number
@@ -689,7 +689,7 @@ export default {
                 _this.accountdata[j].fundAccount == _this.options[i].fundAccount
               ) {
                 _this.accountdata[j].fundAccount = _this.options[i].capitalId
-                _this.accountdata[j].settlementType =
+                _this.accountdata[j].settlementTypeName =
                   _this.options[i].settlementType
               }
             }

@@ -234,15 +234,6 @@
           </template>
         </el-table-column>
         <el-table-column prop="purchaseUnitPrice" label="采购单价" width="200">
-          <template #default="scope">
-            <el-input-number
-              :disabled="true"
-              v-model="productdata[scope.$index].purchaseUnitPrice"
-              :controls="false"
-              :precision="2"
-              :min="0"
-            />
-          </template>
         </el-table-column>
         <el-table-column prop="purchaseMoney" label="采购金额" width="200">
           <template #default="scope">

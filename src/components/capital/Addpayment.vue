@@ -265,7 +265,7 @@
             </el-select>
           </template>
         </el-table-column>
-        <el-table-column prop="settlementType" label="账户类型" />
+        <el-table-column prop="settlementTypeName" label="账户类型" />
         <el-table-column prop="thisMoney" label="本次付款金额">
           <template #default="scope">
             <el-input-number
@@ -684,7 +684,7 @@ export default {
                 _this.accountdata[j].fundAccount == _this.options[i].fundAccount
               ) {
                 _this.accountdata[j].fundAccount = _this.options[i].capitalId
-                _this.accountdata[j].settlementType =
+                _this.accountdata[j].settlementTypeName =
                   _this.options[i].settlementType
               }
             }
@@ -710,9 +710,10 @@ export default {
           _this.options = response.data.data
           _this.options.forEach((item) => {
             if (item.state == 1) {
+              console.log(item);
               _this.accountdata[0].fundAccount = item.capitalId
-              _this.accountdata[0].settlementTypeName = item.settlementType
               _this.accountdata[0].settlementType = item.settlementTypeId
+              _this.accountdata[0].settlementTypeName = item.settlementType
             }
           })
         })

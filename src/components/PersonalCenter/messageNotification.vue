@@ -26,11 +26,13 @@
         @selection-change="handleSelectionChange"
         stripe
       >
-       <el-table-column prop="sendtime" label="发送时间" width="200" />
-        <el-table-column prop="recver" label="接收人" width="200" />
-        <el-table-column prop="status" label="已读状态" width="200"/>
-		<el-table-column prop="sender" label="发送人" width="200" />
-		<el-table-column prop="orderid" label="订单号" width="400" />
+       <el-table-column prop="sendtime" label="发送时间" width="170" />
+       <el-table-column prop="ordertype" label="订单类型" width="150" />
+        <el-table-column prop="recver" label="接收人" width="120" />
+        <el-table-column prop="status" label="已读状态" width="150"/>
+        <el-table-column prop="mid" label="订单审核状态" width="170"/>
+		<el-table-column prop="sender" label="发送人" width="120" />
+		<el-table-column prop="orderid" label="订单号" width="335" />
     <el-table-column label="操作" width="200" fixed>
 						<template #default="scope">
 							<el-tooltip content="查看" placement="top">
@@ -105,8 +107,29 @@ import {
       //查看订单
       queryrow(val){
         sessionStorage.setItem('orderid',val.orderid);
-        
+        this.isreadrow(val);
+        if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'XSDD'){
         this.$router.push('/Sale')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'CGDD'){
+        this.$router.push('/Purchase')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'CGRKD'){
+        this.$router.push('/PurchaseReceipt')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'CGTHD'){
+        this.$router.push('/PurchaseReturn')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'XSCKD'){
+        this.$router.push('/Deliver')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'SKD'){
+        this.$router.push('/Receipt')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'FKD'){
+        this.$router.push('/Payment')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'HXD'){
+        this.$router.push('/Writeoff')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'KCDBD'){
+        this.$router.push('/Allocate')
+        }else if(val.orderid.match(/^[a-z|A-Z]+/gi) == 'XSTHD'){
+        this.$router.push('/Return')
+        }
+        
       },
       //标记已读
       isreadrow(val){

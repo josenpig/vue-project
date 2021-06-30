@@ -13,22 +13,23 @@
       <!-- 用户信息 -->
       <el-row style="float: right" :gutter="40">
         <el-col :span="6" style="line-height: 48px">
-          <el-popover
+          <!-- <el-popover
     placement="bottom"
     title="最新消息通知"
     :width="400"
     trigger="click"
   
-  >
+  > -->
             
             
-    <template #reference>
-          <el-button type="text" icon="el-icon-bell" style="color: white;margin-top:-10px" @click="findmessage()"
-            > 提醒<el-badge v-model="msg.isHidden" :max="msg.mrow" :value="msg.nrow" class="item">
-              </el-badge>
+    <!-- <template #reference> -->
+          <el-button type="text" icon="el-icon-bell" style="color: white;margin-top:-10px" @click="gotoset1()"
+            > 提醒
+            <!-- <el-badge v-model="msg.isHidden" :max="msg.mrow" :value="msg.nrow" class="item"> -->
+              <!-- </el-badge> -->
           </el-button>
-    </template>
-    <el-table
+    <!-- </template> -->
+    <!-- <el-table
         :data="message"
         style="width: 100%"
         @selection-change="handleSelectionChange"
@@ -40,8 +41,8 @@
         {{message.sender}}向{{message.recver}}发起了一个{{message.ordertype}}的审批请求,订单编号为{{message.orderid}}
         </el-table-column>
       </el-table>
-      <el-button style="width:400px" @click="gotoset1()">查看所有通知</el-button>
-  </el-popover>
+      <el-button style="width:400px" @click="gotoset1()">查看所有通知</el-button> -->
+  <!-- </el-popover> -->
         </el-col>
         <el-col :span="6" style="line-height: 48px">
           <el-button type="text" icon="el-icon-setting" style="color: white" @click="gotoset()"

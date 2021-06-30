@@ -12,7 +12,6 @@
       >
         <el-step title="提交订单"></el-step>
         <el-step title="二级审批"></el-step>
-        <el-step title="订单收款"></el-step>
       </el-steps>
       <div class="deliver-shenpi">
         <!-- 提交 -->

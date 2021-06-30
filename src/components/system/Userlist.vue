@@ -168,11 +168,7 @@
               type="text"
               class="el-icon-edit"
               size="samll"
-              v-if="
-                tableData[scope.$index].userId != 1 &&
-                tableData[scope.$index].userName !=
-                  $store.state.userInfo.userName
-              "
+              v-if="tableData[scope.$index].userId != 1"
               v-has="{ action: 'user:update' }"
               @click="changeall(scope.$index)"
               >修改</el-button
@@ -425,6 +421,17 @@ export default {
     },
     //删除
     delet(index) {
+      this.form = {
+        userId: '',
+        userName: '',
+        userPhone: '',
+        userSex: '',
+        userState: '',
+        updatedBy: '',
+        delFlag: '',
+        remark: '',
+        roles: [],
+      }
       this.$confirm(
         '是否确认删除用户名为‘' + this.tableData[index].userName + '’的数据项',
         '提示',
@@ -441,7 +448,17 @@ export default {
     },
     //修改所有数据
     changeall(index) {
-      this.form.roles = []
+      this.form = {
+        userId: '',
+        userName: '',
+        userPhone: '',
+        userSex: '',
+        userState: '',
+        updatedBy: '',
+        delFlag: '',
+        remark: '',
+        roles: [],
+      }
       this.thisusername = this.tableData[index].userName
       this.thisuserphone = this.tableData[index].userPhone
       const state = JSON.parse(sessionStorage.getItem('state'))
@@ -463,6 +480,7 @@ export default {
         })
       this.dialogFormVisible = true
       //获取选中行的值
+
       this.form.userId = this.tableData[index].userId
       this.form.userName = this.tableData[index].userName
       this.form.userPhone = this.tableData[index].userPhone
@@ -525,6 +543,17 @@ export default {
         }
       )
         .then(({ value }) => {
+          this.form = {
+            userId: '',
+            userName: '',
+            userPhone: '',
+            userSex: '',
+            userState: '',
+            updatedBy: '',
+            delFlag: '',
+            remark: '',
+            roles: [],
+          }
           this.form.userId = this.tableData[index].userId
           this.form.userPass = value
           this.update()

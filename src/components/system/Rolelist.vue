@@ -187,19 +187,28 @@ export default {
     },
     //删除角色
     delet(index) {
-      this.$confirm(
-        '是否确认删除角色名为‘' + this.tableData[index].roleName + '’的数据项',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-        }
-      ).then(() => {
-        this.form.delFlag = -1
-        this.form.roleId = this.tableData[index].roleId
-        this.update(-1)
-      })
+      ;(this.form = {
+        roleId: '', //角色id
+        roleName: '', //角色名
+        delFlag: '', //删除标识
+        updatedBy: '', //更新人
+        menus: [], //最新菜单
+      }),
+        this.$confirm(
+          '是否确认删除角色名为‘' +
+            this.tableData[index].roleName +
+            '’的数据项',
+          '提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          }
+        ).then(() => {
+          this.form.delFlag = -1
+          this.form.roleId = this.tableData[index].roleId
+          this.update(-1)
+        })
     },
     //修改完成
     update(type) {
@@ -251,7 +260,14 @@ export default {
     },
     //修改
     changeall(index) {
-      this.current = []
+      ;(this.form = {
+        roleId: '', //角色id
+        roleName: '', //角色名
+        delFlag: '', //删除标识
+        updatedBy: '', //更新人
+        menus: [], //最新菜单
+      }),
+        (this.current = [])
       this.form.roleId = this.tableData[index].roleId
       this.name = this.tableData[index].roleName
       this.form.roleName = this.tableData[index].roleName
