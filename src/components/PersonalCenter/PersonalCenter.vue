@@ -109,15 +109,6 @@
             <el-radio v-model="dialogForm.userSex" label="男">男</el-radio>
             <el-radio v-model="dialogForm.userSex" label="女">女</el-radio>
           </el-form-item>
-          <el-form-item label="备注：">
-            <el-input
-              type="textarea"
-              :rows="3"
-              placeholder="请填写用户备注"
-              v-model.trim="dialogForm.remark"
-            >
-            </el-input>
-          </el-form-item>
 	 </el-form>
 	<span class="dialog-footer">
             <el-button>取 消</el-button>
@@ -480,19 +471,19 @@ export default{
 	width: 30%;
 	height: 80%;
 }
-.update-card{
+.UserInfo1 .update-card{
 	margin-left: 20px;
 	margin-top: 20px;
 	width: 61%;
 	height: 70%;
 }
-.text_item{
+.UserInfo1 .text_item{
 	text-align: center;
 }
-.text_i i{
+.UserInfo1 .text_i i{
 	float: left;
 }
-.right{
+.UserInfo1 .right{
 	float: right;
 }
 </style> 

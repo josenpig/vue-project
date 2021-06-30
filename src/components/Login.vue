@@ -105,7 +105,7 @@ export default {
       // 账户登录信息
       loginForm: {
         userName: "admin",
-        userPass: "123456",
+        userPass: "a123456",
       },
       //表单验证规则对象
       loginFormRules: {

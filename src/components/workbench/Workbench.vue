@@ -6,7 +6,7 @@
 				<div class="grid-content bg-purple" >
 					<el-card class="box-card" >
 						<div slot="header" class="clearfix" >
-							<span style="font-size: 24px;margin-top: 10px;">销售</span>
+							<span style="font-size: 16px;margin-top: 10px;">销售</span>
 						</div>
 						<div class="text item">
 							<span>￥{{this.rsum}}</span>
@@ -24,7 +24,7 @@
 				<div class="grid-content bg-purple">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span style="font-size: 24px;margin-top: 10px;">采购</span>
+							<span style="font-size: 16px;margin-top: 10px;">采购</span>
 						</div>
 						<div class="text item">
 							<span>￥{{this.psum}}</span>
@@ -42,7 +42,7 @@
 				<div class="grid-content bg-purple">
 					<el-card class="box-card">
 						<div slot="header" class="clearfix">
-							<span style="font-size: 24px;">库存</span>
+							<span style="font-size: 16px;">库存</span>
 						</div>
 						<div class="text item">
 							<span>总量</span>
