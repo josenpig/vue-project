@@ -56,7 +56,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-            </p>          
+            </p>         
       </el-form>
        </el-collapse>
     </div>
@@ -138,10 +138,14 @@ import store from "../../store";
         operators:[],
         operatorType:"",//操作员类别
         operatorTypes:[],
+        //ex表格数据
+        excelData:[],
       
       };
     },
     methods: {
+
+    
 			//改变页码数
 			handleCurrentChange(val) {
 				this.findlogbyOperator(this.operator,val, this.pagesize,this.value2,this.operatorType);
