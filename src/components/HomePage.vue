@@ -13,9 +13,35 @@
       <!-- 用户信息 -->
       <el-row style="float: right" :gutter="40">
         <el-col :span="6" style="line-height: 48px">
-          <el-button type="text" icon="el-icon-bell" style="color: white" @click="gotoset1()"
-            >提醒
+          <el-popover
+    placement="bottom"
+    title="最新消息通知"
+    :width="400"
+    trigger="click"
+  
+  >
+            
+            
+    <template #reference>
+          <el-button type="text" icon="el-icon-bell" style="color: white;margin-top:-10px" @click="findmessage()"
+            > 提醒<el-badge v-model="msg.isHidden" :max="msg.mrow" :value="msg.nrow" class="item">
+              </el-badge>
           </el-button>
+    </template>
+    <el-table
+        :data="message"
+        style="width: 100%"
+        @selection-change="handleSelectionChange"
+        stripe
+      >
+        <el-table-column
+          width="400"
+        >
+        {{message.sender}}向{{message.recver}}发起了一个{{message.ordertype}}的审批请求,订单编号为{{message.orderid}}
+        </el-table-column>
+      </el-table>
+      <el-button style="width:400px" @click="gotoset1()">查看所有通知</el-button>
+  </el-popover>
         </el-col>
         <el-col :span="6" style="line-height: 48px">
           <el-button type="text" icon="el-icon-setting" style="color: white" @click="gotoset()"
@@ -106,12 +132,41 @@ export default {
     return {
       circleUrl:"src/assets/img/"+this.$store.state.userInfo.userIcon,
       menulist: [],
+      msg:{
+        isHidden:false,
+        mrow:1,
+        vrow:10,
+      },
+      message:[],
     };
   },
   created() {
     this.menulist = this.menulists;
   },
   methods: {
+    //获取未读消息通知，
+    findmessage(){
+      const state = JSON.parse(sessionStorage.getItem("state"));
+       var fd={
+          userid:this.$store.state.userInfo.userName,
+        };
+        var _this = this;
+       
+        this.axios({
+          url:"http://localhost:8088/frameproject/msg/get",
+          method:"get",
+          params: fd,
+          processData: false,
+          headers:{
+            JWTDemo:state.userInfo.token,
+          }
+          }).then(function(response){
+            _this.message=response.data.data.msg;
+            console.log(response.data.data.msg)
+          }).catch(function(error){
+             console.log(error)
+          });
+    },
     handleCommand(command) {
       //退出
       if (command == "signout") {
@@ -128,10 +183,43 @@ export default {
     },
    gotoset1(){
       this.$router.push('/messageNotification')
-    }
+    },
+             // 消息队列获取
+            mqtthuoquMsg() {
+                //初始化连接
+                const headers = {
+                    login: "guest",
+                    passcode: "guest"
+                };
+                //进行连接
+                this.client.connect(headers.login, headers.passcode, this.onConnected,  this.onFailed, "/");
+            },
+            onConnected: function () {
+                //订阅频道
+                const topic = "/exchange/mail.exchange/mail.routing.key";
+		console.log(topic+">>>>>>>>>>>>>>>>>>>>>");
+                this.client.subscribe(topic, this.responseCallback, this.onFailed);
+            },
+            onFailed: function (frame) {
+                console.log("MQ Failed: " + frame);
+                this.$message.error('连接失败')
+            },
+            // 回传消息
+            responseCallback: function (frame) {
+                 console.log("MQ msg=>" + frame.body);
+                //接收消息处理
+            },
+            // 断开相应的连接
+            close:function(){
+                  this.client.disconnect(function() {
+                            console.log("已退出账号");
+                  })
+            }
   },
-  computed: {
+ 
+  computed: { 
     ...mapState(["menulists"]),
+   
   },
 };
 </script>
@@ -194,5 +282,8 @@ export default {
 }
 .el-header-div1 {
   float: left;
+}
+.ul-s{
+  list-style-type:none;
 }
 </style>

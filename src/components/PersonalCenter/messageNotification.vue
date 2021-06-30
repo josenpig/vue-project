@@ -1,70 +1,53 @@
 <template>
   <!-- 主内容 -->
-  <div class="returnlist">
+  <div class="returnlistme">
     <!-- 标题 -->
-    <div class="page-tag">
-      <span style="float: left;font-size:28px">消息通知</span>
+    <div class="page-tagme">
+      <span style="float: left;font-size:28px">订单审批通知</span>
       <!-- 标签页 -->
     </div>
     <!-- 表单头部 筛选 -->
-    <div class="returnlist-header1">
+    <div class="returnlist-header1me">
       <el-collapse accordion>
-          <div class="ss">
-            <!-- 操作员 -->
-            <br /><br />
-            <span>操作员:</span>
-            <el-select>
-              <el-option ></el-option>
-                  
-      
-
-            </el-select>
-			<!--操作内容 -->
-			<span>操作内容:</span>
-		   <el-input v-model="input" placeholder="请输入内容" ></el-input>
-       <el-button type="primary" icon="el-icon-search" @click="findpage()">搜索</el-button>
-            <!-- 操作时间 -->
-            <div class="block">
-            <span class="demonstration">操作时间:</span>
-            <el-date-picker
-             v-model="value2"
-             align="right"
-             type="date"
-             placeholder="选择日期"
-             @change="findpage()"
-            :disabled-date="disabledDate"
-            :shortcuts="shortcuts"
-          >
-        </el-date-picker>
-  </div>
-          </div>
-        
+        <br>
+       <el-button-group>
+  <el-button type="primary" icon="el-icon-search" @click="qureynotread()">未读</el-button>
+  <el-button type="primary" icon="el-icon-search" @click="qureyisread()">已读</el-button>
+  <el-button type="primary" icon="el-icon-search" @click="qureyAll()">全部</el-button>
+      </el-button-group>
+       <el-button class="yd" type="primary" icon="el-icon-view" @click="isreadAll()">全部已读</el-button>
       </el-collapse>
     </div>
     <!-- 表体内容 -->
-    <div class="returnlist-mian">
+    <div class="returnlist-mianme">
       <el-table
         :data="tableData"
         style="width: 100%"
         @selection-change="handleSelectionChange"
         stripe
       >
-        <el-table-column
-          prop="createtime"
-          label="操作时间"
-          sortable
-          width="340"
-        />
-        <el-table-column prop="operator+'ss'" label="操作员" width="230" />
-        <el-table-column prop="operation" label="操作内容" width="185" />
-		<el-table-column prop="method" label="操作的方法" width="460" />
-		<!-- <el-table-column prop="params" label="参数" width="230" /> -->
-		<el-table-column prop="ipaddress" label="ip地址" width="230" />
-
+       <el-table-column prop="sendtime" label="发送时间" width="200" />
+        <el-table-column prop="recver" label="接收人" width="200" />
+        <el-table-column prop="status" label="已读状态" width="200"/>
+		<el-table-column prop="sender" label="发送人" width="200" />
+		<el-table-column prop="orderid" label="订单号" width="400" />
+    <el-table-column label="操作" width="200" fixed>
+						<template #default="scope">
+							<el-tooltip content="查看" placement="top">
+								<el-button size="mini" icon="el-icon-search" @click="queryrow(scope.row)" type="primary" circle />
+							</el-tooltip>
+              	<el-tooltip content="标记为未读" placement="top">
+								<el-button size="mini" icon="el-icon-bell" @click="notreadrow(scope.row)" type="primary" circle />
+							</el-tooltip>
+							<el-tooltip content="标记为已读" placement="top">
+								<el-button size="mini" icon="el-icon-message-solid" @click="isreadrow(scope.row)" type="primary" circle />
+							</el-tooltip>
+						</template>
+					</el-table-column>
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
-    <div class="returnlist-footer">
+    <div class="returnlist-footerme">
       <el-pagination
         background
         layout="prev, pager, next"
@@ -80,12 +63,12 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue'
 import {
 		ElMessage
 	} from 'element-plus'
  export default {
     data() {
+      
       return {
         disabledDate(time) {
           return time.getTime() > Date.now()
@@ -115,48 +98,104 @@ import {
 		    pagesize: 5,
 	    	max: 0,
 	    	currentPage: 1,
-        operator:"",//操作员
-        operators:[],
-        input: ref(''),
+        //
         };
     },
     methods: {
-			//改变页码数
-			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize,this.value2,this.operator,this.input);
-			},
-       //获取操作员
-     findusername(){
-				const state = JSON.parse(sessionStorage.getItem("state"));
-        var _this = this;
-        this.axios({
-          url:"http://localhost:8088/frameproject/personnel/ofpeople",
-          method:"get",
-          processData: false,
-          headers:{
-            JWTDemo:state.userInfo.token,
-          }
-          }).then(function(response){
-            _this.operators=response.data.data.notifiers;
-            console.log(response.data.data.notifiers)
-          }).catch(function(error){
-             console.log(error)
-          });
-
+      //查看订单
+      queryrow(val){
+        sessionStorage.setItem('orderid',val.orderid);
+        this.$router.push('/Sale')
       },
-			//分页查询
-			findpage() {
-				const state = JSON.parse(sessionStorage.getItem("state"));
+      //标记已读
+      isreadrow(val){
+        const state = JSON.parse(sessionStorage.getItem("state"));
 				var _this = this;
 				var fd = {
 					currentPage: this.currentPage,
 					pagesize: this.pagesize,
-          createtime:this.value2,
-          input: this.input,
-          operator:this.operator,
+          userName : this.$store.state.userInfo.userName,
+          orderid : val.orderid,
 				};
 				this.axios({
-						url: "http://localhost:8088/frameproject/operationlog/findoperationlogbycondition",
+						url: "http://localhost:8088/frameproject/message/isread",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+				    _this.findpage();
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+      },
+       //标记已读所有
+      isreadAll(){
+        const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pagesize: this.pagesize,
+          userName : this.$store.state.userInfo.userName,
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/message/isreadAll",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+				    _this.findpage();
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+      },
+      //标记未读
+      notreadrow(val){
+          const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pagesize: this.pagesize,
+          userName : this.$store.state.userInfo.userName,
+          orderid : val.orderid,
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/message/notread",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+				    _this.findpage();
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+      },
+      //查看已读
+      qureyisread(){
+        const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pagesize: this.pagesize,
+          userName : this.$store.state.userInfo.userName,
+				};
+
+				this.axios({
+						url: "http://localhost:8088/frameproject/message/qureyisread",
 						method: "get",
 						processData: false,
 						params: fd,
@@ -168,7 +207,75 @@ import {
 						_this.tableData = response.data.data.rows;
 						_this.max = response.data.data.total;
                         console.log(response.data.data.rows);
-                        console.log(response.data.data.total)
+                        console.log(response.data.data.total);
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+      },
+      //查看未读
+      qureynotread(){
+           const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pagesize: this.pagesize,
+          userName : this.$store.state.userInfo.userName,
+				};
+
+				this.axios({
+						url: "http://localhost:8088/frameproject/message/qureynotread",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						_this.tableData = response.data.data.rows;
+						_this.max = response.data.data.total;
+                        console.log(response.data.data.rows);
+                        console.log(response.data.data.total);
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+      },
+      //查看所有
+      qureyAll(){
+        this.findpage();
+      },
+			//改变页码数
+			handleCurrentChange(val) {
+				this.findpage(val, this.pagesize);
+			},
+    
+			//分页查询
+			findpage() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				var fd = {
+					currentPage: this.currentPage,
+					pagesize: this.pagesize,
+          userName : this.$store.state.userInfo.userName,
+          orderid : this.orderid,
+				};
+
+				this.axios({
+						url: "http://localhost:8088/frameproject/message/allm",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						_this.tableData = response.data.data.rows;
+						_this.max = response.data.data.total;
+                        console.log(response.data.data.rows);
+                        console.log(response.data.data.total);
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -179,66 +286,66 @@ import {
 		created() {
 			this.findpage();
       this.handleCurrentChange();
-      this.findusername();
 		}
   };
 </script>
 
 <style>
-.returnlist {
+.returnlistme {
   width: 100%;
   background-color: #e9eef3 !important ;
 }
 /* 顶部 */
-.returnlist .page-tag {
+.returnlistme .page-tagme {
   padding: 0 10px;
   color: #323232;
   font-size: 18px;
-  line-height: 40px;
+  height: 40px;
   background-color: #e9eef3;
 }
 /* 内容表头 筛选框 */
-.returnlist-header1 {
+.returnlist-header1me {
   padding: 15px 15px;
+  height: 80px;
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.returnlist .el-radio-group {
+.returnlistme .el-radio-group {
   margin: 10px 0px;
 }
-.returnlist-header1 span {
+.returnlist-header1me span {
   font-size: 14px;
   color: #666666;
   margin-right: 10px;
 }
-.returnlist .el-tag {
+.returnlistme .el-tag {
   color: #409eff !important;
 }
-.returnlist .el-collapse,
-.returnlist .el-collapse-item__wrap,
-.returnlist .el-collapse-item__header,
-.returnlist .el-radio-button__inner {
+.returnlistme .el-collapse,
+.returnlistme .el-collapse-item__wrap,
+.returnlistme .el-collapse-item__header,
+.returnlistme .el-radio-button__inner {
   border: none !important;
   border-radius: 0px !important;
 }
-.returnlist .el-select--small {
+.returnlistme .el-select--small {
   line-height: 32px;
   margin-right: 20px;
 }
 /* 表体内容 */
-.returnlist-main {
+.returnlist-mainme {
   border-bottom: #e9eef3 5px solid;
   background-color: white;
 }
-.returnlist th {
+.returnlistme th {
   color: white !important;
   background-color: #459df5 !important;
 }
-.returnlist .cell {
+.returnlistme .cell {
   text-align: center;
 }
 /* 内容表尾 */
-.returnlist-footer {
+.returnlist-footerme {
   padding: 25px 15px;
   background-color: white;
   text-align: center;
@@ -253,8 +360,8 @@ import {
 .block{
 	float: left;
 }
-.el-button{
-  margin-left: 10px;
-}
 
+.yd{
+  float: right;
+}
 </style>

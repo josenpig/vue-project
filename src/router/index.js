@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 import LoginView from "../components/Login.vue"//登录
 import HomePageView from "../components/HomePage.vue"//首页
 import PersonalCenterView from "../components/personalCenter/PersonalCenter.vue"//个人中心
+import messageNotificationView from "../components/personalCenter/messageNotification.vue"//通知中心
 import store from "../store"
 const routes = [
 	{
@@ -25,6 +26,11 @@ const routes = [
 		path:'/PersonalCenter',
 		name:'PersonalCenter',
 		component : PersonalCenterView,
+		},
+		{
+		path:'/messageNotification',
+		name:'messageNotification',
+		component : messageNotificationView,
 		},
 			]
 	},
