@@ -6,7 +6,7 @@
 			<span>供应商列表</span>
 			<div class="shenpi">
 				<!-- 新增供应商 -->
-				<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
+				<el-button v-has="{ action: 'vendor:add' }"  type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
 					<i class="el-icon-plus"></i> 新增供应商
 				</el-button>
 
@@ -125,7 +125,7 @@
 		</div>
 		<!--批量删除-->
 		<div style="float: left;padding-top: 15px;">
-			<el-button @click="batchDel" size="mini"><i class="el-icon-close"></i> 批量删除</el-button>
+			<el-button v-has="{ action: 'vendor:delete' }" @click="batchDel" size="mini"><i class="el-icon-close"></i> 批量删除</el-button>
 		</div>
 		<!--搜索框-->
 		<div class="page-search">
@@ -149,18 +149,18 @@
 				<el-table-column fixed label="操作" width="100">
 					<template #default="scope">
 						<el-tooltip content="修改" placement="top">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						<el-button v-has="{ action: 'vendor:update' }" size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						</el-tooltip>
 						
 						<el-tooltip content="删除" placement="top">
-						<el-button size="small" @click="del(scope.row.vendorId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button v-has="{ action: 'vendor:delete' }"  size="small" @click="del(scope.row.vendorId,scope.$index)" type="text" icon="el-icon-delete" circle></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column fixed label="管理产品" width="70">
 					<template #default="scope">
 						<el-tooltip content="该供应商下的产品" placement="top">
-						<el-button size="small" @click="findpageByidToPro(scope.row.vendorId,name)" type="text" icon="el-icon-s-goods" circle></el-button>
+						<el-button v-has="{ action: 'vendor:update' }"  size="small" @click="findpageByidToPro(scope.row.vendorId,name)" type="text" icon="el-icon-s-goods" circle></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>

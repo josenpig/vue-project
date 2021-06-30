@@ -6,7 +6,7 @@
 			<span>仓库列表</span>
 			<div class="shenpi">
 				<!-- 新增仓库 -->
-				<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
+				<el-button v-has="{ action: 'customer:add' }" type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
 					<i class="el-icon-plus"></i> 新增仓库
 				</el-button>
 				<el-dialog title="仓库信息" v-model="dialogFormVisible">
@@ -107,11 +107,11 @@
 				<el-table-column prop="date" fixed label="操作" width="100">
 					<template #default="scope">
 						<el-tooltip content="修改" placement="top">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						<el-button v-has="{ action: 'customer:update' }" size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						</el-tooltip>
 						
 						<el-tooltip content="删除" placement="top">
-						<el-button size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button v-has="{ action: 'customer:delete' }" size="small" @click="del(scope.row.depotId)" type="text" icon="el-icon-delete" circle></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>

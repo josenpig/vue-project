@@ -6,7 +6,7 @@
 			<span>结算类型列表</span>
 			<div class="shenpi">
 				<!-- 新增结算类型 -->
-				<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
+				<el-button v-has="{ action: 'type:add' }" type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
 					<i class="el-icon-plus"></i> 新增结算类型
 				</el-button>
 				
@@ -51,11 +51,11 @@
 				<el-table-column prop="date" label="操作" width="300">
 					<template #default="scope">
 						<el-tooltip content="修改" placement="top">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						<el-button v-has="{ action: 'type:update' }" size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 						</el-tooltip>
 						
 						<el-tooltip content="删除" placement="top">
-						<el-button size="small" @click="del(scope.row.id)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-button v-has="{ action: 'type:delete' }" size="small" @click="del(scope.row.id)" type="text" icon="el-icon-delete" circle></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>

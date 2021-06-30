@@ -6,7 +6,7 @@
 			<span>资金账户设置</span>
 			<div style="float: right;">
 				<!-- 新增资金账户 -->
-				<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 110px;">
+				<el-button v-has="{ action: 'account:add' }" type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 110px;">
 					<i class="el-icon-plus"></i> 新增资金账户
 				</el-button>
 
@@ -138,11 +138,11 @@
 				<el-table-column prop="date" label="操作" width="150">
 			 	<template #default="scope">
 					<el-tooltip content="修改" placement="top">
-			 		<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+			 		<el-button v-has="{ action: 'account:update' }" size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
 			 		</el-tooltip>
 			 		
 			 		<el-tooltip content="删除" placement="top">
-					<el-button size="small" @click="del(scope.row.capitalId)" type="text" icon="el-icon-delete" circle></el-button>
+					<el-button v-has="{ action: 'account:delete' }" size="small" @click="del(scope.row.capitalId)" type="text" icon="el-icon-delete" circle></el-button>
 					</el-tooltip>
 				</template>
 				</el-table-column>

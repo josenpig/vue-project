@@ -188,17 +188,17 @@
 				<el-table-column fixed label="操作" width="100">
 					<template #default="scope">
 						<el-tooltip content="修改" placement="top">
-							<el-button type="text" size="small" @click="openupdate(scope.row)" icon="el-icon-edit" circle></el-button>
+							<el-button  v-has="{ action: 'sort:update' }" type="text" size="small" @click="openupdate(scope.row)" icon="el-icon-edit" circle></el-button>
 						</el-tooltip>
 						<el-tooltip content="删除" placement="top">
-							<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
+							<el-button  v-has="{ action: 'sort:delete' }" size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column fixed label="状态" width="80">
 					<template #default="scope">
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;padding: 7px;">下架</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6);color: white;padding: 7px;">上架</el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;padding: 7px;" v-has="{ action: 'sort:update' }">下架</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6);color: white;padding: 7px;" v-has="{ action: 'sort:update' }">上架</el-button>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
