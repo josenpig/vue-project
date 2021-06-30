@@ -65,9 +65,16 @@
 			</el-table>
 		</div>
 		<!-- 表尾分页显示 -->
-		<div class="salelist-footer">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
-			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
+		<div class="unit-footer">
+			<!-- 表尾分页显示 -->
+			  <el-pagination
+			  @size-change="handleSizeChange"
+			  @current-change="handleCurrentChange"
+			  :current-page="currentPage"
+			  :page-sizes="[5, 10, 30, 100]"
+			  :page-size="pagesize"
+			  layout="total, sizes, prev, pager, next, jumper"
+			  :total="max">
 			</el-pagination>
 		</div>
 
@@ -107,9 +114,18 @@
 		},
 		methods: {
 			//改变页码数
-			handleCurrentChange(val) {
-				this.findpage(val, this.pagesize);
+			handleSelectionChange(val) {
+			  this.joinstockdata = val;
 			},
+			handleCurrentChange(val) {
+			    this.currentPage=val;
+			    this.findpage();
+			},
+			handleSizeChange(val) {
+			    this.pagesize=val;
+			    this.currentPage=1;
+			    this.findpage();
+			  },
 			//分页查询
 			findpage() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
@@ -432,7 +448,7 @@
 
 	/* 内容表尾 */
 	.unit-footer {
-		padding: 20px 15px;
-		background-color: white;
+	  padding: 20px 15px;
+	  background-color: white;
 	}
 </style>

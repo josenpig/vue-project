@@ -368,6 +368,7 @@
 				console.log(this.proForm)
 				console.log(this.stockForm)
 				console.log(this.supplyForm)
+				
 				if (this.proForm.productId == '' ||
 					this.proForm.productName == '' ||
 					this.proForm.ingredient == '' ||
@@ -377,89 +378,119 @@
 					this.proForm.purchaseMoney == '') {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
-					
-					var df=true;
-					var vf=true;
+					var dfn=true
+					var vfn=true
 					if(this.stockForm.size!=0){
 						this.stockForm.forEach((item)=>{
-							var dname=item.depotName
-							this.stockForm.forEach((item2)=>{
-								if(item!=item2){
-								if(item2.depotName==dname){
-									df=false
-								}}
-							})
+								if(item.depotName==''){
+									dfn=false
+								}
 						})
 					}
 					if(this.supplyForm.size!=0){
 						this.supplyForm.forEach((item)=>{
-							var vid=item.vendor_id
-							this.supplyForm.forEach((item2)=>{
-								if(item!=item2){
-								if(item2.vendor_id==vid){
-									vf=false
-								}}
-							})
+								if(item.vendor_id==''){
+									vfn=false
+								}
 						})
 					}
-					if(df==false){
+					if(dfn==false){
 						ElMessage.warning({
-							message: '不能选中重复的仓库！',
+							message: '仓库名称不能为空！',
 							type: 'success'
 						});
 					}
-					if(vf==false){
+					if(vfn==false){
 						ElMessage.warning({
-							message: '不能选中重复的供应商！',
+							message: '供应商名称不能为空！',
 							type: 'success'
 						});
 					}
-					
-					
-					this.pdID()
-					if(vf==true && df==true){
-					setTimeout(() => {
-						if (this.judge) {
-							const state = JSON.parse(sessionStorage.getItem("state"));
-							var _this = this;
-							var user = state.userInfo.userName;
-							this.dialogFormVisible = false
-							
-							this.axios({
-									url: "http://localhost:8088/frameproject/baseProduct/addProduct",
-									method: "post",
-									processData: false,
-									data: {
-										User: JSON.stringify(user),
-										Product: JSON.stringify(_this.proForm),
-										Stock: JSON.stringify(_this.stockForm),
-										Supply: JSON.stringify(_this.supplyForm)
-									},
-									headers: {
-										JWTDemo: state.userInfo.token,
-									},
+					if(dfn==true && vfn==true){
+							var df=true;
+							var vf=true;
+							if(this.stockForm.size!=0){
+								this.stockForm.forEach((item)=>{
+									var dname=item.depotName
+									this.stockForm.forEach((item2)=>{
+										if(item!=item2){
+										if(item2.depotName==dname){
+											df=false
+										}}
+									})
 								})
-								.then(function(response) {
-									console.log(response.data.data)
-									ElMessage.success({
-										message: '添加成功',
+							}
+							if(this.supplyForm.size!=0){
+								this.supplyForm.forEach((item)=>{
+									var vid=item.vendor_id
+									this.supplyForm.forEach((item2)=>{
+										if(item!=item2){
+										if(item2.vendor_id==vid){
+											vf=false
+										}}
+									})
+								})
+							}
+							if(df==false){
+								ElMessage.warning({
+									message: '不能选中重复的仓库！',
+									type: 'success'
+								});
+							}
+							if(vf==false){
+								ElMessage.warning({
+									message: '不能选中重复的供应商！',
+									type: 'success'
+								});
+							}
+							
+							if(vf==true && df==true){
+							this.pdID()
+							setTimeout(() => {
+								if (this.judge) {
+									const state = JSON.parse(sessionStorage.getItem("state"));
+									var _this = this;
+									var user = state.userInfo.userName;
+									this.dialogFormVisible = false
+									
+									this.axios({
+											url: "http://localhost:8088/frameproject/baseProduct/addProduct",
+											method: "post",
+											processData: false,
+											data: {
+												User: JSON.stringify(user),
+												Product: JSON.stringify(_this.proForm),
+												Stock: JSON.stringify(_this.stockForm),
+												Supply: JSON.stringify(_this.supplyForm)
+											},
+											headers: {
+												JWTDemo: state.userInfo.token,
+											},
+										})
+										.then(function(response) {
+											console.log(response.data.data)
+											ElMessage.success({
+												message: '添加成功',
+												type: 'success'
+											});
+											_this.form = {}
+											_this.judge = {}
+											_this.$router.push("/Product")
+										})
+										.catch(function(error) {
+											console.log(error);
+										});
+								} else {
+									ElMessage.warning({
+										message: '产品ID重复！',
 										type: 'success'
 									});
-									_this.form = {}
-									_this.judge = {}
-									_this.$router.push("/Product")
-								})
-								.catch(function(error) {
-									console.log(error);
-								});
-						} else {
-							ElMessage.warning({
-								message: '产品ID重复！',
-								type: 'success'
-							});
+								}
+							}, 200);
+							}
 						}
-					}, 200);}
-				}
+						
+					}
 			},
 			
 			//查询单位列表

@@ -65,9 +65,9 @@
 		<div class="product-mian">
 			<el-table :data="tableData" style="width: 100%" max-height="400" @selection-change="handleSelectionChange" border
 			 stripe>
+				<el-table-column fixed :show-overflow-tooltip="true" prop="depotName" label="仓库名称" sortable width="180" />
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
 				<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="180" />
-				<el-table-column :show-overflow-tooltip="true" prop="depotName" label="仓库名称" sortable width="180" />
 				<el-table-column prop="openingNumber" label="期初数量" sortable width="140" />
 				<el-table-column prop="productNumber" label="当前库存" sortable width="140" />
 				<el-table-column prop="expectNumber" label="预计可用量" sortable width="140" />
@@ -77,8 +77,8 @@
 						<span v-if="scope.row.state==1" style="color: seagreen;">上架</span>
 					</template>
 				</el-table-column>
-				<el-table-column prop="productSpec" label="规格" width="120" />
-				<el-table-column prop="ingredient" label="成分" width="120" />
+				<el-table-column  :show-overflow-tooltip="true"  prop="productSpec" label="规格" width="120" />
+				<el-table-column  :show-overflow-tooltip="true"  prop="ingredient" label="成分" width="180" />
 				<el-table-column prop="gramHeavy" label="克重" width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
@@ -90,8 +90,15 @@
 		</div>
 		<!-- 表尾分页显示 -->
 		<div class="salelist-footer" v-show="paging">
-			<el-pagination background layout="prev, pager, next" :total="max" :page-size="pagesize" style="margin-top: 50px"
-			 @current-change="handleCurrentChange" v-model:currentPage="currentPage">
+			<!-- 表尾分页显示 -->
+			  <el-pagination
+			  @size-change="handleSizeChange"
+			  @current-change="handleCurrentChange"
+			  :current-page="currentPage"
+			  :page-sizes="[5, 10, 30, 100]"
+			  :page-size="pagesize"
+			  layout="total, sizes, prev, pager, next, jumper"
+			  :total="max">
 			</el-pagination>
 		</div>
 	</div>
@@ -178,10 +185,19 @@
 						console.log(error);
 					});
 			},
-			// 改变页码数
-			handleCurrentChange(val) {
-			  this.findpage(val, this.pagesize);
+			//改变页码数
+			handleSelectionChange(val) {
+			  this.joinstockdata = val;
 			},
+			handleCurrentChange(val) {
+			    this.currentPage=val;
+			    this.findpage();
+			},
+			handleSizeChange(val) {
+			    this.pagesize=val;
+			    this.currentPage=1;
+			    this.findpage();
+			  },
 			//查询所有产品分类
 			findAllProType() {
 				const state = JSON.parse(sessionStorage.getItem("state"));
