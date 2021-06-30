@@ -6,8 +6,11 @@
       <span>新增采购入库单</span>
       <div class="adddeliver-shenpi">
         <!-- 提交 -->
-        <el-button size="mini" @click="examine(-2)">保存草稿</el-button>
+        <el-button size="mini" @click="examine(-2)"
+        v-has="{ action: 'entry:add' }"
+        >保存草稿</el-button>
         <el-button type="primary" size="mini" @click="examine(0)"
+        v-has="{ action: 'entry:add' }"
           >提交审批</el-button
         >
       </div>
@@ -64,11 +67,20 @@
     <el-dialog title="选择库存产品" v-model="dialogTableVisible" width="65%">
       <!-- 分类 -->
       <div style="width: 20%; height: 500px; float: left">
+        <el-button
+          class="el-icon-menu"
+          @click="dialogopen(0)"
+          type="primary"
+          style="width: 90%"
+        >
+          全部
+        </el-button>
         <el-tree
-          :data="data"
+          :data="ProType"
+          :default-expand-all="true"
           :props="defaultProps"
-          accordion
-          @node-click="handleNodeClick"
+          @node-click="findByType"
+          style="font-size: 15px"
         >
         </el-tree>
       </div>
@@ -122,15 +134,14 @@
           style="width:100%;height:50px;text-align:center;position:absolute;left;0;bottom:0;"
         >
           <el-pagination
-            background
-            layout="prev, pager, next"
-            :total="max"
-            :page-size="pagesize"
-            style="float: left"
-            @current-change="handleCurrentChange"
-            v-model:currentPage="currentPage"
-          >
-          </el-pagination>
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 30, 100]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="max">
+    </el-pagination>
           <div style="float: right">
             <el-button type="primary" @click="addproduct()">确定</el-button>
           </div>
@@ -148,7 +159,7 @@
               <el-button
                 size="mini"
                 icon="el-icon-plus"
-                @click="addrow(productdata)"
+                @click="dialogopen()"
                 type="primary"
                 circle
               />
@@ -371,7 +382,9 @@ export default {
       max: 0,
       currentPage: 1,
       //判断是否为采购订单生成入库
-      issale:false
+      issale:false,
+      ProType:[],
+      type:"",
     };
   },
   computed: {
@@ -383,9 +396,9 @@ export default {
     saleMoney() {
       return function (id) {
         this.productdata[id].purchaseMoney =
-          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*1000)/1000
+          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*100)/100
         return (
-          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*1000)/1000
+          Math.round(this.productdata[id].purchaseUnitPrice * this.productdata[id].productNum*100)/100
         );
       };
     },
@@ -429,16 +442,56 @@ export default {
       this.joinstockdata = val;
     },
     handleCurrentChange(val) {
-      this.dialogopen(val, this.pagesize);
+        this.currentPage=val;
+        this.dialogopen();
+    },
+    handleSizeChange(val) {
+        this.pagesize=val;
+        this.currentPage=1;
+        this.dialogopen();
+      },
+      findAllProType() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      var _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/baseProductType/findProType',
+        method: 'get',
+        processData: false,
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.ProType = response.data.data
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     },
     //选择产品
-    dialogopen() {
+    dialogopen(val) {
       const state = JSON.parse(sessionStorage.getItem("state"));
       const _this = this;
+      if (
+          this.formorder.vendorName == ""
+        ) {
+          this.$notify({
+            title: "警告",
+            message: "请选择供应商！！！",
+            type: "warning",
+          });
+          return false;
+      }
+      if(val==0){
+        this.type=""
+      }
       var fd = {
         currentPage: this.currentPage,
         pageSize: this.pagesize,
+        vendorName:this.formorder.vendorName,
+        type:this.type
       };
+      
       this.axios({
         url: "http://localhost:8088/frameproject/baseProduct/allpurchaseproduct",
         method: "get",
@@ -456,6 +509,10 @@ export default {
           console.log(error);
         });
       this.dialogTableVisible = true;
+    },
+    findByType(type) {
+      this.type = type.label
+      this.dialogopen()
     },
     //确认添加产品
     addproduct() {
@@ -583,6 +640,7 @@ export default {
     },
   },
   created: function () {
+    this.findAllProType();
     const purchase = JSON.parse(sessionStorage.getItem("receipt"));
     if (purchase != null) {
       this.issale=true

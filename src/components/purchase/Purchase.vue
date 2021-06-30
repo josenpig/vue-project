@@ -25,8 +25,8 @@
         <el-button
           size="mini"
           v-if="formorder.vettingState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(-1)"
+          v-has="{ action: 'purchase:approval' }"
           >驳回</el-button
         >
         <el-button
@@ -34,14 +34,15 @@
           size="mini"
           v-if="formorder.vettingState == 0"
           @click="approval(0)"
+          v-has="{ action: 'purchase:approval' }"
           >保存</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.vettingState == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(1)"
+          v-has="{ action: 'purchase:approval' }"
           >审批通过</el-button
         >
         <el-button
