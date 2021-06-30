@@ -6,7 +6,7 @@
 			<span>结算类型列表</span>
 			<div class="shenpi">
 				<!-- 新增结算类型 -->
-				<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
+				<el-button v-has="{ action: 'type:add' }" type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
 					<i class="el-icon-plus"></i> 新增结算类型
 				</el-button>
 				
@@ -50,8 +50,13 @@
 			 stripe>
 				<el-table-column prop="date" label="操作" width="300">
 					<template #default="scope">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.id)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-tooltip content="修改" placement="top">
+						<el-button v-has="{ action: 'type:update' }" size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						</el-tooltip>
+						
+						<el-tooltip content="删除" placement="top">
+						<el-button v-has="{ action: 'type:delete' }" size="small" @click="del(scope.row.id)" type="text" icon="el-icon-delete" circle></el-button>
+						</el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column prop="settlementType" label="结算类型名称" sortable width="500" />
@@ -197,8 +202,14 @@
 						},
 					})
 					.then(function(response) {
-						console.log("结算类型名称不重复是否通过:" + response.data)
-						_this.judge = response.data
+						console.log("结算类型名称不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if(response.data.data==false) {
+							ElMessage.warning({
+								message: '结算类型名称重复！',
+								type: 'success'
+							});
+						}
 					})
 					.catch(function(error) {
 						console.log(error);
@@ -241,12 +252,7 @@
 								.catch(function(error) {
 									console.log(error);
 								});
-						} else {
-							ElMessage.warning({
-								message: '结算类型名称重复！',
-								type: 'success'
-							});
-						}
+						} 
 					}, 200)
 				}
 			},

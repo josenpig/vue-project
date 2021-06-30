@@ -51,6 +51,16 @@
           库存盘点总数量：{{ total }}
         </el-alert>
       </span>
+      <span>
+        <el-alert
+          style="font-size: 35px"
+          class="el-icon-s-finance"
+          center
+          :closable="false"
+        >
+          盘盈盘亏总和：{{ total }}
+        </el-alert>
+      </span>
       <!-- 备注 -->
 
       <el-divider content-position="left">订单备注</el-divider>
@@ -95,7 +105,13 @@ export default {
     };
   },
   computed: {
-    //销售总金额
+    inventorypl: function () {
+      var allmoney = 0;
+      this.productdata.forEach((money) => {
+        allmoney += money.unitPl;
+      });
+      return Math.round(allmoney * 1000) / 1000;
+    },
     total: function () {
       var allmoney = 0;
       this.productdata.forEach((money) => {

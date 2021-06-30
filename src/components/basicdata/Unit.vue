@@ -6,7 +6,7 @@
 			<span>单位列表</span>
 			<div class="shenpi">
 				<!-- 新增单位 -->
-				<el-button type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
+				<el-button v-has="{ action: 'unit:add' }" type="text" size="small " @click="dialogFormVisible = true" style="color: white;background-color: #459df5;width: 90px;">
 					<i class="el-icon-plus"></i> 新增单位
 				</el-button>
 
@@ -52,8 +52,13 @@
 			 stripe>
 				<el-table-column prop="date" label="操作" width="300">
 					<template #default="scope">
-						<el-button size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
-						<el-button size="small" @click="del(scope.row.unitId)" type="text" icon="el-icon-delete" circle></el-button>
+						<el-tooltip content="修改" placement="top">
+						<el-button v-has="{ action: 'unit:update' }" size="small" @click="openupdate(scope.row)" type="text" icon="el-icon-edit" circle></el-button>
+						</el-tooltip>
+						
+						<el-tooltip content="删除" placement="top">
+						<el-button v-has="{ action: 'unit:delete' }" size="small" @click="del(scope.row.unitId)" type="text" icon="el-icon-delete" circle></el-button>
+						</el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column prop="unitName" label="单位名称" sortable width="500" />
@@ -197,9 +202,9 @@
 						},
 					})
 					.then(function(response) {
-						console.log("单位名称不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if(!response.data){
+						console.log("单位名称不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if(response.data.data==false){
 							ElMessage.warning({
 								message: '单位名称重复！',
 								type: 'success'

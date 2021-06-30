@@ -3,7 +3,7 @@
   <div class="deliverlist">
     <!-- 标题 -->
     <div class="page-tag">
-      <span style="float: left">库存盘点单列表</span>
+      <span style="float: left">调拨单列表</span>
       <!-- 标签页 -->
     </div>
     <!-- 表单头部 筛选 -->
@@ -19,7 +19,7 @@
           <div>
             <!-- 出库日期 -->
             <div style="height: 50px">
-              <span>出库日期:</span>
+              <span>盘点日期:</span>
               <el-radio-group v-model="collection" size="small" @change="qbc()">
                 <el-radio-button label="全部"></el-radio-button>
                 <el-radio-button label="今天"></el-radio-button>
@@ -44,17 +44,15 @@
               </div>
             </div>
             <!-- 结案状态 -->
-            <span>审批状态:</span>
+            <span>订单状态:</span>
             <el-radio-group v-model="status" size="small" @change="qbc()">
               <el-radio-button label="全部"></el-radio-button>
-              <el-radio-button label="草稿"></el-radio-button>
-              <el-radio-button label="待审批"></el-radio-button>
-              <el-radio-button label="已驳回"></el-radio-button>
-              <el-radio-button label="审批通过"></el-radio-button>
+              <el-radio-button label="已完成"></el-radio-button>
+              <el-radio-button label="未完成"></el-radio-button>
             </el-radio-group>
             <!-- 客户 -->
             <br /><br />
-            <span>供应商:</span>
+            <span>盘点仓库:</span>
             <el-select
               v-model="value1"
               size="small"
@@ -64,31 +62,14 @@
             >
               <el-option
                 v-for="item in options1"
-                :key="item.vendorId"
-                :label="item.vendorName"
-                :value="item.vendorId"
+                :key="item.depotName"
+                :label="item.depotName"
+                :value="item.depotName"
               >
               </el-option>
             </el-select>
-            <!-- 创建人 -->
-            <span>创建人:</span>
-            <el-select
-              v-model="value2"
-              clearable
-              size="small"
-              filterable
-              @change="qbc()"
-            >
-              <el-option
-                v-for="item in options2"
-                :key="item.userId"
-                :value="item.userId"
-                :label="item.userName"
-              >
-              </el-option>
-            </el-select>
-            <!-- 采购人员 -->
-            <span>采购人员:</span>
+            <!-- 调入仓库 -->
+            <span>盘点人:</span>
             <el-select
               v-model="value3"
               clearable
@@ -98,12 +79,14 @@
             >
               <el-option
                 v-for="item in options3"
-                :key="item.userId"
+                :key="item.userName"
                 :value="item.userId"
                 :label="item.userName"
               >
               </el-option>
             </el-select>
+           
+            
           </div>
         </el-collapse-item>
       </el-collapse>
@@ -140,7 +123,7 @@
       >
         <el-table-column
           prop="id"
-          label="采购入库单编号"
+          label="盘点单编号"
           fixed
           width="200"
         >
@@ -151,70 +134,41 @@
           </template>
         </el-table-column>
         <el-table-column
-          prop="inboundDate"
-          label="出库日期"
+          prop="inventoryTime"
+          label="盘点日期"
           fixed
           sortable
-          width="150"
+          width="200"
         />
-        <el-table-column prop="vendorName" label="供应商" width="120" />
-        <el-table-column prop="buyerName" label="采购人员" width="120" />
-        <el-table-column
-          prop="offersPrice"
-          label="优惠后应收款(元)"
-          width="150"
-        />
-        <el-table-column prop="vettingState" label="出库状态" width="120">
+        <el-table-column prop="depotId" label="仓库id" width="200" />
+        <el-table-column prop="depotName" label="仓库名称" width="200" />
+
+        <el-table-column prop="inventorycount" label="盘点产品量" width="200" />
+        <el-table-column prop="inventorycounter" label="已盘点产品量" width="120" />
+        <el-table-column prop="inventorystate" label="盘点状态" width="200">
           <template #default="scope">
-            <span v-if="tableData[scope.$index].vettingState == 0">
-              未入库
+            <span v-if="tableData[scope.$index].inventorystate == 0">
+              盘点草稿
             </span>
-            <span v-if="tableData[scope.$index].vettingState == 1">
-              完全入库
+            <span v-if="tableData[scope.$index].inventorystate == 1">
+              盘点完成
             </span>
             <!-- <span v-else> 完全入库 </span> -->
           </template>
         </el-table-column>
         <el-table-column
-          prop="createDate"
-          label="创建时间"
-          sortable
-          width="200"
-        />
-        <el-table-column prop="vettingState" label="审批状态" width="120">
-          <template #default="scope">
-            <span v-if="tableData[scope.$index].vettingState == 0">
-              待二级审批
-            </span>
-            <span v-else-if="tableData[scope.$index].vettingState == -2">
-              草稿
-            </span>
-            <span v-else-if="tableData[scope.$index].vettingState == -1">
-              审批未通过
-            </span>
-            <span v-else> 审批通过 </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="state" label="订单状态" width="120">
-          <template #default="scope">
-            <span v-if="tableData[scope.$index].state == 0"> 执行中 </span>
-            <span v-else> 已结束 </span>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="updateDate"
-          label="更新时间"
+          prop="inventorypeople"
+          label="盘点人"
           sortable
           width="200"
         />
         <el-table-column
-          prop="lastVettingTime"
-          label="最后审批时间"
+          prop="inventorypl"
+          label="盘点盈亏"
           sortable
           width="200"
         />
-        <el-table-column prop="vettingName" label="审批人" width="120" />
-        <el-table-column prop="createPeople" label="创建人" width="120" />
+        <el-table-column prop="remarks" label="备注" width="200" />
       </el-table>
     </div>
     <!-- 表尾分页显示 -->
@@ -249,9 +203,9 @@ export default {
       options2: [],
       options3: [],
       options4: [],
-      value1: '', //
-      value2: '', //
-      value3: '', //
+      value1: '', //供应商
+      value2: '', //创建人
+      value3: '', //采购人员
       //条件查询数据
       vagueorderid: '',
       condition: {
@@ -299,17 +253,16 @@ export default {
         }
       })
       return [
-        '出库日期: ' + this.collection,
-        '审批状态: ' + this.status,
-        '供应商: ' + value1,
-        '创建人: ' + value2,
-        '采购人员: ' + value3,
+        '盘点日期: ' + this.collection,
+        '盘点状态: ' + this.status,
+        '盘点仓库: ' + value1,
+        '盘点人: ' + value3,
       ]
     },
   },
   methods: {
     goadd() {
-      this.$router.push('/InventoryCounting')
+      this.$router.push('/InventoryCountingList')
     },
     findpage() {
       const state = JSON.parse(sessionStorage.getItem('state'))
@@ -370,7 +323,8 @@ export default {
         },
       })
         .then(function (response) {
-          _this.options2 = response.data.data.notifiers
+          _this.options1 = response.data.data.depots
+          _this.options3 = response.data.data.notifiers
         })
         .catch(function (error) {
           console.log(error)
@@ -378,7 +332,7 @@ export default {
     },
     goorder(val) {
       sessionStorage.setItem('orderid', this.tableData[val].id)
-      this.$router.push('/PurchaseReceipt')
+      this.$router.push('/Inventory')
     },
   },
   created: function () {

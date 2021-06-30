@@ -7,31 +7,27 @@
 			<div>
 				<el-button @click="findpage" type="primary" class="allType">
 					<i class="el-icon-caret-bottom" style="padding:10px 0px 0px 5px;"></i>全部
-					<el-button type="text" @click="openAdd(AllId)" style="float: right;color: white;" class="el-icon-circle-plus-outline">
+					<el-button type="text" @click="openAdd(AllId)" style="float: right;color: white;" class="el-icon-circle-plus-outline" v-has="{ action: 'sort:add' }">
 						<span style="font-size: 10px;">新增子分类</span>
 					</el-button>
 				</el-button>
 			</div>
-			<el-tree :data="ProType" node-key="1000" @node-click="findByType" :expand-on-click-node="false" style="font-size: 15px;padding: 5px 15px;">
+			<el-tree :data="ProType" node-key="1000" @node-click="findByType" style="font-size: 15px;padding: 5px 15px;">
 				<template #default="{ node, data }">
 					<span class="custom-tree-node">
 						<span>{{ node.label }}</span>
 						<span style="padding: 10px;">
-							<el-tooltip content="新增子分类" placement="top">
-								<el-button type="text" @click="openAdd(data)" class="el-icon-circle-plus-outline"></el-button>
-							</el-tooltip>
-							<el-tooltip content="删除" placement="top">
-								<el-button type="text" @click="remove(data)" class="el-icon-delete"></el-button>
-							</el-tooltip>
-							<el-tooltip content="修改" placement="top">
-								<el-button type="text" @click="openupdateProType(data)" class="el-icon-edit"></el-button>
-							</el-tooltip>
+							<el-button type="text" @click="openAdd(data)" class="el-icon-circle-plus-outline" v-has="{ action: 'sort:add' }"></el-button>
+
+							<el-button type="text" @click="remove(data)" class="el-icon-delete" v-has="{ action: 'sort:delete' }"></el-button>
+
+							<el-button type="text" @click="openupdateProType(data)" v-has="{ action: 'sort:update' }" class="el-icon-edit"></el-button>
+
 						</span>
 					</span>
 				</template>
 			</el-tree>
 		</div>
-
 	</div>
 
 	<!--新增子分类-->
@@ -79,7 +75,7 @@
 			<span>产品列表</span>
 			<div class="shenpi">
 				<!-- 新增产品 -->
-				<el-button type="text" size="small " @click="ToAdd" style="color: white;background-color: #459df5;width: 90px;margin: 3px;">
+				<el-button type="text" v-has="{ action: 'product:add' }" size="small " @click="ToAdd" style="color: white;background-color: #459df5;width: 90px;margin: 3px;">
 					<i class="el-icon-plus"></i> 新增产品
 				</el-button>
 			</div>
@@ -151,9 +147,11 @@
 					</el-form-item>
 					<el-form-item label="产品状态" :label-width="formLabelWidth">
 						<span style="color: #ff4949;padding: 15px;">下架</span>
-						<el-switch @change="disableOrEnable(updateForm)" v-model="updateForm.SWstate" active-color="#13ce66" inactive-color="#ff4949">
+						<el-switch @change="disableOrEnable(updateForm)" v-model="updateForm.SWstate" active-color="#13ce66"
+						 inactive-color="#ff4949">
 						</el-switch>
-						<span style="color: #13ce66;padding: 15px;">上架</span></el-form-item>
+						<span style="color: #13ce66;padding: 15px;">上架</span>
+					</el-form-item>
 				</el-form>
 				<template #footer>
 					<span class="dialog-footer">
@@ -190,23 +188,23 @@
 				<el-table-column fixed label="操作" width="100">
 					<template #default="scope">
 						<el-tooltip content="修改" placement="top">
-							<el-button type="text" size="small" @click="openupdate(scope.row)" icon="el-icon-edit" circle></el-button>
+							<el-button  v-has="{ action: 'sort:update' }" type="text" size="small" @click="openupdate(scope.row)" icon="el-icon-edit" circle></el-button>
 						</el-tooltip>
 						<el-tooltip content="删除" placement="top">
-							<el-button size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
+							<el-button  v-has="{ action: 'sort:delete' }" size="small" @click="del(scope.row.productId)" type="text" icon="el-icon-delete" circle></el-button>
 						</el-tooltip>
 					</template>
 				</el-table-column>
 				<el-table-column fixed label="状态" width="80">
 					<template #default="scope">
-						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;padding: 7px;">下架</el-button>
-						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6);color: white;padding: 7px;">上架</el-button>
+						<el-button v-if="scope.row.state==1" @click="disableOrEnable(scope.row)" round style="background-color: rgba(255,127,80,0.7);color: white;padding: 7px;" v-has="{ action: 'sort:update' }">下架</el-button>
+						<el-button v-if="scope.row.state==0" @click="disableOrEnable(scope.row)" round style="background-color: rgba(144,238,144,0.6);color: white;padding: 7px;" v-has="{ action: 'sort:update' }">上架</el-button>
 					</template>
 				</el-table-column>
 				<el-table-column fixed prop="productId" label="产品编号" sortable width="120" />
-				<el-table-column prop="productName" label="产品名称" sortable width="120" />
-				<el-table-column prop="productSpec" label="规格" width="120" />
-				<el-table-column prop="ingredient" label="成分" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="productName" label="产品名称" sortable width="150" />
+				<el-table-column :show-overflow-tooltip="true" prop="productSpec" label="规格" width="140" />
+				<el-table-column :show-overflow-tooltip="true" prop="ingredient" label="成分" width="140" />
 				<el-table-column prop="gramHeavy" label="克重" width="120" />
 				<el-table-column prop="productTypeName" label="分类" sortable width="120" />
 				<el-table-column prop="unitName" label="单位" sortable width="120" />
@@ -217,8 +215,8 @@
 						<span v-if="scope.row.state==1" style="color: seagreen;">上架</span>
 					</template>
 				</el-table-column>
-				<el-table-column :show-overflow-tooltip="true" prop="productDescribe" label="产品描述" width="120" />
-				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注" width="120" />
+				<el-table-column :show-overflow-tooltip="true" prop="productDescribe" label="产品描述" width="200" />
+				<el-table-column :show-overflow-tooltip="true" prop="remarks" label="备注" width="150" />
 				<el-table-column prop="purchaseMoney" label="采购单价(元)" sortable width="120" />
 				<el-table-column prop="purchaseUnitPrice" label="销售单价(元)" sortable width="120" />
 				<el-table-column prop="userName" label="创建人" sortable width="120" />
@@ -308,8 +306,8 @@
 					purchaseMoney: '', //采购单价
 					remarks: '', //备注
 					productDescribe: '', //产品描述
-					state: '' ,//产品状态
-					SWstate: '' ,//switch产品状态
+					state: '', //产品状态
+					SWstate: '', //switch产品状态
 				},
 				//全部分类
 				AllId: {
@@ -564,7 +562,7 @@
 									message: response.data.data,
 									type: 'success'
 								});
-								_this.updateForm.SWstate=val.state==0?false:true
+								_this.updateForm.SWstate = val.state == 0 ? false : true
 							}
 						})
 						.catch(function(error) {
@@ -575,7 +573,7 @@
 						type: 'info',
 						message: '已取消' + able
 					});
-					_this.updateForm.SWstate=val.state==0?false:true
+					_this.updateForm.SWstate = val.state == 0 ? false : true
 				});
 			},
 			//根据分类查询商品
@@ -645,9 +643,9 @@
 						},
 					})
 					.then(function(response) {
-						console.log("单位名称不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (!response.data) {
+						console.log("单位名称不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data == false) {
 							ElMessage.warning({
 								message: '单位名称重复！',
 								type: 'success'
@@ -725,9 +723,9 @@
 						},
 					})
 					.then(function(response) {
-						console.log("产品名称不重复是否通过:" + response.data)
-						_this.judge2 = response.data
-						if (!response.data) {
+						console.log("产品名称不重复是否通过:" + response.data.data)
+						_this.judge2 = response.data.data
+						if (response.data.data == false) {
 							ElMessage.warning({
 								message: '产品名称重复！',
 								type: 'success'
@@ -919,7 +917,7 @@
 				this.updateForm.productDescribe = val.productDescribe
 				this.updateForm.pictureId = val.pictureId
 				this.updateForm.state = val.state
-				this.updateForm.SWstate = val.state==0?false:true
+				this.updateForm.SWstate = val.state == 0 ? false : true
 			},
 			//修改产品信息---
 			update() {

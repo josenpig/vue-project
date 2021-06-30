@@ -180,7 +180,6 @@ import {
     computed: {},
 		created() {
 			this.findpage();
-      this.handleCurrentChange();
       this.findusername();
 		}
   };

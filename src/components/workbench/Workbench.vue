@@ -1,542 +1,436 @@
 <template>
-  <div class="workbench">
-    <el-row :gutter="20">
-      <el-col :span="6"
-        ><div class="grid-content bg-purple">
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span>销售</span>
-              <el-dropdown
-                style="float: right"
-                trigger="click"
-                @command="handleCommandPurchase"
-              >
-                <span class="el-dropdown-link">
-                  {{ salePurchaseT }}
-                  <i class="el-icon-arrow-down el-icon--right"></i>
-                </span>
-                <template #dropdown>
-                <el-dropdown-menu >
-                  <el-dropdown-item command="天">按天</el-dropdown-item>
-                  <el-dropdown-item command="周">按周</el-dropdown-item>
-                  <el-dropdown-item command="月">按月</el-dropdown-item>
-                </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <div class="text item">
-              <span v-text="sellPurchaseDate.previously"></span>
-              <div class="ik-pull-right">
-                ￥<span
-                  v-text="
-                    debt.deliverygBeforeM === null ? 0 : debt.deliverygBeforeM
-                  "
-                ></span>
-                <span class="stats__badge">3笔</span>
-              </div>
-            </div>
-            <div class="text item">
-              <span v-text="sellPurchaseDate.now"></span>
-              <div class="ik-pull-right">
-                ￥<span
-                  v-text="
-                    debt.deliverygAfterM === null ? 0 : debt.deliverygAfterM
-                  "
-                ></span>
-                <span class="stats__badge">3笔</span>
-              </div>
-            </div>
-          </el-card>
-        </div></el-col
-      >
-      <el-col :span="6"
-        ><div class="grid-content bg-purple">
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span>采购</span>
-              <el-dropdown
-                style="float: right"
-                trigger="click"
-                @command="handleCommand"
-              >
-                <span class="el-dropdown-link">
-                  {{ saleT }}
-                  <i class="el-icon-arrow-down el-icon--right"></i>
-                </span>
-                <template #dropdown>
-                <el-dropdown-menu >
-                  <el-dropdown-item command="天">按天</el-dropdown-item>
-                  <el-dropdown-item command="周">按周</el-dropdown-item>
-                  <el-dropdown-item command="月">按月</el-dropdown-item>
-                </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
-            <div class="text item">
-              <span v-text="sellDate.previously"></span>
-              <div class="ik-pull-right">
-                ￥<span
-                  v-text="debt.saleBeforeM === null ? 0 : debt.saleBeforeM"
-                ></span>
-                <span
-                  class="stats__badge"
-                  v-text="debt.saleBeforeSum + '笔'"
-                ></span>
-              </div>
-            </div>
-            <div class="text item">
-              <span v-text="sellDate.now"></span>
-              <div class="ik-pull-right">
-                ￥<span
-                  v-text="debt.saleAfterM === null ? 0 : debt.saleAfterM"
-                ></span>
-                <span
-                  class="stats__badge"
-                  v-text="debt.saleAfterSum + '笔'"
-                ></span>
-              </div>
-            </div>
-          </el-card></div
-      ></el-col>
-      <el-col :span="6"
-        ><div class="grid-content bg-purple">
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span>库存</span>
-            </div>
-            <div class="text item">
-              <span>总量</span>
-              <div class="ik-pull-right">
-                <span v-text="debt.amount"></span>
-              </div>
-            </div>
-            <div class="text item">
-              <span>总成本</span>
-              <div class="ik-pull-right">
-                ￥<span v-text="debt.cost"></span>
-              </div>
-            </div>
-          </el-card></div
-      ></el-col>
-      <el-col :span="6"
-        ><div class="grid-content bg-purple">
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span>欠款</span>
-            </div>
-            <div class="text item">
-              <span>客户</span>
-              <div class="ik-pull-right">
-                ￥<span v-text="debt.client === null ? 0 : debt.client"></span>
-              </div>
-            </div>
-            <div class="text item">
-              <span>供应商</span>
-              <div class="ik-pull-right">
-                ￥<span
-                  v-text="debt.supplier === null ? 0 : debt.supplier"
-                ></span>
-              </div>
-            </div>
-          </el-card></div
-      ></el-col>
-    </el-row>
-    <el-row :gutter="20">
-      <el-col
-        :span="17"
-        style="padding-left: 10px; padding-right: 10px; padding-top: 10px"
-      >
-        <el-tabs
-          class="work-tabs"
-          v-model="activeName"
-          @tab-click="handleClick"
-        >
-          <el-tab-pane label="待审批" name="awaitApprove">
-            <el-table
-              :data="awaitApproveData"
-              style="width: 100%"
-              border
-              height="400"
-            >
-              <el-table-column fixed prop="number" label="单据编号">
-              </el-table-column>
-              <el-table-column prop="numberType" label="单据类型">
-              </el-table-column>
-              <el-table-column prop="supplier" label="客户/供应商">
-              </el-table-column>
-              <el-table-column prop="price" label="金额"> </el-table-column>
-              <el-table-column prop="submitter" label="提交人">
-              </el-table-column>
-              <el-table-column prop="submitterTime" label="提交时间">
-              </el-table-column>
-              <el-table-column prop="operation" label="操作">
-                <template slot-scope="scope">
-                  <!--        <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>-->
-                  <el-button
-                    type="text"
-                    size="small"
-                    @click="passClick(scope.row), (add = true)"
-                    >通过</el-button
-                  >
-                  <el-button
-                    @click="reject(scope.row)"
-                    type="text"
-                    size="small"
-                    style="color: red"
-                    >驳回</el-button
-                  >
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
-          <el-tab-pane label="已通过" name="finishApprove">
-            <el-table
-              :data="finishApproveData"
-              style="width: 100%"
-              border
-              height="400"
-            >
-              <el-table-column fixed prop="number" label="单据编号">
-              </el-table-column>
-              <el-table-column prop="numberType" label="单据类型">
-              </el-table-column>
-              <el-table-column prop="supplier" label="客户/供应商">
-              </el-table-column>
-              <el-table-column prop="price" label="金额"> </el-table-column>
-              <el-table-column prop="submitter" label="提交人">
-              </el-table-column>
-              <el-table-column prop="submitterTime" label="提交时间">
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
-          <el-tab-pane label="已驳回" name="awaitEnterStock">
-            <el-table
-              :data="rejectApproveData"
-              style="width: 100%"
-              border
-              height="400"
-            >
-              <el-table-column fixed prop="number" label="单据编号">
-              </el-table-column>
-              <el-table-column prop="numberType" label="单据类型">
-              </el-table-column>
-              <el-table-column prop="supplier" label="客户/供应商">
-              </el-table-column>
-              <el-table-column prop="price" label="金额"> </el-table-column>
-              <el-table-column prop="submitter" label="提交人">
-              </el-table-column>
-              <el-table-column prop="submitterTime" label="提交时间">
-              </el-table-column>
-            </el-table>
-          </el-tab-pane>
-        </el-tabs>
-      </el-col>
-      <el-col :span="6" class="select-col">
-        <el-row>
-          <div>查询</div>
-        </el-row>
-        <el-row class="select-row">
-          <el-col :span="10">库存查询：</el-col>
-          <el-col :span="10"
-            ><el-input
-              placeholder="请输入产品名称,编号"
-              v-model="queryRepertoryVal"
-            ></el-input
-          ></el-col>
-          <el-col :span="2"
-            ><el-button
-              type="primary"
-              icon="el-icon-search"
-              @click="queryRepertory()"
-            ></el-button
-          ></el-col>
-        </el-row>
-        <el-row class="select-row">
-          <el-col :span="10">客户查询：</el-col>
-          <el-col :span="10"
-            ><el-input
-              placeholder="请输入产品名称"
-              v-model="queryClientVal"
-            ></el-input
-          ></el-col>
-          <el-col :span="2"
-            ><el-button
-              type="primary"
-              icon="el-icon-search"
-              @click="queryClient()"
-            ></el-button
-          ></el-col>
-        </el-row>
-        <el-row class="select-row">
-          <el-col :span="10">供应商查询：</el-col>
-          <el-col :span="10"
-            ><el-input
-              placeholder="请输入产品名称"
-              v-model="querySupplierVal"
-            ></el-input
-          ></el-col>
-          <el-col :span="2"
-            ><el-button
-              type="primary"
-              icon="el-icon-search"
-              @click="querySupplier()"
-            ></el-button
-          ></el-col>
-        </el-row>
-      </el-col>
-    </el-row>
-    <el-row>
-    </el-row>
-    <el-dialog title="库存查询" :visible.sync="dialogTableVisible">
-      <el-table :data="queryRepertoryData">
-        <el-table-column
-          property="productNum"
-          label="产品编号"
-          width="150"
-        ></el-table-column>
-        <el-table-column
-          property="productName"
-          label="产品名称"
-          width="200"
-        ></el-table-column>
-        <el-table-column property="productSpace" label="规格"></el-table-column>
-        <el-table-column
-          property="productCategories"
-          label="产品类型"
-        ></el-table-column>
-        <el-table-column
-          property="warehouseName"
-          label="所属仓库"
-        ></el-table-column>
-        <el-table-column
-          property="productOpeningNum"
-          label="数量"
-        ></el-table-column>
-      </el-table>
-    </el-dialog>
-    <el-dialog title="客户查询" :visible.sync="dialogTableClientVisible">
-      <el-table :data="queryClientData">
-        <el-table-column
-          property="clientName"
-          label="客户名"
-          width="150"
-        ></el-table-column>
-        <el-table-column
-          property="clientNum"
-          label="客户编号"
-          width="200"
-        ></el-table-column>
-        <el-table-column
-          property="clientContact"
-          label="联系人"
-        ></el-table-column>
-        <el-table-column
-          property="clientPhone"
-          label="联系方式"
-        ></el-table-column>
-      </el-table>
-    </el-dialog>
-    <el-dialog title="供应商查询" :visible.sync="dialogTableSupplierVisible">
-      <el-table :data="querySupplierData">
-        <el-table-column
-          property="clientName"
-          label="客户名"
-          width="150"
-        ></el-table-column>
-        <el-table-column
-          property="clientNum"
-          label="客户编号"
-          width="200"
-        ></el-table-column>
-        <el-table-column
-          property="clientContact"
-          label="联系人"
-        ></el-table-column>
-        <el-table-column
-          property="clientPhone"
-          label="联系方式"
-        ></el-table-column>
-      </el-table>
-    </el-dialog>
-  </div>
+	<div class="workbench">
+		<h3 style="margin: 5px;">业务数据统计</h3>
+		<el-row :gutter="20">
+			<el-col :span="8">
+				<div class="grid-content bg-purple" >
+					<el-card class="box-card" >
+						<div slot="header" class="clearfix" >
+							<span style="font-size: 24px;margin-top: 10px;">销售</span>
+						</div>
+						<div class="text item">
+							<span>￥{{this.rsum}}</span>
+							<div class="ik-pull-right">
+								<span
+								    class="stats__badge"
+								    v-text="this.rcount + '笔'"
+								  ></span>
+							</div>
+						</div>
+					</el-card>
+				</div>
+			</el-col>
+			<el-col :span="8">
+				<div class="grid-content bg-purple">
+					<el-card class="box-card">
+						<div slot="header" class="clearfix">
+							<span style="font-size: 24px;margin-top: 10px;">采购</span>
+						</div>
+						<div class="text item">
+							<span>￥{{this.psum}}</span>
+							<div class="ik-pull-right">
+								<span
+								    class="stats__badge"
+								    v-text="this.pcount + '笔'"
+								  ></span>
+							</div>
+						</div>
+					</el-card>
+				</div>
+			</el-col>
+			<el-col :span="8">
+				<div class="grid-content bg-purple">
+					<el-card class="box-card">
+						<div slot="header" class="clearfix">
+							<span style="font-size: 24px;">库存</span>
+						</div>
+						<div class="text item">
+							<span>总量</span>
+							<div class="text2">
+								<span>{{this.ps}}</span>
+							</div>
+						</div>
+						<div class="text item">
+							<span style="size: 20px;">总成本</span>
+							<div class="text2">
+								<span>￥</span>
+								<span>{{(this.ms).toFixed(2)}} </span>
+							</div>
+						</div>
+					</el-card>
+				</div>
+			</el-col>
+		</el-row>
+		<div style="float: left;margin-top: 30px;">
+			<!--横向条状图-->
+			<div class="Echarts">
+				<div id="main" style="width: 900px;height:700px;"></div>
+			</div>
+			<!---->
+		</div>
+		<div style="float: right;">
+			<div id="f"></div>
+			<el-calendar v-model="value" class="calen">
+			</el-calendar>
+		</div>
+	</div>
 </template>
 
 <script>
-export default {
-  name: "Workbench",
-  data() {
-    return {
-      // a:"123"
-      saleT: "按天",
-      salePurchaseT: "按天",
-      sellDate: { now: "今天", previously: "昨天" },
-      sellPurchaseDate: { now: "今天", previously: "昨天" },
-      sale: { afterTime: "", afterM: 100, beforeTime: "", beforeM: "100" },
-      debt: {
-        deliverygAfterM: null,
-        saleBeforeSum: 1,
-        deliverygAfterSum: 0,
-        deliverygBeforeSum: 0,
-        saleAfterM: 1100,
-        supplier: 3,
-        deliverygBeforeM: null,
-        saleAfterSum: 2,
-        client: 5,
-        saleBeforeM: 1000,
-      },
-      activeName: "awaitApprove",
-      finishApproveData: [],
-      awaitApproveData: [],
-      rejectApproveData: [],
-      dialogTableVisible: false,
-      dialogTableClientVisible: false,
-      dialogTableSupplierVisible: false,
-      queryRepertoryVal: "",
-      queryClientVal: "",
-      querySupplierVal: "",
-      queryRepertoryData: [],
-      queryClientData: [],
-      querySupplierData: [],
-    };
-  },
-  methods: {
-    handleCommand(c) {
-      // eslint-disable-next-line no-empty
-      this.saleT = "按" + c;
-      if (c === "天") {
-        this.sellDate.now = "今" + c;
-        this.sellDate.previously = "昨" + c;
-      } else {
-        this.sellDate.now = "本" + c;
-        this.sellDate.previously = "上" + c;
-      }
-    },
-    handleCommandPurchase(c) {
-      // eslint-disable-next-line no-empty
-      this.salePurchaseT = "按" + c;
-      if (c === "天") {
-        this.sellPurchaseDate.now = "今" + c;
-        this.sellPurchaseDate.previously = "昨" + c;
-      } else {
-        this.sellPurchaseDate.now = "本" + c;
-        this.sellPurchaseDate.previously = "上" + c;
-      }
-    }
-  },
-};
+	import * as echarts from 'echarts'
+	export default {
+		name: "Workbench",
+		data() {
+			return {
+				value: new Date(),
+				//本期总收入
+				rsum: 0,
+				//本期总支出
+				psum: 0,
+				//付款总条数
+				rcount:'',
+				//收款总条数
+				pcount:'',
+				
+				value1: "全部", //仓库名称
+				value2: "全部", //产品名称
+				value3: "全部", //产品分类
+				value4: "否", //是否下架
+				pagesize: 5,
+				max: 0,
+				currentPage: 1,
+
+				tableData: [],
+
+				//库存总量
+				ps: 0,
+				//总价值
+				ms: 0,
+				//产品销售top
+				SalesTop:[],
+				salesTop2:[],
+			};
+		},
+		methods: {
+			myEcharts() {
+				var chartDom = document.getElementById('main');
+				var myChart = echarts.init(chartDom);
+				var option;
+				
+				option = {
+				    title: {
+				        text: '产品销售 TOP10',
+				        subtext: '销售产品前十名',
+				        left: 'center'
+				    },
+				    tooltip: {
+				        trigger: 'item'
+				    },
+				    legend: {
+				        orient: 'vertical',
+				        left: 'left',
+				    },
+				    series: [
+				        {
+				            name: '产品销售',
+				            type: 'pie',
+				            radius: '50%',
+				            data: this.salesTop2,
+				            emphasis: {
+				                itemStyle: {
+				                    shadowBlur: 10,
+				                    shadowOffsetX: 0,
+				                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+				                }
+				            }
+				        }
+				    ]
+				};
+				
+				option && myChart.setOption(option);
+			},
+			//资金账户期间总收入和总支出
+			sum() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				console.log("time:" + this.customtime1)
+				var fd = {
+					startTime: null,
+					endTime: null
+				};
+				this.axios({
+						url: "http://localhost:8088/frameproject/ReportFormController/fundAllRsumAndPsum",
+						method: "get",
+						processData: false,
+						params: fd,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.rsum = response.data.data[0];
+						_this.psum = response.data.data[1];
+
+						console.log("rsum:" + _this.rsum)
+						console.log("psum:" + _this.psum)
+						_this.myEcharts();
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//资金账户期间总条数
+			count() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				console.log("time:" + this.customtime1)
+				this.axios({
+						url: "http://localhost:8088/frameproject/ReportFormController/fundAllCount",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.pcount = response.data.data[0];
+						_this.rcount = response.data.data[1];
+			
+						console.log("pcount:" + _this.pcount)
+						console.log("rcount:" + _this.rcount)
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//库存
+			findpagePro() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				console.log(this.value1 + "+++" + this.value2 + "+++" + this.value3 + "+++" + this.value4)
+				this.axios({
+						url: "http://localhost:8088/frameproject/ReportFormController/findAllProductInventoryVo",
+						method: "get",
+						params: {
+							depotName: _this.value1,
+							productName: _this.value2,
+							productTypeName: _this.value3,
+							state: _this.value4,
+							currentPage: _this.currentPage,
+							pageSize: _this.pagesize
+						},
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data.rows)
+						_this.tableData = response.data.data.rows;
+						_this.tableData.forEach((item) => {
+							_this.ps += item.productNumber
+							_this.ms += item.productNumber * item.purchaseUnitPrice
+						})
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+			//查询产品销售top10
+			findSalesTop() {
+				const state = JSON.parse(sessionStorage.getItem("state"));
+				var _this = this;
+				this.axios({
+						url: "http://localhost:8088/frameproject/capitalPayment/findSalesTop",
+						method: "get",
+						processData: false,
+						headers: {
+							JWTDemo: state.userInfo.token,
+						},
+					})
+					.then(function(response) {
+						console.log(response.data.data)
+						_this.SalesTop = response.data.data;
+						var f=10;
+						if(_this.SalesTop.size<10){
+							f=_this.SalesTop.size
+						}
+						for(var i=0;i<f;i++){
+							_this.salesTop2.push({
+								name: _this.SalesTop[i].productName,
+								value: _this.SalesTop[i].psum,
+							})
+						}
+						console.log(_this.salesTop2)
+					})
+					.catch(function(error) {
+						console.log(error);
+					});
+			},
+		},
+		mounted() {
+			this.sum();
+		},
+		created(){
+			this.count();
+			this.findpagePro();
+			this.findSalesTop();
+		}
+	};
 </script>
 
 <style>
-.workbench .el-col {
-  border-radius: 4px;
-}
-.workbench .bg-purple-dark {
-  background: #99a9bf;
-}
-.workbench .bg-purple {
-  background: #d3dce6;
-}
-.workbench .bg-purple-light {
-  background: #e5e9f2;
-}
-.workbench .grid-content {
-  border-radius: 4px;
-  min-height: 36px;
-}
-.workbench .row-bg {
-  padding: 10px 0;
-  background-color: #f9fafc;
-}
-.workbench .text {
-  font-size: 14px;
-}
+	.workbench .el-col {
+		border-radius: 4px;
+	}
 
-.item {
-  margin-bottom: 18px;
-  line-height: 10px;
-}
+	.workbench .bg-purple-dark {
+		background: #99a9bf;
+	}
 
-.clearfix:before,
-.clearfix:after {
-  display: table;
-  content: "";
-  line-height: 10px;
-}
-.clearfix:after {
-  clear: both;
-}
+	.workbench .bg-purple {
+		background: #d3dce6;
+	}
 
-.box-card {
-  text-align: left;
-  /*width: 250px;*/
-}
-.el-dropdown-link {
-    cursor: pointer;
-    color: #409EFF;
-  }
-.el-card__header {
-  line-height: 10px;
-  /*text-align: left;*/
-  /*width: 200px;*/
-}
-.ik-pull-right {
-  float: right;
-}
-.stats__badge {
-  min-width: 48px;
-  line-height: 16px;
-  text-align: center;
-  margin-left: 10px;
-  font-size: 12px;
-  border-radius: 2px;
-  vertical-align: middle;
-  display: inline-block;
-  border: 1px solid #bcf2d4;
-  background-color: #e5fff1;
-  color: #66d598;
-}
-.work-tabs {
-  background: white;
-  border-radius: 1%;
-}
-.select-col {
-  background-color: white;
-  border-radius: 5px;
-  margin: 20px 20px 20px 0;
-  padding: 10px 10px;
-}
-.select-row {
-  margin: 20px 5px;
-}
-.col-a {
-  border: 1px solid #fcfcfc;
-  min-height: 1px;
-  background: transparent;
-  display: block;
-  float: left;
-  padding: 20px 0 20px;
-  color: #333333;
-  text-decoration: none;
-  text-align: center;
-  background-color: white;
-  border-bottom: 1px solid #eeeff3;
-  border-right: 1px solid #eeeff3;
-  width: 100%;
-  transition: color 0.3s ease;
-}
-.col-a:hover {
-  background-color: #fafafa;
-}
-.fast-row {
-  margin-bottom: 0;
-}
-.fast-row-title {
-  background-color: #eaeaea;
-  padding: 5px;
-  font-weight: bold;
-  font-size: 14px;
-}
-.el-tabs__nav-scroll {
-  margin-left: 10px;
-}
+	.workbench .bg-purple-light {
+		background: #e5e9f2;
+	}
+
+	.workbench .grid-content {
+		border-radius: 4px;
+		min-height: 36px;
+	}
+
+	.workbench .row-bg {
+		padding: 10px 0;
+		background-color: #f9fafc;
+	}
+
+	.workbench .text {
+		font-size: 20px;
+		margin-top: 20px;
+	}
+
+	.item {
+		margin-bottom: 18px;
+		line-height: 10px;
+	}
+
+	.clearfix:before,
+	.clearfix:after {
+		display: table;
+		content: "";
+		line-height: 10px;
+	}
+
+	.clearfix:after {
+		clear: both;
+	}
+
+	.box-card {
+		text-align: left;
+		/*width: 250px;*/
+	}
+
+	.el-dropdown-link {
+		cursor: pointer;
+		color: #409EFF;
+	}
+
+	.el-card__header {
+		line-height: 10px;
+		/*text-align: left;*/
+		/*width: 200px;*/
+	}
+
+	.ik-pull-right {
+		margin: -15px 0px 0px 80px;
+	}
+
+	.stats__badge {
+		min-width: 54px;
+		line-height: 20px;
+		text-align: center;
+		margin-left: 10px;
+		font-size: 15px;
+		border-radius: 2px;
+		vertical-align: middle;
+		display: inline-block;
+		border: 1px solid #bcf2d4;
+		background-color: #e5fff1;
+		color: #66d598;
+	}
+
+	.work-tabs {
+		background: white;
+		border-radius: 1%;
+	}
+
+	.select-col {
+		background-color: white;
+		border-radius: 5px;
+		margin: 20px 20px 20px 0;
+		padding: 10px 10px;
+	}
+
+	.select-row {
+		margin: 20px 5px;
+	}
+
+	.col-a {
+		border: 1px solid #fcfcfc;
+		min-height: 1px;
+		background: transparent;
+		display: block;
+		float: left;
+		padding: 20px 0 20px;
+		color: #333333;
+		text-decoration: none;
+		text-align: center;
+		background-color: white;
+		border-bottom: 1px solid #eeeff3;
+		border-right: 1px solid #eeeff3;
+		width: 100%;
+		transition: color 0.3s ease;
+	}
+
+	.col-a:hover {
+		background-color: #fafafa;
+	}
+
+	.fast-row {
+		margin-bottom: 0;
+	}
+
+	.fast-row-title {
+		background-color: #eaeaea;
+		padding: 5px;
+		font-weight: bold;
+		font-size: 14px;
+	}
+
+	.el-tabs__nav-scroll {
+		margin-left: 10px;
+	}
+
+	#f {
+		width: 250px;
+		height: 33px;
+		background-color: white;
+		z-index: 99;
+		position: relative;
+		top: 45px;
+		left: 50%;
+	}
+	
+	.calen{
+		width: 500px;
+		height: 650px;
+	}
+	
+	.text2{
+		size: 20px;float: right;
+	}
+	
 </style>

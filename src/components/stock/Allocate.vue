@@ -18,16 +18,17 @@
         <el-button
           size="mini"
           v-if="formorder.state == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(-1)"
+          v-has="{ action: 'ocate:approval' }"
+          ocate:approval
           >驳回</el-button
         >
         <el-button
           type="primary"
           size="mini"
           v-if="formorder.state == 0"
-          v-has="{ action: 'approval' }"
           @click="approval(1)"
+          v-has="{ action: 'ocate:approval' }"
           >审批通过</el-button
         >
       </div>

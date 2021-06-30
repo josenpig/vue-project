@@ -347,15 +347,14 @@
 						},
 					})
 					.then(function(response) {
-						console.log("pid不重复是否通过:" + response.data)
-						_this.judge = response.data
-						if (response.data==false) {
+						console.log("pid不重复是否通过:" + response.data.data)
+						_this.judge = response.data.data
+						if (response.data.data==false) {
 							ElMessage.warning({
 								message: '产品ID重复',
 								type: 'success'
 							});
 						}else{
-							// _this.AddCustomer()
 							console.log(response.data)
 						}
 					})
@@ -378,7 +377,6 @@
 					this.proForm.purchaseMoney == '') {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
-					this.pdID()
 					
 					var df=true;
 					var vf=true;
@@ -417,6 +415,8 @@
 						});
 					}
 					
+					
+					this.pdID()
 					if(vf==true && df==true){
 					setTimeout(() => {
 						if (this.judge) {

@@ -49,27 +49,23 @@
             </el-radio-group>
             <!-- 订单编号 -->
             <br /><br />
-            <span>订单编号:</span>
-            <el-input style="width:160px" size="small" v-model="value1" filterable></el-input>
             <!-- 供应商 -->
             <span>供应商:</span>
-            <el-select v-model="value2" size="small" filterable>
-              <el-option v-for="item in options2" :value="item.label">
+            <el-select v-model="value2" size="small" @change="findpage()" filterable>
+              <el-option v-for="item in options2"
+                :key="item.vendorId"
+                :value="item.vendorId"
+                :label="item.vendorName">
               </el-option>
             </el-select>
             <!-- 采购人 -->
             <span>采购人:</span>
-            <el-select v-model="value3" size="small" filterable>
-              <el-option v-for="item in options3" :value="item.label">
+            <el-select v-model="value3" size="small" @change="findpage()" filterable>
+              <el-option v-for="item in options3"
+                :key="item.userId"
+                :value="item.userId"
+                :label="item.userName">
               </el-option>
-            </el-select>
-            <!-- 审批状态 -->
-            <span>审批状态:</span>
-            <el-select v-model="value4" size="small" filterable>
-              <el-option>草稿</el-option>
-              <el-option>审批不通过</el-option>
-              <el-option>待审批</el-option>
-              <el-option>审批通过</el-option>
             </el-select>
           </div>
         </el-collapse-item>
@@ -77,6 +73,30 @@
     </div>
     <!-- 表体内容 -->
     <div class="salelist-mian">
+
+        <div style="padding: 10px 25px">
+        <el-button
+          icon="el-icon-plus"
+          type="primary"
+          size="small"
+          @click="goadd()"
+          >新增采购订单</el-button
+        >
+        <!-- 模糊查询 -->
+        <div style="float: right">
+          <el-input
+            clearable
+            v-model="value1"
+            placeholder="请输入订单编号"
+            style="width: 200px"
+            size="small"
+          />
+          <el-button icon="el-icon-search" size="small" @click="join()"
+            >查询</el-button
+          >
+        </div>
+      </div>
+
       <el-table
         :data="tableData"
         style="width: 100%"
@@ -182,15 +202,14 @@
     </div>
     <!-- 表尾分页显示 -->
     <div class="salelist-footer" v-show="paging">
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :total="max"
-        :page-size="pagesize"
-        style="margin-top: 50px"
-        @current-change="handleCurrentChange"
-        v-model:currentPage="currentPage"
-      >
+     <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 30, 100]"
+      :page-size="pagesize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="max">
       </el-pagination>
     </div>
   </div>
@@ -226,7 +245,7 @@ export default {
         orderid:"",//订单编号
         vendor:"",//供应商
         buyer:"",//采购人
-        vettingstate:0,//审批状态
+        vettingstate:"",//审批状态
       },
       //表单数据
       tableData: [],
@@ -247,18 +266,44 @@ export default {
       return this.collection == "自定义" ? true : false;
     },
     all: function () {
+      var value2 = ''
+      this.options2.forEach((item) => {
+        if (item.vendorId == this.value2) {
+          value2 = item.vendorName
+        }
+      })
+      var value3 = ''
+      this.options3.forEach((item) => {
+        if (item.userId == this.value3) {
+          value3 = item.userName
+        }
+      })
       return [
         "单据日期: " + this.billdate,
         "收款日期: " + this.collection,
         "订单状态: " + this.status,
         "订单编号: " + this.value1,
-        "供应商: " + this.value2,
-        "采购人: " + this.value3,
-        "审批状态: " + this.value4,
+        "供应商: " + value2,
+        "采购人: " + value3,
       ];
     },
   },
   methods: {
+    goadd() {
+      this.$router.push('/AddPurchase')
+    },
+    handleSelectionChange(val) {
+      this.joinstockdata = val;
+    },
+    handleCurrentChange(val) {
+        this.currentPage=val;
+        this.findpage();
+    },
+    handleSizeChange(val) {
+        this.pagesize=val;
+        this.currentPage=1;
+        this.findpage();
+      },
     findpage() {
       const state = JSON.parse(sessionStorage.getItem("state"));
       var _this = this;
@@ -268,7 +313,6 @@ export default {
       this.condition.orderid=this.value1
       this.condition.vendor=this.value2
       this.condition.buyer=this.value3
-      this.condition.vettingstate=this.value4
       console.log(this.condition)
       this.axios({
         url: "http://localhost:8088/frameproject/purchaseOrder/findpage",
@@ -282,8 +326,9 @@ export default {
         },
       })
         .then(function (response) {
+          console.log(response);
           if(response.data.data.rows==null){
-            _this.tableDat=""
+            _this.tableData=""
           }else{
             _this.tableData = response.data.data.rows;
           }
@@ -293,10 +338,24 @@ export default {
           console.log(error);
         });
     },
-    // 改变页码数
-    // handleCurrentChange(val) {
-    //   this.findpage(val, this.pagesize);
-    // },
+    findsaleman() {
+      const state = JSON.parse(sessionStorage.getItem('state'))
+      const _this = this
+      this.axios({
+        url: 'http://localhost:8088/frameproject/personnel/ofpeople',
+        method: 'get',
+        headers: {
+          JWTDemo: state.userInfo.token,
+        },
+      })
+        .then(function (response) {
+          _this.options2 = response.data.data.vendors
+          _this.options3 = response.data.data.purchasemans
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
     goorder(val) {
       sessionStorage.setItem("orderid", this.tableData[val].id);
       this.$router.push("/Purchase");
@@ -305,6 +364,7 @@ export default {
 
   created: function () {
     this.findpage();
+    this.findsaleman();
   },
 };
 </script>
