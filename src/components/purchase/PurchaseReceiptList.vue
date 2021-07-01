@@ -166,7 +166,7 @@
         />
         <el-table-column prop="vettingState" label="出库状态" width="120">
           <template #default="scope">
-            <span v-if="tableData[scope.$index].vettingState == 0">
+            <span v-if="tableData[scope.$index].vettingState != 1">
               未入库
             </span>
             <span v-if="tableData[scope.$index].vettingState == 1">

@@ -378,35 +378,7 @@
 					this.proForm.purchaseMoney == '') {
 					ElMessage.error('必填或必须选不能为空！！！');
 				} else {
-					var dfn=true
-					var vfn=true
-					if(this.stockForm.size!=0){
-						this.stockForm.forEach((item)=>{
-								if(item.depotName==''){
-									dfn=false
-								}
-						})
-					}
-					if(this.supplyForm.size!=0){
-						this.supplyForm.forEach((item)=>{
-								if(item.vendor_id==''){
-									vfn=false
-								}
-						})
-					}
-					if(dfn==false){
-						ElMessage.warning({
-							message: '仓库名称不能为空！',
-							type: 'success'
-						});
-					}
-					if(vfn==false){
-						ElMessage.warning({
-							message: '供应商名称不能为空！',
-							type: 'success'
-						});
-					}
-					if(dfn==true && vfn==true){
+					
 							var df=true;
 							var vf=true;
 							if(this.stockForm.size!=0){
@@ -487,7 +459,7 @@
 									});
 								}
 							}, 200);
-							}
+							
 						}
 						
 					}
